@@ -1,0 +1,54 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContestQsoLogToSql.web", "ContestQsoLogToSql.web\ContestQsoLogToSql.web.csproj", "{CD505B39-E71F-4ECC-B414-BC153F7CE24A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WpfModalDialog", "WpfModalDialog\WpfModalDialog.csproj", "{5B56604E-C27D-492F-93FF-7D35F200124C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8F529004-414C-4A31-8EA2-AB496BD7A50F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.DataAccessLayer", "L2Sql.DataAccessLayer\L2Sql.DataAccessLayer.csproj", "{6485E207-39F2-47B3-B7CF-F0D4D6D05D09}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logqso.mvc.common", "..\..\..\vwd projects mvc\Logqso.mvc\logqso.mvc.common\Logqso.mvc.common.csproj", "{7D8DAD53-FC2E-4812-A636-BE213A28FB0F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.DomainModel", "L2Sql.DomainModel\L2Sql.DomainModel.csproj", "{ECFFE740-9D5A-4EC8-B75B-79BF95961101}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.BusinessLayer", "L2Sql.BusinessLayer\L2Sql.BusinessLayer.csproj", "{A2916863-14AB-4D4C-A475-2D08935503A3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CD505B39-E71F-4ECC-B414-BC153F7CE24A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD505B39-E71F-4ECC-B414-BC153F7CE24A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD505B39-E71F-4ECC-B414-BC153F7CE24A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD505B39-E71F-4ECC-B414-BC153F7CE24A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5B56604E-C27D-492F-93FF-7D35F200124C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5B56604E-C27D-492F-93FF-7D35F200124C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5B56604E-C27D-492F-93FF-7D35F200124C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5B56604E-C27D-492F-93FF-7D35F200124C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6485E207-39F2-47B3-B7CF-F0D4D6D05D09}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6485E207-39F2-47B3-B7CF-F0D4D6D05D09}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6485E207-39F2-47B3-B7CF-F0D4D6D05D09}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6485E207-39F2-47B3-B7CF-F0D4D6D05D09}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D8DAD53-FC2E-4812-A636-BE213A28FB0F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D8DAD53-FC2E-4812-A636-BE213A28FB0F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D8DAD53-FC2E-4812-A636-BE213A28FB0F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D8DAD53-FC2E-4812-A636-BE213A28FB0F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{ECFFE740-9D5A-4EC8-B75B-79BF95961101}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ECFFE740-9D5A-4EC8-B75B-79BF95961101}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ECFFE740-9D5A-4EC8-B75B-79BF95961101}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ECFFE740-9D5A-4EC8-B75B-79BF95961101}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2916863-14AB-4D4C-A475-2D08935503A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2916863-14AB-4D4C-A475-2D08935503A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2916863-14AB-4D4C-A475-2D08935503A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2916863-14AB-4D4C-A475-2D08935503A3}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

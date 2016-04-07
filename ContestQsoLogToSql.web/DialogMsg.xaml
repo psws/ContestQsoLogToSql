@@ -1,0 +1,22 @@
+﻿<Window x:Class="ContestQsoLogToSql.web.DialogMsg"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:draw="clr-namespace:System.Drawing;assembly=System.Drawing"
+         xmlns:local="clr-namespace:ContestQsoLogToSql.web"
+
+        Title="Message" Height="202" Width="430">
+    <Window.Resources>
+        <local:IconToImageSourceConverter x:Key="IconToImageSourceConverter" />
+    </Window.Resources>
+
+    <Grid>
+        <TextBlock x:Name="DialogMessageTextBlock" HorizontalAlignment="Left" Margin="156,37,0,0" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Top" Height="93" Width="207"/>
+        
+        <Image x:Name="Image1" HorizontalAlignment="Left" Height="100" Margin="21,37,0,0" VerticalAlignment="Top" Width="100"  
+               Source="{Binding Source={x:Static draw:SystemIcons.Warning},
+        Converter={StaticResource IconToImageSourceConverter},
+        Mode=OneWay}">
+        </Image>
+
+    </Grid>
+</Window>

@@ -1,0 +1,41 @@
+﻿If the table with an ENUM type  name does not match the ENUM name you cannot map to ENUM
+    //ALL HAVE TO BE CAST AS INT BECAUSE OF EF BUG
+    //ALL names SHOULD MATCH 
+    // LogCategory.CatOperator needs to be LogCategory.CatOperatorEnum
+    //http://stackoverflow.com/questions/26692965/no-corresponding-object-layer-type-could-be-found-for-the-conceptual-type
+    //http://stackoverflow.com/questions/13527400/entity-framework-5-rtm-code-first-enum-support-broken-enums-in-other-namespaces
+    //QsoModeTypeEnum, ContestTypeEnum, QsoRadioTypeEnum are ok to map to enum
+right click on every enum in DataModel.edmx tables.
+map int32 to proper enum.
+The mapping will chain if name does mot contain enum
+Save and repair non-mapped enums match and there are no errors.
+
+Make sure to move the DataMadel.TT file to a new DomainModel project
+See: Creating DomainModel.txt for procedure.
+
+Afte DomainModel is created:
+saving DataModel.tt, in doamin project, will create the table files with the correct enums from aboce.
+You need to add the Logqso.mvc.common reference to the domain project
+
+modify every file in DomaonModel to derive from IEntity and have a 'public EntityState EntityState { get; set; }' property
+example:
+public partial class CabrilloInfo : IEntity
+    {
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
+        public CabrilloInfo()
+        {
+            this.Logs = new HashSet<Log>();
+        }
+    
+        public int CabrilloInfoId { get; set; }
+        public int ClaimedScore { get; set; }
+        public string Club { get; set; }
+        public string Operators { get; set; }
+        public string Address { get; set; }
+        public string AddressCity { get; set; }
+        public string AddressState { get; set; }
+
+        public string AddressPostalCode { get; set; }
+        public string AddressCountry { get; set; }
+
+        public EntityState EntityState { get; set; }

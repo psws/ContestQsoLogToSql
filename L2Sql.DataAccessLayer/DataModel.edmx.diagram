@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="d3d88524ac3f4c4995b04b8f3fe97f53" Name="Diagram1">
+        <EntityTypeShape EntityType="LogqsoDataModel.C__MigrationHistory" Width="1.5" PointX="3.75" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.CabrilloInfo" Width="1.75" PointX="3" PointY="11.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.CallInfo" Width="2" PointX="6" PointY="11.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.CallSign" Width="1.5" PointX="0.75" PointY="11.5" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.Contest" Width="2" PointX="0.75" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.ContestType" Width="2" PointX="1.5" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.Log" Width="2" PointX="3" PointY="6.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.LogCategory" Width="2.125" PointX="0.75" PointY="24.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.Qso" Width="1.875" PointX="8.5" PointY="10" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.QsoExchangeAlpha" Width="2" PointX="10.75" PointY="10.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.QsoExchangeType" Width="1.875" PointX="1.5" PointY="19.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.QsoExtraData" Width="2" PointX="10.75" PointY="12.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.QsoModeType" Width="2.25" PointX="1.5" PointY="22.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.QsoRadioType" Width="2.125" PointX="6.25" PointY="8.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.Session" Width="1.5" PointX="3.75" PointY="19.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.Station" Width="1.5" PointX="5.25" PointY="16.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnDupe" Width="1.5" PointX="5.75" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnIncorrectCall" Width="1.5" PointX="5.75" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnIncorrectExchange" Width="1.5" PointX="7.75" PointY="2.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnNotInLog" Width="1.5" PointX="7.75" PointY="5.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnSummary" Width="1.5" PointX="3" PointY="16" IsExpanded="true" />
+        <EntityTypeShape EntityType="LogqsoDataModel.UbnUnique" Width="1.5" PointX="9.75" PointY="2.625" IsExpanded="true" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CabrilloInfo_dbo_Contest_ContestId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CallInfo_dbo_CallSign_CallsignId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CallInfo_dbo_Contest_ContestId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CallInfo_dbo_Session_SessionName" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_CallInfo_dbo_Station_LogId_StationName" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Log_dbo_CallSign_CallsignId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Qso_dbo_CallSign_CallsignId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_UbnSummary_dbo_CallSign_CallsignId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Log_dbo_Contest_ContestId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_UbnSummary_dbo_Contest_ContestId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Log_dbo_LogCategory_LogCategoryId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Qso_dbo_Log_LogId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Station_dbo_Log_LogId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_Qso_dbo_Station_LogId_StationName" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" ManuallyRouted="false" />
+        <AssociationConnector Association="LogqsoDataModel.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

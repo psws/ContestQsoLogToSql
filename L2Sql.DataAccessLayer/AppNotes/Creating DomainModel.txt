@@ -1,0 +1,49 @@
+﻿http://blog.magnusmontin.net/2013/05/30/generic-dal-using-entity-framework/comment-page-1/
+
+Again, in an enterprise level application where separation of concerns is of great importance you certainl
+y want to have your domain logic and your data access logic in separate projects. In other words you want
+ to move the generated model (DataModel.tt) to another project. This can easily be accomplished by following these steps:
+
+2. Add a new class library project L2Sql.DomainModel to the solution in Visual Studio.
+ 3. Open File Explorer (right-click on the solution in Visual Studio and choose the “Open Folder in File Explorer” option)
+  and move the Model.tt file to the new project folder.
+ 4. Back in Visual Studio, include the Model.tt file in the new project by clicking on the “Show All Files” icon at the top
+  of the Solution Explorer and then right-click on the Model.tt file and choose the “Include In Project” option.
+ 5. Delete the Model.tt file from the DAL project.
+ 6. For the template in the new domain model project to be able to find the model you then need to modify it to point to the
+  correct EDMX path. You do this by setting the inputFile variable in the Model.tt template file to point to an explicit path
+   where to find the model:
+
+
+
+
+const string inputFile = @"../L2Sql.DataAccessLayer/DataModel.edmx";
+ 
+
+Once you save the file the entity classes should be generated in the domain model project. Note that if you make any changes
+ to the model in the DAL project later on you are required to explicitly update your model classes. By right-click on the Model.tt
+  template file and choose “Run Custom Tool” the entity classes will be regenerated to reflect the latest changes to the model.
+
+  7. As the context by default expects the entity classes to be in the same namespace, add a using statement for their new namespace
+   to the DaaModel.Context.tt template file in the DAL project:
+
+
+
+
+using System;
+using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
+using L2Sql.DomainModel; 
+<#
+if (container.FunctionImports.Any())
+{
+#>
+using System.Data.Objects;
+using System.Data.Objects.DataClasses;
+using System.Linq;
+<#
+}
+#>
+ 
+
+8. Finally, you need to add a reference from the DAL project to the domain model project in order for it to compile.

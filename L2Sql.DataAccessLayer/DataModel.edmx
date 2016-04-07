@@ -1,0 +1,1718 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+      <Schema Namespace="LogqsoDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="__MigrationHistory">
+          <Key>
+            <PropertyRef Name="MigrationId" />
+            <PropertyRef Name="ContextKey" />
+          </Key>
+          <Property Name="MigrationId" Type="nvarchar" MaxLength="150" Nullable="false" />
+          <Property Name="ContextKey" Type="nvarchar" MaxLength="300" Nullable="false" />
+          <Property Name="Model" Type="varbinary(max)" Nullable="false" />
+          <Property Name="ProductVersion" Type="nvarchar" MaxLength="32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CabrilloInfo">
+          <Key>
+            <PropertyRef Name="ContestId" />
+            <PropertyRef Name="CallSignId" />
+          </Key>
+          <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
+          <Property Name="CallSignId" Type="int" Nullable="false" />
+          <Property Name="ClaimedScore" Type="int" Nullable="false" />
+          <Property Name="Club" Type="varchar" MaxLength="20" />
+          <Property Name="Operators" Type="varchar" MaxLength="200" />
+          <Property Name="Address" Type="varchar" MaxLength="200" />
+          <Property Name="AddressCity" Type="varchar" MaxLength="100" />
+          <Property Name="AddressState" Type="varchar" MaxLength="100" />
+          <Property Name="AddressPostalCode" Type="varchar" MaxLength="50" />
+          <Property Name="AddressCountry" Type="varchar" MaxLength="50" />
+        </EntityType>
+        <EntityType Name="CallInfo">
+          <Key>
+            <PropertyRef Name="CallInfoId" />
+            <PropertyRef Name="CallGroup" />
+          </Key>
+          <Property Name="CallInfoId" Type="int" Nullable="false" />
+          <Property Name="CallGroup" Type="int" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="StationName" Type="varchar" MaxLength="20" />
+          <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
+          <Property Name="CallsignId" Type="int" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="SessionName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="Disabled" Type="bit" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CallSign">
+          <Key>
+            <PropertyRef Name="CallSignId" />
+          </Key>
+          <Property Name="CallSignId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Call" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="Continent" Type="int" Nullable="false" />
+          <Property Name="Accuracy" Type="int" Nullable="false" />
+          <Property Name="Latitude" Type="float" />
+          <Property Name="Longitude" Type="float" />
+          <Property Name="GeoCodeChk" Type="bit" />
+        </EntityType>
+        <EntityType Name="Contest">
+          <Key>
+            <PropertyRef Name="ContestId" />
+          </Key>
+          <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
+          <Property Name="ContestName" Type="varchar" MaxLength="30" Nullable="false" />
+          <Property Name="ContestTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoModeTypeEnum" Type="int" Nullable="false" />
+          <Property Name="StartDateTime" Type="datetime" Nullable="false" />
+          <Property Name="EndDateTime" Type="datetime" Nullable="false" />
+          <Property Name="Active" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ContestType">
+          <Key>
+            <PropertyRef Name="ContestTypeEnum" />
+          </Key>
+          <Property Name="ContestTypeEnum" Type="int" Nullable="false" />
+          <Property Name="ContestTypeEnumName" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoExchangeName" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="QsoMultName" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="QsoMult2Name" Type="varchar" MaxLength="20" />
+          <Property Name="ExtraDataName" Type="varchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="Log">
+          <Key>
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="LogId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ContestYear" Type="datetime" Nullable="false" />
+          <Property Name="CallsignId" Type="int" Nullable="false" />
+          <Property Name="ContestId" Type="varchar" MaxLength="35" />
+          <Property Name="LogCategoryId" Type="int" Nullable="false" />
+          <Property Name="QsoExchangeNumber" Type="smallint" />
+          <Property Name="QsoDatabaseServerInstance" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="QsoDatabaseInstance" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="QsoDatabaseTableName" Type="varchar" MaxLength="100" Nullable="false" />
+          <Property Name="WintestDataID" Type="int" />
+          <Property Name="N1mmDataID" Type="int" />
+        </EntityType>
+        <EntityType Name="LogCategory">
+          <Key>
+            <PropertyRef Name="LogCategoryId" />
+          </Key>
+          <Property Name="LogCategoryId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="CatOperatorEnum" Type="int" Nullable="false" />
+          <Property Name="CatOperatorOverlayEnum" Type="int" Nullable="false" />
+          <Property Name="CatBandEnum" Type="int" Nullable="false" />
+          <Property Name="CatPowerEnum" Type="int" Nullable="false" />
+          <Property Name="CatAssistedEnum" Type="int" Nullable="false" />
+          <Property Name="CatNoOfTxEnum" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Qso">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="StationName" Type="varchar" MaxLength="20" />
+          <Property Name="Frequency" Type="decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="CallsignId" Type="int" Nullable="false" />
+          <Property Name="QsoDateTime" Type="datetime" Nullable="false" />
+          <Property Name="RxRst" Type="tinyint" Nullable="false" />
+          <Property Name="TxRst" Type="tinyint" Nullable="false" />
+          <Property Name="QsoExchangeNumber" Type="smallint" />
+          <Property Name="QsoModeTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="QsoExchangeAlpha">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="QsoExhangeAlphaValue" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="QsoExchangeType">
+          <Key>
+            <PropertyRef Name="QsoExchangeTypeEnum" />
+          </Key>
+          <Property Name="QsoExchangeTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnumName" Type="varchar" MaxLength="20" />
+        </EntityType>
+        <EntityType Name="QsoExtraData">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="QsoExtraDataValue" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="QsoModeType">
+          <Key>
+            <PropertyRef Name="QsoModeTypeEnum" />
+          </Key>
+          <Property Name="QsoModeTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoModeEnumName" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="QsoRadioType">
+          <Key>
+            <PropertyRef Name="QsoRadioTypeEnum" />
+          </Key>
+          <Property Name="QsoRadioTypeEnum" Type="int" Nullable="false" />
+          <Property Name="QsoRadioTypeName" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Session">
+          <Key>
+            <PropertyRef Name="SessionName" />
+          </Key>
+          <Property Name="SessionName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="UserName" Type="varchar" MaxLength="256" Nullable="false" />
+          <Property Name="SessionDateTime" Type="datetime" Nullable="false" />
+          <Property Name="CategorySettings" Type="xml" />
+          <Property Name="FiltersSettings" Type="xml" />
+          <Property Name="XaxisSettings" Type="xml" />
+          <Property Name="YaxisSettings" Type="xml" />
+          <Property Name="Subscription" Type="smallmoney" />
+        </EntityType>
+        <EntityType Name="Station">
+          <Key>
+            <PropertyRef Name="LogId" />
+            <PropertyRef Name="StationName" />
+          </Key>
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="StationName" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnDupes">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnIncorrectCall">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="CorrectCall" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="UbnIncorrectExchange">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+          <Property Name="CorrectExchange" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="UbnNotInLog">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnSummary">
+          <Key>
+            <PropertyRef Name="CallsignId" />
+            <PropertyRef Name="ContestId" />
+          </Key>
+          <Property Name="CallsignId" Type="int" Nullable="false" />
+          <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
+          <Property Name="ContestYear" Type="datetime" Nullable="false" />
+          <Property Name="LogCategoryId" Type="int" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnUniques">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="smallint" Nullable="false" />
+          <Property Name="LogId" Type="int" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CabrilloInfo" Type="Self.CabrilloInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="CabrilloInfo">
+              <PropertyRef Name="CallSignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CabrilloInfo_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CabrilloInfo" Type="Self.CabrilloInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="CabrilloInfo">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum">
+          <End Role="QsoRadioType" Type="Self.QsoRadioType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoRadioType">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Session_SessionName">
+          <End Role="Session" Type="Self.Session" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Session">
+              <PropertyRef Name="SessionName" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="SessionName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Station_LogId_StationName">
+          <End Role="Station" Type="Self.Station" Multiplicity="0..1" />
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Station">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Contest_dbo_ContestType_ContestTypeEnum">
+          <End Role="ContestType" Type="Self.ContestType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Contest" Type="Self.Contest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContestType">
+              <PropertyRef Name="ContestTypeEnum" />
+            </Principal>
+            <Dependent Role="Contest">
+              <PropertyRef Name="ContestTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum">
+          <End Role="QsoModeType" Type="Self.QsoModeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Contest" Type="Self.Contest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoModeType">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Principal>
+            <Dependent Role="Contest">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum">
+          <End Role="QsoExchangeType" Type="Self.QsoExchangeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContestType" Type="Self.ContestType" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoExchangeType">
+              <PropertyRef Name="QsoExchangeTypeEnum" />
+            </Principal>
+            <Dependent Role="ContestType">
+              <PropertyRef Name="QsoExchangeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="0..1" />
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_LogCategory_LogCategoryId">
+          <End Role="LogCategory" Type="Self.LogCategory" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LogCategory">
+              <PropertyRef Name="LogCategoryId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="LogCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1" />
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_Log_LogId">
+          <End Role="Log" Type="Self.Log" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Log">
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum">
+          <End Role="QsoModeType" Type="Self.QsoModeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoModeType">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum">
+          <End Role="QsoRadioType" Type="Self.QsoRadioType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoRadioType">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_Station_LogId_StationName">
+          <End Role="Station" Type="Self.Station" Multiplicity="0..1" />
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Station">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId">
+          <End Role="Qso" Type="Self.Qso" Multiplicity="1" />
+          <End Role="QsoExchangeAlpha" Type="Self.QsoExchangeAlpha" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Qso">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="QsoExchangeAlpha">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId">
+          <End Role="Qso" Type="Self.Qso" Multiplicity="1" />
+          <End Role="QsoExtraData" Type="Self.QsoExtraData" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Qso">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="QsoExtraData">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Station_dbo_Log_LogId">
+          <End Role="Log" Type="Self.Log" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Station" Type="Self.Station" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Log">
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="Station">
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId">
+          <End Role="LogCategory" Type="Self.LogCategory" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LogCategory">
+              <PropertyRef Name="LogCategoryId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="LogCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="LogqsoDataModelStoreContainer">
+          <EntitySet Name="__MigrationHistory" EntityType="Self.__MigrationHistory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CabrilloInfo" EntityType="Self.CabrilloInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CallInfo" EntityType="Self.CallInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CallSign" EntityType="Self.CallSign" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Contest" EntityType="Self.Contest" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ContestType" EntityType="Self.ContestType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Log" EntityType="Self.Log" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="LogCategory" EntityType="Self.LogCategory" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Qso" EntityType="Self.Qso" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QsoExchangeAlpha" EntityType="Self.QsoExchangeAlpha" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QsoExchangeType" EntityType="Self.QsoExchangeType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QsoExtraData" EntityType="Self.QsoExtraData" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QsoModeType" EntityType="Self.QsoModeType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="QsoRadioType" EntityType="Self.QsoRadioType" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Session" EntityType="Self.Session" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Station" EntityType="Self.Station" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnDupes" EntityType="Self.UbnDupes" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnIncorrectCall" EntityType="Self.UbnIncorrectCall" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnIncorrectExchange" EntityType="Self.UbnIncorrectExchange" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnNotInLog" EntityType="Self.UbnNotInLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnSummary" EntityType="Self.UbnSummary" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UbnUniques" EntityType="Self.UbnUniques" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" Association="Self.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId">
+            <End Role="CallSign" EntitySet="CallSign" />
+            <End Role="CabrilloInfo" EntitySet="CabrilloInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CabrilloInfo_dbo_Contest_ContestId" Association="Self.FK_dbo_CabrilloInfo_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contest" />
+            <End Role="CabrilloInfo" EntitySet="CabrilloInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_CallSign_CallsignId" Association="Self.FK_dbo_CallInfo_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSign" />
+            <End Role="CallInfo" EntitySet="CallInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Contest_ContestId" Association="Self.FK_dbo_CallInfo_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contest" />
+            <End Role="CallInfo" EntitySet="CallInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" Association="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum">
+            <End Role="QsoRadioType" EntitySet="QsoRadioType" />
+            <End Role="CallInfo" EntitySet="CallInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Session_SessionName" Association="Self.FK_dbo_CallInfo_dbo_Session_SessionName">
+            <End Role="Session" EntitySet="Session" />
+            <End Role="CallInfo" EntitySet="CallInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Station_LogId_StationName" Association="Self.FK_dbo_CallInfo_dbo_Station_LogId_StationName">
+            <End Role="Station" EntitySet="Station" />
+            <End Role="CallInfo" EntitySet="CallInfo" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" Association="Self.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum">
+            <End Role="ContestType" EntitySet="ContestType" />
+            <End Role="Contest" EntitySet="Contest" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" Association="Self.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum">
+            <End Role="QsoModeType" EntitySet="QsoModeType" />
+            <End Role="Contest" EntitySet="Contest" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" Association="Self.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum">
+            <End Role="QsoExchangeType" EntitySet="QsoExchangeType" />
+            <End Role="ContestType" EntitySet="ContestType" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_CallSign_CallsignId" Association="Self.FK_dbo_Log_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSign" />
+            <End Role="Log" EntitySet="Log" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_Contest_ContestId" Association="Self.FK_dbo_Log_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contest" />
+            <End Role="Log" EntitySet="Log" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_LogCategory_LogCategoryId" Association="Self.FK_dbo_Log_dbo_LogCategory_LogCategoryId">
+            <End Role="LogCategory" EntitySet="LogCategory" />
+            <End Role="Log" EntitySet="Log" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_CallSign_CallsignId" Association="Self.FK_dbo_Qso_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSign" />
+            <End Role="Qso" EntitySet="Qso" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_Log_LogId" Association="Self.FK_dbo_Qso_dbo_Log_LogId">
+            <End Role="Log" EntitySet="Log" />
+            <End Role="Qso" EntitySet="Qso" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" Association="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum">
+            <End Role="QsoModeType" EntitySet="QsoModeType" />
+            <End Role="Qso" EntitySet="Qso" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" Association="Self.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum">
+            <End Role="QsoRadioType" EntitySet="QsoRadioType" />
+            <End Role="Qso" EntitySet="Qso" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_Station_LogId_StationName" Association="Self.FK_dbo_Qso_dbo_Station_LogId_StationName">
+            <End Role="Station" EntitySet="Station" />
+            <End Role="Qso" EntitySet="Qso" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" Association="Self.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId">
+            <End Role="Qso" EntitySet="Qso" />
+            <End Role="QsoExchangeAlpha" EntitySet="QsoExchangeAlpha" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" Association="Self.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId">
+            <End Role="Qso" EntitySet="Qso" />
+            <End Role="QsoExtraData" EntitySet="QsoExtraData" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Station_dbo_Log_LogId" Association="Self.FK_dbo_Station_dbo_Log_LogId">
+            <End Role="Log" EntitySet="Log" />
+            <End Role="Station" EntitySet="Station" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_CallSign_CallsignId" Association="Self.FK_dbo_UbnSummary_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSign" />
+            <End Role="UbnSummary" EntitySet="UbnSummary" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_Contest_ContestId" Association="Self.FK_dbo_UbnSummary_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contest" />
+            <End Role="UbnSummary" EntitySet="UbnSummary" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" Association="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId">
+            <End Role="LogCategory" EntitySet="LogCategory" />
+            <End Role="UbnSummary" EntitySet="UbnSummary" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema>
+    </edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="LogqsoDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="C__MigrationHistory">
+          <Key>
+            <PropertyRef Name="MigrationId" />
+            <PropertyRef Name="ContextKey" />
+          </Key>
+          <Property Name="MigrationId" Type="String" MaxLength="150" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="ContextKey" Type="String" MaxLength="300" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Model" Type="Binary" MaxLength="Max" FixedLength="false" Nullable="false" />
+          <Property Name="ProductVersion" Type="String" MaxLength="32" FixedLength="false" Unicode="true" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CabrilloInfo">
+          <Key>
+            <PropertyRef Name="ContestId" />
+            <PropertyRef Name="CallSignId" />
+          </Key>
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CallSignId" Type="Int32" Nullable="false" />
+          <Property Name="ClaimedScore" Type="Int32" Nullable="false" />
+          <Property Name="Club" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Operators" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="Address" Type="String" MaxLength="200" FixedLength="false" Unicode="false" />
+          <Property Name="AddressCity" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AddressState" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AddressPostalCode" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="AddressCountry" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" FromRole="CabrilloInfo" ToRole="CallSign" />
+          <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_CabrilloInfo_dbo_Contest_ContestId" FromRole="CabrilloInfo" ToRole="Contest" />
+        </EntityType>
+        <EntityType Name="CallInfo">
+          <Key>
+            <PropertyRef Name="CallInfoId" />
+            <PropertyRef Name="CallGroup" />
+          </Key>
+          <Property Name="CallInfoId" Type="Int32" Nullable="false" />
+          <Property Name="CallGroup" Type="Int32" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="StationName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="CallsignId" Type="Int32" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="SessionName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Disabled" Type="Boolean" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_CallInfo_dbo_CallSign_CallsignId" FromRole="CallInfo" ToRole="CallSign" />
+          <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_CallInfo_dbo_Contest_ContestId" FromRole="CallInfo" ToRole="Contest" />
+          <NavigationProperty Name="QsoRadioType" Relationship="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="CallInfo" ToRole="QsoRadioType" />
+          <NavigationProperty Name="Session" Relationship="Self.FK_dbo_CallInfo_dbo_Session_SessionName" FromRole="CallInfo" ToRole="Session" />
+          <NavigationProperty Name="Station" Relationship="Self.FK_dbo_CallInfo_dbo_Station_LogId_StationName" FromRole="CallInfo" ToRole="Station" />
+        </EntityType>
+        <EntityType Name="CallSign">
+          <Key>
+            <PropertyRef Name="CallSignId" />
+          </Key>
+          <Property Name="CallSignId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Call" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Continent" Type="Int32" Nullable="false" />
+          <Property Name="Accuracy" Type="Int32" Nullable="false" />
+          <Property Name="Latitude" Type="Double" />
+          <Property Name="Longitude" Type="Double" />
+          <Property Name="GeoCodeChk" Type="Boolean" />
+          <NavigationProperty Name="CabrilloInfoes" Relationship="Self.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" FromRole="CallSign" ToRole="CabrilloInfo" />
+          <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_CallSign_CallsignId" FromRole="CallSign" ToRole="CallInfo" />
+          <NavigationProperty Name="Logs" Relationship="Self.FK_dbo_Log_dbo_CallSign_CallsignId" FromRole="CallSign" ToRole="Log" />
+          <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_CallSign_CallsignId" FromRole="CallSign" ToRole="Qso" />
+          <NavigationProperty Name="UbnSummaries" Relationship="Self.FK_dbo_UbnSummary_dbo_CallSign_CallsignId" FromRole="CallSign" ToRole="UbnSummary" />
+        </EntityType>
+        <EntityType Name="Contest">
+          <Key>
+            <PropertyRef Name="ContestId" />
+          </Key>
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContestName" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContestTypeEnum" Type="LogqsoDataModel.ContestTypeEnum" Nullable="false" />
+          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="StartDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="EndDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="Active" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="CabrilloInfoes" Relationship="Self.FK_dbo_CabrilloInfo_dbo_Contest_ContestId" FromRole="Contest" ToRole="CabrilloInfo" />
+          <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_Contest_ContestId" FromRole="Contest" ToRole="CallInfo" />
+          <NavigationProperty Name="ContestType" Relationship="Self.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" FromRole="Contest" ToRole="ContestType" />
+          <NavigationProperty Name="QsoModeType" Relationship="Self.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" FromRole="Contest" ToRole="QsoModeType" />
+          <NavigationProperty Name="Logs" Relationship="Self.FK_dbo_Log_dbo_Contest_ContestId" FromRole="Contest" ToRole="Log" />
+          <NavigationProperty Name="UbnSummaries" Relationship="Self.FK_dbo_UbnSummary_dbo_Contest_ContestId" FromRole="Contest" ToRole="UbnSummary" />
+        </EntityType>
+        <EntityType Name="ContestType">
+          <Key>
+            <PropertyRef Name="ContestTypeEnum" />
+          </Key>
+          <Property Name="ContestTypeEnum" Type="LogqsoDataModel.ContestTypeEnum" Nullable="false" />
+          <Property Name="ContestTypeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnum" Type="LogqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
+          <Property Name="QsoExchangeName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="QsoMultName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="QsoMult2Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ExtraDataName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="Contests" Relationship="Self.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" FromRole="ContestType" ToRole="Contest" />
+          <NavigationProperty Name="QsoExchangeType" Relationship="Self.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" FromRole="ContestType" ToRole="QsoExchangeType" />
+        </EntityType>
+        <EntityType Name="Log">
+          <Key>
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="LogId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ContestYear" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CallsignId" Type="Int32" Nullable="false" />
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" />
+          <Property Name="LogCategoryId" Type="Int32" Nullable="false" />
+          <Property Name="QsoExchangeNumber" Type="Int16" />
+          <Property Name="QsoDatabaseServerInstance" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="QsoDatabaseInstance" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="QsoDatabaseTableName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="WintestDataID" Type="Int32" />
+          <Property Name="N1mmDataID" Type="Int32" />
+          <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_Log_dbo_CallSign_CallsignId" FromRole="Log" ToRole="CallSign" />
+          <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_Log_dbo_Contest_ContestId" FromRole="Log" ToRole="Contest" />
+          <NavigationProperty Name="LogCategory" Relationship="Self.FK_dbo_Log_dbo_LogCategory_LogCategoryId" FromRole="Log" ToRole="LogCategory" />
+          <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_Log_LogId" FromRole="Log" ToRole="Qso" />
+          <NavigationProperty Name="Stations" Relationship="Self.FK_dbo_Station_dbo_Log_LogId" FromRole="Log" ToRole="Station" />
+        </EntityType>
+        <EntityType Name="LogCategory">
+          <Key>
+            <PropertyRef Name="LogCategoryId" />
+          </Key>
+          <Property Name="LogCategoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="CatOperatorEnum" Type="LogqsoDataModel.CatOperatorEnum" Nullable="false" />
+          <Property Name="CatOperatorOverlayEnum" Type="LogqsoDataModel.CatOperatorOverlayEnum" Nullable="false" />
+          <Property Name="CatBandEnum" Type="LogqsoDataModel.CatBandEnum" Nullable="false" />
+          <Property Name="CatPowerEnum" Type="LogqsoDataModel.CatPowerEnum" Nullable="false" />
+          <Property Name="CatAssistedEnum" Type="LogqsoDataModel.CatAssistedEnum" Nullable="false" />
+          <Property Name="CatNoOfTxEnum" Type="LogqsoDataModel.CatNoOfTxEnum" Nullable="false" />
+          <NavigationProperty Name="Logs" Relationship="Self.FK_dbo_Log_dbo_LogCategory_LogCategoryId" FromRole="LogCategory" ToRole="Log" />
+          <NavigationProperty Name="UbnSummaries" Relationship="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" FromRole="LogCategory" ToRole="UbnSummary" />
+        </EntityType>
+        <EntityType Name="Qso">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="StationName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="Frequency" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="CallsignId" Type="Int32" Nullable="false" />
+          <Property Name="QsoDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="RxRst" Type="Byte" Nullable="false" />
+          <Property Name="TxRst" Type="Byte" Nullable="false" />
+          <Property Name="QsoExchangeNumber" Type="Int16" />
+          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_Qso_dbo_CallSign_CallsignId" FromRole="Qso" ToRole="CallSign" />
+          <NavigationProperty Name="Log" Relationship="Self.FK_dbo_Qso_dbo_Log_LogId" FromRole="Qso" ToRole="Log" />
+          <NavigationProperty Name="QsoModeType" Relationship="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" FromRole="Qso" ToRole="QsoModeType" />
+          <NavigationProperty Name="QsoRadioType" Relationship="Self.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="Qso" ToRole="QsoRadioType" />
+          <NavigationProperty Name="Station" Relationship="Self.FK_dbo_Qso_dbo_Station_LogId_StationName" FromRole="Qso" ToRole="Station" />
+          <NavigationProperty Name="QsoExchangeAlpha" Relationship="Self.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" FromRole="Qso" ToRole="QsoExchangeAlpha" />
+          <NavigationProperty Name="QsoExtraData" Relationship="Self.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" FromRole="Qso" ToRole="QsoExtraData" />
+        </EntityType>
+        <EntityType Name="QsoExchangeAlpha">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="QsoExhangeAlphaValue" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Qso" Relationship="Self.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" FromRole="QsoExchangeAlpha" ToRole="Qso" />
+        </EntityType>
+        <EntityType Name="QsoExchangeType">
+          <Key>
+            <PropertyRef Name="QsoExchangeTypeEnum" />
+          </Key>
+          <Property Name="QsoExchangeTypeEnum" Type="LogqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="ContestTypes" Relationship="Self.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" FromRole="QsoExchangeType" ToRole="ContestType" />
+        </EntityType>
+        <EntityType Name="QsoExtraData">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="QsoExtraDataValue" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Qso" Relationship="Self.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" FromRole="QsoExtraData" ToRole="Qso" />
+        </EntityType>
+        <EntityType Name="QsoModeType">
+          <Key>
+            <PropertyRef Name="QsoModeTypeEnum" />
+          </Key>
+          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="QsoModeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="Contests" Relationship="Self.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" FromRole="QsoModeType" ToRole="Contest" />
+          <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" FromRole="QsoModeType" ToRole="Qso" />
+        </EntityType>
+        <EntityType Name="QsoRadioType">
+          <Key>
+            <PropertyRef Name="QsoRadioTypeEnum" />
+          </Key>
+          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <Property Name="QsoRadioTypeName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="QsoRadioType" ToRole="CallInfo" />
+          <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="QsoRadioType" ToRole="Qso" />
+        </EntityType>
+        <EntityType Name="Session">
+          <Key>
+            <PropertyRef Name="SessionName" />
+          </Key>
+          <Property Name="SessionName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="SessionDateTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CategorySettings" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="FiltersSettings" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="XaxisSettings" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="YaxisSettings" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Subscription" Type="Decimal" Precision="10" Scale="4" />
+          <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_Session_SessionName" FromRole="Session" ToRole="CallInfo" />
+        </EntityType>
+        <EntityType Name="Station">
+          <Key>
+            <PropertyRef Name="LogId" />
+            <PropertyRef Name="StationName" />
+          </Key>
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="StationName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_Station_LogId_StationName" FromRole="Station" ToRole="CallInfo" />
+          <NavigationProperty Name="Log" Relationship="Self.FK_dbo_Station_dbo_Log_LogId" FromRole="Station" ToRole="Log" />
+          <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_Station_LogId_StationName" FromRole="Station" ToRole="Qso" />
+        </EntityType>
+        <EntityType Name="UbnDupe">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnIncorrectCall">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="CorrectCall" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="UbnIncorrectExchange">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+          <Property Name="CorrectExchange" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="UbnNotInLog">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UbnSummary">
+          <Key>
+            <PropertyRef Name="CallsignId" />
+            <PropertyRef Name="ContestId" />
+          </Key>
+          <Property Name="CallsignId" Type="Int32" Nullable="false" />
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContestYear" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="LogCategoryId" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_UbnSummary_dbo_CallSign_CallsignId" FromRole="UbnSummary" ToRole="CallSign" />
+          <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_UbnSummary_dbo_Contest_ContestId" FromRole="UbnSummary" ToRole="Contest" />
+          <NavigationProperty Name="LogCategory" Relationship="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" FromRole="UbnSummary" ToRole="LogCategory" />
+        </EntityType>
+        <EntityType Name="UbnUnique">
+          <Key>
+            <PropertyRef Name="QsoNo" />
+            <PropertyRef Name="LogId" />
+          </Key>
+          <Property Name="QsoNo" Type="Int16" Nullable="false" />
+          <Property Name="LogId" Type="Int32" Nullable="false" />
+        </EntityType>
+        <Association Name="FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CabrilloInfo" Type="Self.CabrilloInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="CabrilloInfo">
+              <PropertyRef Name="CallSignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CabrilloInfo_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CabrilloInfo" Type="Self.CabrilloInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="CabrilloInfo">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum">
+          <End Role="QsoRadioType" Type="Self.QsoRadioType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoRadioType">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Session_SessionName">
+          <End Role="Session" Type="Self.Session" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Session">
+              <PropertyRef Name="SessionName" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="SessionName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_CallInfo_dbo_Station_LogId_StationName">
+          <End Role="Station" Type="Self.Station" Multiplicity="0..1" />
+          <End Role="CallInfo" Type="Self.CallInfo" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Station">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Principal>
+            <Dependent Role="CallInfo">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1" />
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_CallSign_CallsignId">
+          <End Role="CallSign" Type="Self.CallSign" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CallSign">
+              <PropertyRef Name="CallSignId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="CallsignId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Contest_dbo_ContestType_ContestTypeEnum">
+          <End Role="ContestType" Type="Self.ContestType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Contest" Type="Self.Contest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ContestType">
+              <PropertyRef Name="ContestTypeEnum" />
+            </Principal>
+            <Dependent Role="Contest">
+              <PropertyRef Name="ContestTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum">
+          <End Role="QsoModeType" Type="Self.QsoModeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Contest" Type="Self.Contest" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoModeType">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Principal>
+            <Dependent Role="Contest">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="0..1" />
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_Contest_ContestId">
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contest">
+              <PropertyRef Name="ContestId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="ContestId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum">
+          <End Role="QsoExchangeType" Type="Self.QsoExchangeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="ContestType" Type="Self.ContestType" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoExchangeType">
+              <PropertyRef Name="QsoExchangeTypeEnum" />
+            </Principal>
+            <Dependent Role="ContestType">
+              <PropertyRef Name="QsoExchangeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Log_dbo_LogCategory_LogCategoryId">
+          <End Role="LogCategory" Type="Self.LogCategory" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LogCategory">
+              <PropertyRef Name="LogCategoryId" />
+            </Principal>
+            <Dependent Role="Log">
+              <PropertyRef Name="LogCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_Log_LogId">
+          <End Role="Log" Type="Self.Log" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Log">
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Station_dbo_Log_LogId">
+          <End Role="Log" Type="Self.Log" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Station" Type="Self.Station" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Log">
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="Station">
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId">
+          <End Role="LogCategory" Type="Self.LogCategory" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="UbnSummary" Type="Self.UbnSummary" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="LogCategory">
+              <PropertyRef Name="LogCategoryId" />
+            </Principal>
+            <Dependent Role="UbnSummary">
+              <PropertyRef Name="LogCategoryId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum">
+          <End Role="QsoModeType" Type="Self.QsoModeType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoModeType">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="QsoModeTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum">
+          <End Role="QsoRadioType" Type="Self.QsoRadioType" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="QsoRadioType">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="QsoRadioTypeEnum" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_Qso_dbo_Station_LogId_StationName">
+          <End Role="Station" Type="Self.Station" Multiplicity="0..1" />
+          <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Station">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Principal>
+            <Dependent Role="Qso">
+              <PropertyRef Name="LogId" />
+              <PropertyRef Name="StationName" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId">
+          <End Role="Qso" Type="Self.Qso" Multiplicity="1" />
+          <End Role="QsoExchangeAlpha" Type="Self.QsoExchangeAlpha" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Qso">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="QsoExchangeAlpha">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId">
+          <End Role="Qso" Type="Self.Qso" Multiplicity="1" />
+          <End Role="QsoExtraData" Type="Self.QsoExtraData" Multiplicity="0..1" />
+          <ReferentialConstraint>
+            <Principal Role="Qso">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Principal>
+            <Dependent Role="QsoExtraData">
+              <PropertyRef Name="QsoNo" />
+              <PropertyRef Name="LogId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="LogqsoDataEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="C__MigrationHistory" EntityType="Self.C__MigrationHistory" />
+          <EntitySet Name="CabrilloInfoes" EntityType="Self.CabrilloInfo" />
+          <EntitySet Name="CallInfoes" EntityType="Self.CallInfo" />
+          <EntitySet Name="CallSigns" EntityType="Self.CallSign" />
+          <EntitySet Name="Contests" EntityType="Self.Contest" />
+          <EntitySet Name="ContestTypes" EntityType="Self.ContestType" />
+          <EntitySet Name="Logs" EntityType="Self.Log" />
+          <EntitySet Name="LogCategories" EntityType="Self.LogCategory" />
+          <EntitySet Name="Qsoes" EntityType="Self.Qso" />
+          <EntitySet Name="QsoExchangeAlphas" EntityType="Self.QsoExchangeAlpha" />
+          <EntitySet Name="QsoExchangeTypes" EntityType="Self.QsoExchangeType" />
+          <EntitySet Name="QsoExtraDatas" EntityType="Self.QsoExtraData" />
+          <EntitySet Name="QsoModeTypes" EntityType="Self.QsoModeType" />
+          <EntitySet Name="QsoRadioTypes" EntityType="Self.QsoRadioType" />
+          <EntitySet Name="Sessions" EntityType="Self.Session" />
+          <EntitySet Name="Stations" EntityType="Self.Station" />
+          <EntitySet Name="UbnDupes" EntityType="Self.UbnDupe" />
+          <EntitySet Name="UbnIncorrectCalls" EntityType="Self.UbnIncorrectCall" />
+          <EntitySet Name="UbnIncorrectExchanges" EntityType="Self.UbnIncorrectExchange" />
+          <EntitySet Name="UbnNotInLogs" EntityType="Self.UbnNotInLog" />
+          <EntitySet Name="UbnSummaries" EntityType="Self.UbnSummary" />
+          <EntitySet Name="UbnUniques" EntityType="Self.UbnUnique" />
+          <AssociationSet Name="FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" Association="Self.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId">
+            <End Role="CallSign" EntitySet="CallSigns" />
+            <End Role="CabrilloInfo" EntitySet="CabrilloInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CabrilloInfo_dbo_Contest_ContestId" Association="Self.FK_dbo_CabrilloInfo_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contests" />
+            <End Role="CabrilloInfo" EntitySet="CabrilloInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_CallSign_CallsignId" Association="Self.FK_dbo_CallInfo_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSigns" />
+            <End Role="CallInfo" EntitySet="CallInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Contest_ContestId" Association="Self.FK_dbo_CallInfo_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contests" />
+            <End Role="CallInfo" EntitySet="CallInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" Association="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum">
+            <End Role="QsoRadioType" EntitySet="QsoRadioTypes" />
+            <End Role="CallInfo" EntitySet="CallInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Session_SessionName" Association="Self.FK_dbo_CallInfo_dbo_Session_SessionName">
+            <End Role="Session" EntitySet="Sessions" />
+            <End Role="CallInfo" EntitySet="CallInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_CallInfo_dbo_Station_LogId_StationName" Association="Self.FK_dbo_CallInfo_dbo_Station_LogId_StationName">
+            <End Role="Station" EntitySet="Stations" />
+            <End Role="CallInfo" EntitySet="CallInfoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_CallSign_CallsignId" Association="Self.FK_dbo_Log_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSigns" />
+            <End Role="Log" EntitySet="Logs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_CallSign_CallsignId" Association="Self.FK_dbo_Qso_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSigns" />
+            <End Role="Qso" EntitySet="Qsoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_CallSign_CallsignId" Association="Self.FK_dbo_UbnSummary_dbo_CallSign_CallsignId">
+            <End Role="CallSign" EntitySet="CallSigns" />
+            <End Role="UbnSummary" EntitySet="UbnSummaries" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" Association="Self.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum">
+            <End Role="ContestType" EntitySet="ContestTypes" />
+            <End Role="Contest" EntitySet="Contests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" Association="Self.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum">
+            <End Role="QsoModeType" EntitySet="QsoModeTypes" />
+            <End Role="Contest" EntitySet="Contests" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_Contest_ContestId" Association="Self.FK_dbo_Log_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contests" />
+            <End Role="Log" EntitySet="Logs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_Contest_ContestId" Association="Self.FK_dbo_UbnSummary_dbo_Contest_ContestId">
+            <End Role="Contest" EntitySet="Contests" />
+            <End Role="UbnSummary" EntitySet="UbnSummaries" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" Association="Self.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum">
+            <End Role="QsoExchangeType" EntitySet="QsoExchangeTypes" />
+            <End Role="ContestType" EntitySet="ContestTypes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Log_dbo_LogCategory_LogCategoryId" Association="Self.FK_dbo_Log_dbo_LogCategory_LogCategoryId">
+            <End Role="LogCategory" EntitySet="LogCategories" />
+            <End Role="Log" EntitySet="Logs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_Log_LogId" Association="Self.FK_dbo_Qso_dbo_Log_LogId">
+            <End Role="Log" EntitySet="Logs" />
+            <End Role="Qso" EntitySet="Qsoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Station_dbo_Log_LogId" Association="Self.FK_dbo_Station_dbo_Log_LogId">
+            <End Role="Log" EntitySet="Logs" />
+            <End Role="Station" EntitySet="Stations" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" Association="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId">
+            <End Role="LogCategory" EntitySet="LogCategories" />
+            <End Role="UbnSummary" EntitySet="UbnSummaries" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" Association="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum">
+            <End Role="QsoModeType" EntitySet="QsoModeTypes" />
+            <End Role="Qso" EntitySet="Qsoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" Association="Self.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum">
+            <End Role="QsoRadioType" EntitySet="QsoRadioTypes" />
+            <End Role="Qso" EntitySet="Qsoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_Qso_dbo_Station_LogId_StationName" Association="Self.FK_dbo_Qso_dbo_Station_LogId_StationName">
+            <End Role="Station" EntitySet="Stations" />
+            <End Role="Qso" EntitySet="Qsoes" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" Association="Self.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId">
+            <End Role="Qso" EntitySet="Qsoes" />
+            <End Role="QsoExchangeAlpha" EntitySet="QsoExchangeAlphas" />
+          </AssociationSet>
+          <AssociationSet Name="FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" Association="Self.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId">
+            <End Role="Qso" EntitySet="Qsoes" />
+            <End Role="QsoExtraData" EntitySet="QsoExtraDatas" />
+          </AssociationSet>
+        </EntityContainer>
+        <EnumType Name="ContestTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.ContestTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="QsoExchangeTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoExchangeTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="QsoModeTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoModeTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="QsoRadioTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoRadioTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatOperatorEnum" a:ExternalTypeName="CatOperatorEnumLogqso.mvc.common.Enum." xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatOperatorOverlayEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatOperatorOverlayEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatBandEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatBandEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatPowerEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatPowerEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatAssistedEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatAssistedEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatNoOfTxEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatNoOfTxEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+      </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="LogqsoDataModelStoreContainer" CdmEntityContainer="LogqsoDataEntities">
+          <EntitySetMapping Name="C__MigrationHistory">
+            <EntityTypeMapping TypeName="LogqsoDataModel.C__MigrationHistory">
+              <MappingFragment StoreEntitySet="__MigrationHistory">
+                <ScalarProperty Name="MigrationId" ColumnName="MigrationId" />
+                <ScalarProperty Name="ContextKey" ColumnName="ContextKey" />
+                <ScalarProperty Name="Model" ColumnName="Model" />
+                <ScalarProperty Name="ProductVersion" ColumnName="ProductVersion" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CabrilloInfoes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.CabrilloInfo">
+              <MappingFragment StoreEntitySet="CabrilloInfo">
+                <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+                <ScalarProperty Name="CallSignId" ColumnName="CallSignId" />
+                <ScalarProperty Name="ClaimedScore" ColumnName="ClaimedScore" />
+                <ScalarProperty Name="Club" ColumnName="Club" />
+                <ScalarProperty Name="Operators" ColumnName="Operators" />
+                <ScalarProperty Name="Address" ColumnName="Address" />
+                <ScalarProperty Name="AddressCity" ColumnName="AddressCity" />
+                <ScalarProperty Name="AddressState" ColumnName="AddressState" />
+                <ScalarProperty Name="AddressPostalCode" ColumnName="AddressPostalCode" />
+                <ScalarProperty Name="AddressCountry" ColumnName="AddressCountry" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CallInfoes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.CallInfo">
+              <MappingFragment StoreEntitySet="CallInfo">
+                <ScalarProperty Name="CallInfoId" ColumnName="CallInfoId" />
+                <ScalarProperty Name="CallGroup" ColumnName="CallGroup" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="StationName" ColumnName="StationName" />
+                <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+                <ScalarProperty Name="CallsignId" ColumnName="CallsignId" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="SessionName" ColumnName="SessionName" />
+                <ScalarProperty Name="Disabled" ColumnName="Disabled" />
+                <ScalarProperty Name="QsoRadioTypeEnum" ColumnName="QsoRadioTypeEnum" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CallSigns">
+            <EntityTypeMapping TypeName="LogqsoDataModel.CallSign">
+              <MappingFragment StoreEntitySet="CallSign">
+                <ScalarProperty Name="CallSignId" ColumnName="CallSignId" />
+                <ScalarProperty Name="Call" ColumnName="Call" />
+                <ScalarProperty Name="Continent" ColumnName="Continent" />
+                <ScalarProperty Name="Accuracy" ColumnName="Accuracy" />
+                <ScalarProperty Name="Latitude" ColumnName="Latitude" />
+                <ScalarProperty Name="Longitude" ColumnName="Longitude" />
+                <ScalarProperty Name="GeoCodeChk" ColumnName="GeoCodeChk" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Contests">
+            <EntityTypeMapping TypeName="LogqsoDataModel.Contest">
+              <MappingFragment StoreEntitySet="Contest">
+                <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+                <ScalarProperty Name="ContestName" ColumnName="ContestName" />
+                <ScalarProperty Name="ContestTypeEnum" ColumnName="ContestTypeEnum" />
+                <ScalarProperty Name="QsoModeTypeEnum" ColumnName="QsoModeTypeEnum" />
+                <ScalarProperty Name="StartDateTime" ColumnName="StartDateTime" />
+                <ScalarProperty Name="EndDateTime" ColumnName="EndDateTime" />
+                <ScalarProperty Name="Active" ColumnName="Active" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ContestTypes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.ContestType">
+              <MappingFragment StoreEntitySet="ContestType">
+                <ScalarProperty Name="ContestTypeEnum" ColumnName="ContestTypeEnum" />
+                <ScalarProperty Name="ContestTypeEnumName" ColumnName="ContestTypeEnumName" />
+                <ScalarProperty Name="QsoExchangeTypeEnum" ColumnName="QsoExchangeTypeEnum" />
+                <ScalarProperty Name="QsoExchangeName" ColumnName="QsoExchangeName" />
+                <ScalarProperty Name="QsoMultName" ColumnName="QsoMultName" />
+                <ScalarProperty Name="QsoMult2Name" ColumnName="QsoMult2Name" />
+                <ScalarProperty Name="ExtraDataName" ColumnName="ExtraDataName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Logs">
+            <EntityTypeMapping TypeName="LogqsoDataModel.Log">
+              <MappingFragment StoreEntitySet="Log">
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="ContestYear" ColumnName="ContestYear" />
+                <ScalarProperty Name="CallsignId" ColumnName="CallsignId" />
+                <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+                <ScalarProperty Name="LogCategoryId" ColumnName="LogCategoryId" />
+                <ScalarProperty Name="QsoExchangeNumber" ColumnName="QsoExchangeNumber" />
+                <ScalarProperty Name="QsoDatabaseServerInstance" ColumnName="QsoDatabaseServerInstance" />
+                <ScalarProperty Name="QsoDatabaseInstance" ColumnName="QsoDatabaseInstance" />
+                <ScalarProperty Name="QsoDatabaseTableName" ColumnName="QsoDatabaseTableName" />
+                <ScalarProperty Name="WintestDataID" ColumnName="WintestDataID" />
+                <ScalarProperty Name="N1mmDataID" ColumnName="N1mmDataID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="LogCategories">
+            <EntityTypeMapping TypeName="LogqsoDataModel.LogCategory">
+              <MappingFragment StoreEntitySet="LogCategory">
+                <ScalarProperty Name="LogCategoryId" ColumnName="LogCategoryId" />
+                <ScalarProperty Name="CatOperatorEnum" ColumnName="CatOperatorEnum" />
+                <ScalarProperty Name="CatOperatorOverlayEnum" ColumnName="CatOperatorOverlayEnum" />
+                <ScalarProperty Name="CatBandEnum" ColumnName="CatBandEnum" />
+                <ScalarProperty Name="CatPowerEnum" ColumnName="CatPowerEnum" />
+                <ScalarProperty Name="CatAssistedEnum" ColumnName="CatAssistedEnum" />
+                <ScalarProperty Name="CatNoOfTxEnum" ColumnName="CatNoOfTxEnum" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Qsoes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.Qso">
+              <MappingFragment StoreEntitySet="Qso">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="StationName" ColumnName="StationName" />
+                <ScalarProperty Name="Frequency" ColumnName="Frequency" />
+                <ScalarProperty Name="CallsignId" ColumnName="CallsignId" />
+                <ScalarProperty Name="QsoDateTime" ColumnName="QsoDateTime" />
+                <ScalarProperty Name="RxRst" ColumnName="RxRst" />
+                <ScalarProperty Name="TxRst" ColumnName="TxRst" />
+                <ScalarProperty Name="QsoExchangeNumber" ColumnName="QsoExchangeNumber" />
+                <ScalarProperty Name="QsoModeTypeEnum" ColumnName="QsoModeTypeEnum" />
+                <ScalarProperty Name="QsoRadioTypeEnum" ColumnName="QsoRadioTypeEnum" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QsoExchangeAlphas">
+            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExchangeAlpha">
+              <MappingFragment StoreEntitySet="QsoExchangeAlpha">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="QsoExhangeAlphaValue" ColumnName="QsoExhangeAlphaValue" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QsoExchangeTypes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExchangeType">
+              <MappingFragment StoreEntitySet="QsoExchangeType">
+                <ScalarProperty Name="QsoExchangeTypeEnum" ColumnName="QsoExchangeTypeEnum" />
+                <ScalarProperty Name="QsoExchangeTypeEnumName" ColumnName="QsoExchangeTypeEnumName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QsoExtraDatas">
+            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExtraData">
+              <MappingFragment StoreEntitySet="QsoExtraData">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="QsoExtraDataValue" ColumnName="QsoExtraDataValue" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QsoModeTypes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.QsoModeType">
+              <MappingFragment StoreEntitySet="QsoModeType">
+                <ScalarProperty Name="QsoModeTypeEnum" ColumnName="QsoModeTypeEnum" />
+                <ScalarProperty Name="QsoModeEnumName" ColumnName="QsoModeEnumName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="QsoRadioTypes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.QsoRadioType">
+              <MappingFragment StoreEntitySet="QsoRadioType">
+                <ScalarProperty Name="QsoRadioTypeEnum" ColumnName="QsoRadioTypeEnum" />
+                <ScalarProperty Name="QsoRadioTypeName" ColumnName="QsoRadioTypeName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Sessions">
+            <EntityTypeMapping TypeName="LogqsoDataModel.Session">
+              <MappingFragment StoreEntitySet="Session">
+                <ScalarProperty Name="SessionName" ColumnName="SessionName" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="SessionDateTime" ColumnName="SessionDateTime" />
+                <ScalarProperty Name="CategorySettings" ColumnName="CategorySettings" />
+                <ScalarProperty Name="FiltersSettings" ColumnName="FiltersSettings" />
+                <ScalarProperty Name="XaxisSettings" ColumnName="XaxisSettings" />
+                <ScalarProperty Name="YaxisSettings" ColumnName="YaxisSettings" />
+                <ScalarProperty Name="Subscription" ColumnName="Subscription" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Stations">
+            <EntityTypeMapping TypeName="LogqsoDataModel.Station">
+              <MappingFragment StoreEntitySet="Station">
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="StationName" ColumnName="StationName" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnDupes">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnDupe">
+              <MappingFragment StoreEntitySet="UbnDupes">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnIncorrectCalls">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnIncorrectCall">
+              <MappingFragment StoreEntitySet="UbnIncorrectCall">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="CorrectCall" ColumnName="CorrectCall" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnIncorrectExchanges">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnIncorrectExchange">
+              <MappingFragment StoreEntitySet="UbnIncorrectExchange">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+                <ScalarProperty Name="CorrectExchange" ColumnName="CorrectExchange" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnNotInLogs">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnNotInLog">
+              <MappingFragment StoreEntitySet="UbnNotInLog">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnSummaries">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnSummary">
+              <MappingFragment StoreEntitySet="UbnSummary">
+                <ScalarProperty Name="CallsignId" ColumnName="CallsignId" />
+                <ScalarProperty Name="ContestId" ColumnName="ContestId" />
+                <ScalarProperty Name="ContestYear" ColumnName="ContestYear" />
+                <ScalarProperty Name="LogCategoryId" ColumnName="LogCategoryId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UbnUniques">
+            <EntityTypeMapping TypeName="LogqsoDataModel.UbnUnique">
+              <MappingFragment StoreEntitySet="UbnUniques">
+                <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
+                <ScalarProperty Name="LogId" ColumnName="LogId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>
