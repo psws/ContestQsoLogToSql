@@ -77,6 +77,20 @@ namespace L2Sql.DataAccessLayer
         {
             Update(items);
         }
+        public virtual void AddRange(params T[] items)
+        {
+            using (var context = new LogqsoDataEntities())
+            {
+                context.Configuration.AutoDetectChangesEnabled = false;
+
+                DbSet<T> dbSet = context.Set<T>();
+                dbSet.AddRange(items);
+                context.SaveChanges();
+
+                context.Configuration.AutoDetectChangesEnabled = true;
+            }
+        }
+
 
         public virtual void Update(params T[] items)
         {

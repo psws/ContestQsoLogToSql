@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using L2Sql.BusinessLayer;
 using CtyLib;
 using System.IO;
+using System.ComponentModel;
 using L2Sql.DomainModel;
 using Logqso.mvc.common.Enum;
 
@@ -20,13 +21,13 @@ namespace L2Sql.BusinessLayer
 
         protected string CtyFile {get; set;}
         protected string LogFileDirectory { get; set; }
-        private InputLogs InputLogs { get; set; }
+        private InputLog InputLog { get; set; }
         ContestTypeEnum ContestTypeEnum;
         private string SqlServerInstance { get; set; }
         private string SqlDatabase { get; set; }
         private string SqlQsoTable { get; set; }
 
-        public ProcessLogs(string CtyFile, string LogFileDirectory, InputLogs InputLogs,
+        public ProcessLogs(string CtyFile, string LogFileDirectory, 
             string SqlServerInstance, string SqlDatabase, string SqlQsoTable)
         {
             this.CtyFile = CtyFile;
@@ -35,7 +36,6 @@ namespace L2Sql.BusinessLayer
             this.SqlDatabase = SqlDatabase;
             this.SqlQsoTable = SqlQsoTable;
 
-            this.InputLogs = InputLogs;
 
             if (LogFileDirectory.ToLower().Contains("cqww") )
 	        {
@@ -55,7 +55,58 @@ namespace L2Sql.BusinessLayer
 
         }
 
-        public bool LogsToDatabase()
+        public bool CallsToDatabase(BackgroundWorker worker)
+        {
+            bool result = true;
+            try
+            {
+                IBusiness = new Business();
+                DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
+                IList<CallSign> ICurrentCallSigns;
+
+                //create cty file
+                CtyObj = new CtyLib.CCtyObj(CtyLib.CCtyObj.DatType.CtyDat, CtyFile);
+                CtyObj.Load();
+                string ContestId = di.Name.ToUpper();
+                DateTime ContestYear;
+                if (DateTime.TryParse("1,1," + di.Name.Substring(di.Name.Length - 4, 4), out ContestYear) == false)
+                {
+                    return false;
+                }
+
+                FileInfo[] rgFiles = di.GetFiles("*.log");
+
+                //go through all logs and capture the callsigns
+                //  sae changes after every log is orocessed.
+                foreach (var item in rgFiles)
+                {
+                    //worker.ReportProgress(1,new InputLog(item.Name, item.Length) );
+                   //get Callsigns already in DB
+                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                    IList<CallSign> INewCallSigns = new List<CallSign>();
+                    StreamReader TxtStream;
+                    TxtStream = new StreamReader(item.FullName);
+                    GetCabrilloCallsignInfo(TxtStream, ICurrentCallSigns, INewCallSigns);
+                    //save all new callsigns
+                    if (INewCallSigns.Count > 0)
+                    {
+                      worker.ReportProgress(1,new InputLog(item.Name, INewCallSigns.Count));
+                      IBusiness.AddCallSign(INewCallSigns.ToArray());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+
+
+            return result;
+        }
+
+
+        public bool LogsToDatabase(BackgroundWorker worker)
         {
             bool result = true;
             try
@@ -82,38 +133,14 @@ namespace L2Sql.BusinessLayer
                 //get LogCategory
                 IList<LogCategory> LogCategorys = IBusiness.GetAllLogCategorys();
 
-                //go through all logs and capture the callsigns
-                //  sae changes after every log is orocessed.
-                foreach (var item in rgFiles)
-                {
-                    //get Callsigns already in DB
-                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    IList<CallSign> INewCallSigns = new List<CallSign>();
-                    StreamReader TxtStream;
-                    TxtStream = new StreamReader(item.FullName);
-                    GetCabrilloCallsignInfo(TxtStream, ICurrentCallSigns, INewCallSigns);
-                    //save all new callsigns
-                    if (INewCallSigns.Count > 0)
-                    {
-                        IBusiness.AddCallSign(INewCallSigns.ToArray());
-                    }
-                }
 
                 //refresh list
                 ICurrentCallSigns = IBusiness.GetAllCallsigns();
 
                 foreach (var item in rgFiles)
                 {
-                    InputLogs.Insert(0, new InputLog(item.Name, item.Length));
-                    Log Log = new Log()
-                    {
-                        ContestYear = ContestYear,
-                        ContestId = ContestId,
-                        QsoDatabaseServerInstance = SqlServerInstance,
-                        QsoDatabaseInstance = SqlDatabase,
-                        QsoDatabaseTableName = SqlQsoTable,
-                        EntityState = EntityState.Added
-                    };
+                    Log Log = null;
+                    //IList<Log> Logs = null;
 
                     //logCategory
                     LogCategory LogCategory = new DomainModel.LogCategory()
@@ -127,64 +154,108 @@ namespace L2Sql.BusinessLayer
                     StreamReader TxtStream;
                     TxtStream = new StreamReader(item.FullName);
                     GetCabrilloInfo(TxtStream, LogCategory, CabInfo);
-                    SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
-                    
-                    //find LogCategory, if it exists
-                    LogCategory DBLogCategory = LogCategorys.Where(
-                        l => l.CatAssistedEnum == LogCategory.CatAssistedEnum &&
-                         l.CatBandEnum == LogCategory.CatBandEnum &&
-                         l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
-                         l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
-                         l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
-                         l.CatPowerEnum == LogCategory.CatPowerEnum
-                       ).SingleOrDefault();
 
-                    if (DBLogCategory != null)
-                    {
-                        Log.LogCategoryId = DBLogCategory.LogCategoryId;
-                    }
-                    else
-                    {//new entry
-                        Log.LogCategory = LogCategory;
-                    }
-
-                    //CabrilloInfo
-                    CabrilloInfo CabrilloInfo = new CabrilloInfo
-                    {
-                        ClaimedScore = CabInfo.ClaimedScore,
-                        Club = CabInfo.Club,
-                        Operators = CabInfo.Operators,
-                        EntityState = EntityState.Added
-                    };
-                    //Log.CabrilloInfo = CabrilloInfo;
-
-
-                    //check if the log callsign already exists in DB
+                    worker.ReportProgress(1, new InputLog(item.Name, item.Length));
                     CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
-                    if (CallSign == null)
+                    if (CallSign != null)
                     {
-                        CallSign = new CallSign
+                        Log = IBusiness.GetLog(ContestId, CallSign.CallSignId);;
+                    }
+                    if (Log == null)
+                    {
+
+                        Log = new Log()
                         {
-                            Call = CabInfo.Callsign,
-                            Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                            Continent = (int)GetContinentEnum(CabInfo.Callsign),
+                            ContestYear = ContestYear,
+                            ContestId = ContestId,
+                            QsoDatabaseServerInstance = SqlServerInstance,
+                            QsoDatabaseInstance = SqlDatabase,
+                            QsoDatabaseTableName = SqlQsoTable,
                             EntityState = EntityState.Added
                         };
-                        //need to assign CallsignId after saveChanges
-                        Log.CallSign = CallSign;
-                        //add to cached list
-                        //CallSigns.Add(CallSign);
-                    }
-                    else if (CallSign.CallSignId != 0)
-                    {//if Id is zero than the Call has not been saved yet, it is from another log
-                        Log.CallsignId = CallSign.CallSignId;
-                    }
 
+                        if (CabInfo.CallTxZone != 0  )
+                        {//only set if contest has zone
+                            Log.QsoExchangeNumber = CabInfo.CallTxZone;
+                        }
+
+
+                        SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
+                    
+                        //find LogCategory, if it exists
+                        LogCategory DBLogCategory = LogCategorys.Where(
+                            l => l.CatAssistedEnum == LogCategory.CatAssistedEnum &&
+                             l.CatBandEnum == LogCategory.CatBandEnum &&
+                             l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
+                             l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
+                             l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
+                             l.CatPowerEnum == LogCategory.CatPowerEnum
+                           ).SingleOrDefault();
+
+                        if (DBLogCategory == null)
+                        {//new entry update DB
+                            IBusiness.AddLogCategory(LogCategory);
+                            Log.LogCategoryId = LogCategory.LogCategoryId;
+                        }
+                        else
+                        {
+                            Log.LogCategoryId = DBLogCategory.LogCategoryId;
+                        }
+
+
+
+                        //check if the log callsign already exists in DB
+                        CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                        if (CallSign == null)
+                        {
+                            CallSign = new CallSign
+                            {
+                                Call = CabInfo.Callsign,
+                                Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
+                                Continent = (int)GetContinentEnum(CabInfo.Callsign),
+                                EntityState = EntityState.Added
+                            };
+                            //need to assign CallsignId after saveChanges
+                           // Log.CallSign = CallSign;
+                            //add to cached list
+                           //IList<CallSign> INewCallSigns = new List<CallSign>();
+
+                           // INewCallSigns.Add(CallSign);
+                           // IBusiness.AddCallSign(INewCallSigns.ToArray());
+                            IBusiness.AddCallSign(CallSign);
+                            //is this required
+                            ICurrentCallSigns = IBusiness.GetAllCallsigns();
+
+                            CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                        }
+                        Log.CallsignId = CallSign.CallSignId;
+                    
+                        //CabrilloInfo
+                        CabrilloInfo CabrilloInfo = null;
+                        CabrilloInfo = IBusiness.GetCabrilloInfo(ContestId, CallSign.CallSignId);
+                        if (CabrilloInfo == null)
+                        {// not in DB
+                            CabrilloInfo = new CabrilloInfo
+                            {
+                                CallSignId = CallSign.CallSignId,
+                                ContestId = ContestId,
+                                ClaimedScore = CabInfo.ClaimedScore,
+                                Club = CabInfo.Club,
+                                Operators = CabInfo.Operators,
+                                EntityState = EntityState.Added
+                            };
+                            IBusiness.AddCabrilloInfo(CabrilloInfo);
+
+                        }
+                    }
 
                     //Update Log
 
-                    Log.QsoExchangeNumber = CabInfo.CallTxZone;
-                    //LoadLog(item.);
+
+                    //get QSos
+                    IList<CallSign> INewCallSigns = new List<CallSign>();
+
+                    //Save Qsos;
                 }
             }
             catch (Exception ex)
@@ -227,22 +298,34 @@ namespace L2Sql.BusinessLayer
                                     line = line.Replace('\t', ' ');
                                 }
                                 string[] Qcolumns = line.Split(" ".ToCharArray());
-                                
+                                int i=0;
+                                int j=0;
+                                string[] QValidcolumns= new string[Qcolumns.Length] ;
+                                while (i < Qcolumns.Length)
+                                {
+                                    if (Qcolumns[i] != "")
+                                    {
+                                        QValidcolumns[j++] = Qcolumns[i];
+                                    }
+                                    i++;
+                                }
                                 switch (ContestTypeEnum)
                                 {
                                     case ContestTypeEnum.CQWW:
-                                        FoundCall = Qcolumns[8];
+                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
                                         break;
                                     case ContestTypeEnum.CQWPX:
-                                        break;
+                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                       break;
                                     case ContestTypeEnum.CQ160:
+                                       FoundCall = QValidcolumns[8].Trim().ToUpper();
                                         break;
                                     case ContestTypeEnum.RUSDXC:
-                                        break;
+                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                       break;
                                     default:
                                         break;
                                 }
-                                break;
                             }
                             else
                             {
@@ -257,19 +340,27 @@ namespace L2Sql.BusinessLayer
                                         break;
                                 }
                             }
-                            //check if new call
-                            CallSign = ICurrentCallsigns.Where(c => c.Call == FoundCall).SingleOrDefault();
-                            if (CallSign == null)
-                            {//it is a new call
-                                CallSign = new CallSign
-                                {
-                                    Call = FoundCall,
-                                    Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                                    Continent = (int)GetContinentEnum(FoundCall),
-                                    EntityState = EntityState.Added
-                                };
-                                //add to new list
-                                INewCallsigns.Add(CallSign);
+                            if (FoundCall != string.Empty)
+                            {
+                                //check if new call
+                                CallSign = ICurrentCallsigns.Where(c => c.Call == FoundCall).SingleOrDefault();
+                                if (CallSign == null)
+                                {//it maybe a new call
+                                    //check if it is new call already, ie. A qsp on a different band.
+                                    CallSign = INewCallsigns.Where(c => c.Call == FoundCall).SingleOrDefault();
+                                    if (CallSign == null)
+                                    {//it is a new call
+                                        CallSign = new CallSign
+                                        {
+                                            Call = FoundCall,
+                                            Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
+                                            Continent = (int)GetContinentEnum(FoundCall),
+                                            EntityState = EntityState.Added
+                                        };
+                                        //add to new list
+                                        INewCallsigns.Add(CallSign);
+                                    }
+                                }
                             }
                         }
 

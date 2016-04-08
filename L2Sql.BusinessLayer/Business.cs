@@ -11,79 +11,132 @@ namespace L2Sql.BusinessLayer
     public class Business : IBusiness
     {
 
-        private readonly ILogRepository LogRepository;
-        private readonly IQsoRepository QsoRepository;
-        private readonly ICallSignRepository CallSignRepository;
-        private readonly ILogCategoryRepository LogCategoryRepository;
- 
+        private readonly ILogRepository ILogRepository;
+        private readonly IQsoRepository IQsoRepository;
+        private readonly ICallSignRepository ICallSignRepository;
+        private readonly ILogCategoryRepository ILogCategoryRepository;
+        private readonly ICabrilloInfoRepository ICabrilloInfoRepository;
+
         public Business()
         {
-            LogRepository = new LogRepository();
-            QsoRepository = new QsoRepository();
-            CallSignRepository = new CallSignRepository();
-            LogCategoryRepository = new LogCategoryRepository();
+            ILogRepository = new LogRepository();
+            IQsoRepository = new QsoRepository();
+            ICallSignRepository = new CallSignRepository();
+            ILogCategoryRepository = new LogCategoryRepository();
+            ICabrilloInfoRepository = new CabrilloInfoRepository();
         }
 
         public Business(ILogRepository LogRepository,
             IQsoRepository QsoRepository)
         {
-            this.LogRepository = LogRepository;
-            this.QsoRepository = QsoRepository;
+            this.ILogRepository = LogRepository;
+            this.IQsoRepository = QsoRepository;
         }
 
         public IList<Log> GetAllLogs(string ContestId)
         {
-            return LogRepository.GetList(d => d.ContestId.Equals(ContestId), 
-                d => d.CallSign ); //include related employees
+            return ILogRepository.GetList(d => d.ContestId.Equals(ContestId), 
+                d => d.CallSign ); //include related 
         }
 
-
-        public IList<LogCategory> GetAllLogCategorys()
+        public Log GetLog(string ContestId, int CallsignId)
         {
-            return LogCategoryRepository.GetAll();
+            return ILogRepository.GetSingle(d => d.ContestId.Equals(ContestId) &&
+            d.CallsignId == CallsignId,
+                d => d.Qsoes); //include related 
         }
+
 
         public void AddLog(params Log[] Logs)
         {
             /* Validation and error handling omitted */
-            LogRepository.Add(Logs);
+            ILogRepository.Add(Logs);
         }
 
         public void UpdateLog(params Log[] Logs)
         {
             /* Validation and error handling omitted */
-            LogRepository.Update(Logs);
+            ILogRepository.Update(Logs);
         }
 
         public void RemoveLog(params Log[] Logs)
         {
             /* Validation and error handling omitted */
-            LogRepository.Remove(Logs);
+            ILogRepository.Remove(Logs);
         }
  
         //CallSigns
         public IList<CallSign> GetAllCallsigns()
         {
-            return CallSignRepository.GetAll(); 
+            return ICallSignRepository.GetAll(); 
         }
 
         public void AddCallSign(params CallSign[] CallSigns)
         {
             /* Validation and error handling omitted */
-            CallSignRepository.Add(CallSigns);
+            try
+            {
+                ICallSignRepository.AddRange(CallSigns);
+            }
+            catch (Exception ex )
+            {
+                
+                throw;
+            }
         }
+
 
         public void UpdateCallSign(params CallSign[] CallSigns)
         {
             /* Validation and error handling omitted */
-            CallSignRepository.Update(CallSigns);
+            ICallSignRepository.Update(CallSigns);
         }
 
         public void RemoveCallSign(params CallSign[] CallSigns)
         {
             /* Validation and error handling omitted */
-            CallSignRepository.Remove(CallSigns);
+            ICallSignRepository.Remove(CallSigns);
         }
+
+        public IList<LogCategory> GetAllLogCategorys()
+        {
+            return ILogCategoryRepository.GetAll();
+        }
+
+        public void AddLogCategory(params LogCategory[] LogCategorys)
+        {
+            /* Validation and error handling omitted */
+            try
+            {
+                ILogCategoryRepository.AddRange(LogCategorys);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public void AddCabrilloInfo(params CabrilloInfo[] CabrilloInfos)
+        {
+            /* Validation and error handling omitted */
+            try
+            {
+                ICabrilloInfoRepository.AddRange(CabrilloInfos);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+
+        public CabrilloInfo GetCabrilloInfo(string ContestId, int CallSignId)
+        {
+            return ICabrilloInfoRepository.GetSingle(d => d.ContestId.Equals(ContestId) &&
+            d.CallSignId == CallSignId); //include related 
+        }
+
 
     }
 }

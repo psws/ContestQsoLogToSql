@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Microsoft.WindowsAPICodePack.Dialogs;
 using System.IO;
-using System.ComponentModel;
 using L2Sql.BusinessLayer;
 
 using WpfModalDialog;
@@ -29,7 +29,7 @@ namespace ContestQsoLogToSql.web
     public partial class MainWindow : Window
     {
         //public List<string> Files { get; set; }
-        
+      
         public MainWindow()
         {
             InitializeComponent();
@@ -428,6 +428,98 @@ namespace ContestQsoLogToSql.web
             }
             return ConnectionString;
         }
+        private void ImportCalls_Click(object sender, RoutedEventArgs e)
+        {
+            string instance = null;
+            if (SqlServerInstanceCombobox.SelectedValue != null &&
+                string.IsNullOrEmpty(SqlServerInstanceCombobox.SelectedValue.ToString()) == false)
+            {
+                instance = SqlServerInstanceCombobox.SelectedValue.ToString();
+                string Login = SQLLoginTextbox.Text;
+                string Pwd = SqlPasswordTextbox.Text;
+
+                if (string.IsNullOrEmpty(Login) == true)
+                {//check registry
+                    try
+                    {
+                        Login = ((App)(Application.Current)).AppRegHKLM.rkRun.GetValue("SqlDatabaseLogin").ToString();
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
+                if (string.IsNullOrEmpty(Pwd) == true)
+                {//check registry
+                    try
+                    {
+                        Pwd = ((App)(Application.Current)).AppRegHKLM.rkRun.GetValue("SqlDatabasePwd").ToString();
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
+
+                if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Pwd))
+                {
+                    ModalMsgDialog.ShowHandlerDialog(string.Format("Please specify the Login and Password for the {0} instabce", instance));
+                    //MessageBox.Show(string.Format("Unable to create ctyobj {0}", "test"));
+                }
+                else
+                {
+                    try
+                    {
+                        //((InputLogs)(LogListbox.ItemsSource)).Add(new InputLog("cn3a.log", 1024));
+                        //((InputLogs)(LogListbox.ItemsSource)).Insert(0, new InputLog("d4b.log", 65536));
+#if false
+                        ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text, (InputLogs)(LogListbox.ItemsSource),
+                            SqlServerInstanceCombobox.SelectedValue.ToString(),
+                            SqlDatabaseCombobox.SelectedValue.ToString(),
+                            SqlQsoTablesComboBox.SelectedValue.ToString());
+                        ProcessLogsobj.LogsToDatabase();
+#else
+
+                        ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+                           SqlServerInstanceCombobox.SelectedValue.ToString(),
+                           SqlDatabaseCombobox.SelectedValue.ToString(),
+                           SqlQsoTablesComboBox.SelectedValue.ToString());
+                        //http://stackoverflow.com/questions/5483565/how-to-use-wpf-background-worker
+                        BackgroundWorker worker = new BackgroundWorker();
+                        worker.WorkerReportsProgress = true;
+                        worker.DoWork += worker_DoWorkCall;
+                        worker.ProgressChanged += worker_ProgressChanged;
+                        worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+                        worker.RunWorkerAsync(ProcessLogsobj);
+#endif
+                    }
+                    catch (Exception ex)
+                    {
+                        ModalMsgDialog.ShowHandlerDialog(string.Format("Unable to create ctyobj {0}", ex.Message));
+                        //MessageBox.Show(string.Format("Unable to create ctyobj {0}", ex.Message));
+                    }
+                }
+            }
+
+        }
+
+        private void worker_DoWorkCall(object sender, DoWorkEventArgs e)
+        {
+            // run all background tasks here
+            //Dispatcher.BeginInvoke(new Action(() =>
+            //{
+            //    ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+            //        SqlServerInstanceCombobox.SelectedValue.ToString(),
+            //        SqlDatabaseCombobox.SelectedValue.ToString(),
+            //        SqlQsoTablesComboBox.SelectedValue.ToString());
+            //})); 
+            //Get the BackgroundWorker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            ProcessLogs ProcessLogsobj = e.Argument as ProcessLogs;
+            ProcessLogsobj.CallsToDatabase(worker);
+
+        }
 
         private void ImportLogs_Click(object sender, RoutedEventArgs e)
         {
@@ -473,11 +565,26 @@ namespace ContestQsoLogToSql.web
                     {
                         //((InputLogs)(LogListbox.ItemsSource)).Add(new InputLog("cn3a.log", 1024));
                         //((InputLogs)(LogListbox.ItemsSource)).Insert(0, new InputLog("d4b.log", 65536));
+#if false
                         ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text, (InputLogs)(LogListbox.ItemsSource),
                             SqlServerInstanceCombobox.SelectedValue.ToString(),
                             SqlDatabaseCombobox.SelectedValue.ToString(),
                             SqlQsoTablesComboBox.SelectedValue.ToString());
                         ProcessLogsobj.LogsToDatabase();
+#else
+
+                        ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+                           SqlServerInstanceCombobox.SelectedValue.ToString(),
+                           SqlDatabaseCombobox.SelectedValue.ToString(),
+                           SqlQsoTablesComboBox.SelectedValue.ToString());
+                        //http://stackoverflow.com/questions/5483565/how-to-use-wpf-background-worker
+                        BackgroundWorker worker = new BackgroundWorker();
+                        worker.WorkerReportsProgress = true;
+                        worker.DoWork += worker_DoWorkLog;
+                        worker.ProgressChanged += worker_ProgressChanged;
+                        worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+                        worker.RunWorkerAsync(ProcessLogsobj);
+#endif
                     }
                     catch (Exception ex)
                     {
@@ -497,6 +604,36 @@ namespace ContestQsoLogToSql.web
         }
 
 
+        private void worker_DoWorkLog(object sender, DoWorkEventArgs e)
+        {
+            // run all background tasks here
+            //Dispatcher.BeginInvoke(new Action(() =>
+            //{
+            //    ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+            //        SqlServerInstanceCombobox.SelectedValue.ToString(),
+            //        SqlDatabaseCombobox.SelectedValue.ToString(),
+            //        SqlQsoTablesComboBox.SelectedValue.ToString());
+            //})); 
+             //Get the BackgroundWorker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            ProcessLogs ProcessLogsobj = e.Argument as ProcessLogs;
+            ProcessLogsobj.LogsToDatabase(worker);
+
+        }
+
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+           
+            InputLog InputLog = e.UserState as InputLog;
+            ((InputLogs)(LogListbox.ItemsSource)).Insert(0, InputLog);
+
+        }
+
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            //update ui once worker complete his work
+        }
 
 
 
