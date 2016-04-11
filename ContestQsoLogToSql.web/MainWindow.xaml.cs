@@ -490,6 +490,10 @@ namespace ContestQsoLogToSql.web
                         worker.DoWork += worker_DoWorkCall;
                         worker.ProgressChanged += worker_ProgressChanged;
                         worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+                        ImportLogs.IsEnabled = false;
+                        ImportCalls.IsEnabled = false;
+
+
                         worker.RunWorkerAsync(ProcessLogsobj);
 #endif
                     }
@@ -583,6 +587,9 @@ namespace ContestQsoLogToSql.web
                         worker.DoWork += worker_DoWorkLog;
                         worker.ProgressChanged += worker_ProgressChanged;
                         worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+                        ImportLogs.IsEnabled = false;
+                        ImportCalls.IsEnabled = false;
+
                         worker.RunWorkerAsync(ProcessLogsobj);
 #endif
                     }
@@ -632,7 +639,8 @@ namespace ContestQsoLogToSql.web
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            //update ui once worker complete his work
+            ImportLogs.IsEnabled = true;
+            ImportCalls.IsEnabled = true;
         }
 
 

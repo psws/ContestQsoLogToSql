@@ -10,13 +10,13 @@ namespace L2Sql.BusinessLayer
 {
     public interface IBusiness
     {
-        void AddLog(params Log[] departments);
-        void UpdateLog(params Log[] departments);
-        void RemoveLog(params Log[] departments);
+        void AddLog(params Log[] Logs);
+        void UpdateLog(params Log[] Logs);
+        void RemoveLog(params Log[] Logs);
         IList<Log> GetAllLogs(string ContestId);
         Log GetLog(string ContestId, int CallsignId);
 
-        void AddCallSign(params CallSign[] CallSigns);
+         void AddCallSign(params CallSign[] CallSigns);
         void UpdateCallSign(params CallSign[] CallSigns);
         void RemoveCallSign(params CallSign[] CallSigns);
         IList<CallSign> GetAllCallsigns();
@@ -27,5 +27,8 @@ namespace L2Sql.BusinessLayer
 
         IList<LogCategory> GetAllLogCategorys();
         void AddLogCategory(params LogCategory[] LogCategorys);
+
+        void AddQso(params Qso[] Qsos);
+        IList<Qso> GetQso(int LogId);
     }
 }

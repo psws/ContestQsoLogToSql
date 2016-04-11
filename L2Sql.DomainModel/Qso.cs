@@ -20,8 +20,8 @@ namespace L2Sql.DomainModel
         public decimal Frequency { get; set; }
         public int CallsignId { get; set; }
         public System.DateTime QsoDateTime { get; set; }
-        public byte RxRst { get; set; }
-        public byte TxRst { get; set; }
+        public short RxRst { get; set; }
+        public short TxRst { get; set; }
         public Nullable<short> QsoExchangeNumber { get; set; }
         public Logqso.mvc.common.Enum.QsoModeTypeEnum QsoModeTypeEnum { get; set; }
         public Logqso.mvc.common.Enum.QsoRadioTypeEnum QsoRadioTypeEnum { get; set; }

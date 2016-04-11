@@ -43,7 +43,7 @@ namespace L2Sql.BusinessLayer
         {
             return ILogRepository.GetSingle(d => d.ContestId.Equals(ContestId) &&
             d.CallsignId == CallsignId,
-                d => d.Qsoes); //include related 
+                d => d.CallSign); //include related 
         }
 
 
@@ -83,6 +83,17 @@ namespace L2Sql.BusinessLayer
                 
                 throw;
             }
+        }
+
+        public void AddQso(params Qso[] Qsos)
+        {
+            /* Validation and error handling omitted */
+                IQsoRepository.AddRange(Qsos);
+        }
+
+        public IList<Qso> GetQso(int LogId)
+        {
+            return IQsoRepository.GetList(d => d.LogId.Equals(LogId)); //include related 
         }
 
 
@@ -134,7 +145,8 @@ namespace L2Sql.BusinessLayer
         public CabrilloInfo GetCabrilloInfo(string ContestId, int CallSignId)
         {
             return ICabrilloInfoRepository.GetSingle(d => d.ContestId.Equals(ContestId) &&
-            d.CallSignId == CallSignId); //include related 
+            d.CallSignId == CallSignId, 
+                d => d.CallSign); //include related )
         }
 
 

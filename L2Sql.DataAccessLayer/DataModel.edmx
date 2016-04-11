@@ -122,8 +122,8 @@
           <Property Name="Frequency" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="CallsignId" Type="int" Nullable="false" />
           <Property Name="QsoDateTime" Type="datetime" Nullable="false" />
-          <Property Name="RxRst" Type="tinyint" Nullable="false" />
-          <Property Name="TxRst" Type="tinyint" Nullable="false" />
+          <Property Name="RxRst" Type="smallint" Nullable="false" />
+          <Property Name="TxRst" Type="smallint" Nullable="false" />
           <Property Name="QsoExchangeNumber" Type="smallint" />
           <Property Name="QsoModeTypeEnum" Type="int" Nullable="false" />
           <Property Name="QsoRadioTypeEnum" Type="int" Nullable="false" />
@@ -841,8 +841,8 @@
           <Property Name="Frequency" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="CallsignId" Type="Int32" Nullable="false" />
           <Property Name="QsoDateTime" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="RxRst" Type="Byte" Nullable="false" />
-          <Property Name="TxRst" Type="Byte" Nullable="false" />
+          <Property Name="RxRst" Type="Int16" Nullable="false" />
+          <Property Name="TxRst" Type="Int16" Nullable="false" />
           <Property Name="QsoExchangeNumber" Type="Int16" />
           <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
           <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />

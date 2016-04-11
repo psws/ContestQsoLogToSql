@@ -9,6 +9,7 @@ using System.IO;
 using System.ComponentModel;
 using L2Sql.DomainModel;
 using Logqso.mvc.common.Enum;
+using System.Diagnostics;
 
 
 
@@ -63,6 +64,7 @@ namespace L2Sql.BusinessLayer
                 IBusiness = new Business();
                 DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
                 IList<CallSign> ICurrentCallSigns;
+                IList<CallSign> INewCallSigns = new List<CallSign>();
 
                 //create cty file
                 CtyObj = new CtyLib.CCtyObj(CtyLib.CCtyObj.DatType.CtyDat, CtyFile);
@@ -83,16 +85,19 @@ namespace L2Sql.BusinessLayer
                     //worker.ReportProgress(1,new InputLog(item.Name, item.Length) );
                    //get Callsigns already in DB
                     ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    IList<CallSign> INewCallSigns = new List<CallSign>();
                     StreamReader TxtStream;
                     TxtStream = new StreamReader(item.FullName);
                     GetCabrilloCallsignInfo(TxtStream, ICurrentCallSigns, INewCallSigns);
                     //save all new callsigns
                     if (INewCallSigns.Count > 0)
                     {
-                      worker.ReportProgress(1,new InputLog(item.Name, INewCallSigns.Count));
-                      IBusiness.AddCallSign(INewCallSigns.ToArray());
+                        CallSign[] CallSigns;
+                        worker.ReportProgress(1,new InputLog(item.Name, INewCallSigns.Count));
+                        CallSigns = INewCallSigns.ToArray();
+                        IBusiness.AddCallSign(CallSigns);
                     }
+                    ICurrentCallSigns.Clear();
+                    INewCallSigns.Clear();
                 }
             }
             catch (Exception ex)
@@ -109,8 +114,6 @@ namespace L2Sql.BusinessLayer
         public bool LogsToDatabase(BackgroundWorker worker)
         {
             bool result = true;
-            try
-            {
                 IBusiness = new Business();
                 DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
                 QsoModeTypeEnum QsoModeTypeEnum;
@@ -141,130 +144,211 @@ namespace L2Sql.BusinessLayer
                 {
                     Log Log = null;
                     //IList<Log> Logs = null;
-
-                    //logCategory
-                    LogCategory LogCategory = new DomainModel.LogCategory()
-                        {
-                            EntityState = EntityState.Added
-                        };
+                    LogCategory LogCategory = null;
 
                     //Create Cabrillo base
                     CabrilloLTagInfos CabInfo;
                     CabInfo = new CabrilloLTagInfos();
                     StreamReader TxtStream;
                     TxtStream = new StreamReader(item.FullName);
-                    GetCabrilloInfo(TxtStream, LogCategory, CabInfo);
+                    //if (item.FullName.Contains("ai4co"))
+                    //{
 
-                    worker.ReportProgress(1, new InputLog(item.Name, item.Length));
-                    CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
-                    if (CallSign != null)
+                    //}   
+                    if (TxtStream != null)
                     {
-                        Log = IBusiness.GetLog(ContestId, CallSign.CallSignId);;
-                    }
-                    if (Log == null)
-                    {
-
-                        Log = new Log()
+                        using (TxtStream)
                         {
-                            ContestYear = ContestYear,
-                            ContestId = ContestId,
-                            QsoDatabaseServerInstance = SqlServerInstance,
-                            QsoDatabaseInstance = SqlDatabase,
-                            QsoDatabaseTableName = SqlQsoTable,
-                            EntityState = EntityState.Added
-                        };
-
-                        if (CabInfo.CallTxZone != 0  )
-                        {//only set if contest has zone
-                            Log.QsoExchangeNumber = CabInfo.CallTxZone;
-                        }
-
-
-                        SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
-                    
-                        //find LogCategory, if it exists
-                        LogCategory DBLogCategory = LogCategorys.Where(
-                            l => l.CatAssistedEnum == LogCategory.CatAssistedEnum &&
-                             l.CatBandEnum == LogCategory.CatBandEnum &&
-                             l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
-                             l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
-                             l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
-                             l.CatPowerEnum == LogCategory.CatPowerEnum
-                           ).SingleOrDefault();
-
-                        if (DBLogCategory == null)
-                        {//new entry update DB
-                            IBusiness.AddLogCategory(LogCategory);
-                            Log.LogCategoryId = LogCategory.LogCategoryId;
-                        }
-                        else
-                        {
-                            Log.LogCategoryId = DBLogCategory.LogCategoryId;
-                        }
-
-
-
-                        //check if the log callsign already exists in DB
-                        CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
-                        if (CallSign == null)
-                        {
-                            CallSign = new CallSign
+                            try
                             {
-                                Call = CabInfo.Callsign,
-                                Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                                Continent = (int)GetContinentEnum(CabInfo.Callsign),
-                                EntityState = EntityState.Added
-                            };
-                            //need to assign CallsignId after saveChanges
-                           // Log.CallSign = CallSign;
-                            //add to cached list
-                           //IList<CallSign> INewCallSigns = new List<CallSign>();
 
-                           // INewCallSigns.Add(CallSign);
-                           // IBusiness.AddCallSign(INewCallSigns.ToArray());
-                            IBusiness.AddCallSign(CallSign);
-                            //is this required
-                            ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                            GetCabrilloInfo(TxtStream,  CabInfo);
 
-                            CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
-                        }
-                        Log.CallsignId = CallSign.CallSignId;
-                    
-                        //CabrilloInfo
-                        CabrilloInfo CabrilloInfo = null;
-                        CabrilloInfo = IBusiness.GetCabrilloInfo(ContestId, CallSign.CallSignId);
-                        if (CabrilloInfo == null)
-                        {// not in DB
-                            CabrilloInfo = new CabrilloInfo
+                            worker.ReportProgress(1, new InputLog(item.Name, item.Length));
+                            CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                            if (CallSign != null)
                             {
-                                CallSignId = CallSign.CallSignId,
-                                ContestId = ContestId,
-                                ClaimedScore = CabInfo.ClaimedScore,
-                                Club = CabInfo.Club,
-                                Operators = CabInfo.Operators,
-                                EntityState = EntityState.Added
-                            };
-                            IBusiness.AddCabrilloInfo(CabrilloInfo);
+                                Log = IBusiness.GetLog(ContestId, CallSign.CallSignId); ;
+                            }
+                            if (Log == null)
+                            {
 
+                                Log = new Log()
+                                {
+                                    ContestYear = ContestYear,
+                                    ContestId = ContestId,
+                                    QsoDatabaseServerInstance = SqlServerInstance,
+                                    QsoDatabaseInstance = SqlDatabase,
+                                    QsoDatabaseTableName = SqlQsoTable,
+                                    EntityState = EntityState.Added
+                                };
+
+                                if (CabInfo.CallTxZone != 0)
+                                {//only set if contest has zone
+                                    Log.QsoExchangeNumber = CabInfo.CallTxZone;
+                                }
+                                //logCategory
+                                LogCategory = new DomainModel.LogCategory();
+
+                                SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
+
+                                //find LogCategory, if it exists
+                                LogCategory DBLogCategory;
+                                try
+                                {
+                                    DBLogCategory = LogCategorys.Where(
+                                        l => l.CatAssistedEnum == LogCategory.CatAssistedEnum &&
+                                         l.CatBandEnum == LogCategory.CatBandEnum &&
+                                         l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
+                                         l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
+                                         l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
+                                         l.CatPowerEnum == LogCategory.CatPowerEnum
+                                       ).SingleOrDefault();
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(string.Format(" Problem in LogsToDatabase() LogCategorys: {0}"), ex.Message);
+                                    throw;
+                                }
+
+                                try
+                                {
+                                    if (DBLogCategory == null)
+                                    {//new entry update DB
+                                        LogCategory.EntityState = EntityState.Added;
+                                        IBusiness.AddLogCategory(LogCategory);
+                                        LogCategorys = IBusiness.GetAllLogCategorys();
+                                        Log.LogCategoryId = LogCategory.LogCategoryId;
+                                    }
+                                    else
+                                    {
+                                        Log.LogCategoryId = DBLogCategory.LogCategoryId;
+                                    }
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(string.Format(" Problem in LogsToDatabase() DBLogCategory: {0}"), ex.Message);
+                                    throw;
+                                }
+
+
+
+                                //check if the log callsign already exists in DB
+                                CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                                if (CallSign == null)
+                                {
+                                    CallSign = new CallSign
+                                    {
+                                        Call = CabInfo.Callsign,
+                                        Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
+                                        Continent = (int)GetContinentEnum(CabInfo.Callsign),
+                                        EntityState = EntityState.Added
+                                    };
+                                    //need to assign CallsignId after saveChanges
+                                    // Log.CallSign = CallSign;
+                                    //add to cached list
+                                    //IList<CallSign> INewCallSigns = new List<CallSign>();
+
+                                    // INewCallSigns.Add(CallSign);
+                                    // IBusiness.AddCallSign(INewCallSigns.ToArray());
+                                    IBusiness.AddCallSign(CallSign);
+                                    //is this required
+                                    ICurrentCallSigns.Clear();
+                                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
+
+                                    CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                                }
+                                Log.CallsignId = CallSign.CallSignId;
+
+                                //Update Log
+                                try
+                                {
+                                    IBusiness.AddLog(Log);
+                                }
+                                catch (Exception ex)
+                                {
+                                    Debug.WriteLine(string.Format(" Problem in LogsToDatabase() AddLog: {0} message {1}"),Log.CallsignId, ex.Message);
+                                    throw;
+                                }
+                            }
+                            //CabrilloInfo
+                            CabrilloInfo CabrilloInfo = null;
+                            CabrilloInfo = IBusiness.GetCabrilloInfo(ContestId, Log.CallsignId);
+                            try
+                            {
+                                if (CabrilloInfo == null)
+                                {// not in DB
+                                    CabrilloInfo = new CabrilloInfo
+                                    {
+                                        CallSignId = CallSign.CallSignId,
+                                        ContestId = ContestId,
+                                        ClaimedScore = CabInfo.ClaimedScore,
+                                        EntityState = EntityState.Added
+                                    };
+                                    if (!string.IsNullOrEmpty(CabInfo.Operators ) )
+                                    {
+                                        if (CabInfo.Operators.Length > 200)
+                                        {
+                                            CabInfo.Operators = CabInfo.Operators.Substring(1, 200);
+                                        }
+                                        CabrilloInfo.Operators = CabInfo.Operators;
+                                    }
+                                     if (!string.IsNullOrEmpty( CabInfo.Club ) )
+                                    {
+                                        if (CabInfo.Club.Length >20)
+                                        {
+                                            CabInfo.Club = CabInfo.Club.Substring(1, 20);
+                                        }
+                                        CabrilloInfo.Club = CabInfo.Club;
+                                    }
+                                   IBusiness.AddCabrilloInfo(CabrilloInfo);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                Debug.WriteLine(string.Format(" Problem in LogsToDatabase() CabrilloInfo: {0} message {1}"), Log.CallsignId, ex.Message);
+                                throw;
+                            }
+
+
+                            //get QSos
+
+                            switch (ContestTypeEnum)
+                            {
+                                case ContestTypeEnum.CQWW:
+                                    if (Log.LogId == 1923)
+                                    {
+
+                                    }
+                                    try
+                                    {
+                                        GetCqwwQSOInfo(TxtStream, Log);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        
+                                        throw;
+                                    }
+                                    break;
+                                case ContestTypeEnum.CQWPX:
+                                    break;
+                                case ContestTypeEnum.CQ160:
+                                    break;
+                                case ContestTypeEnum.RUSDXC:
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }//stream
+                        catch (Exception ex)
+                        {
+                            Debug.WriteLine(string.Format(" Problem in LogsToDatabase() stream: {0}  message {1}"),item.FullName,  ex.Message);
+                            throw;
                         }
-                    }
+                    }//stream 
 
-                    //Update Log
-
-
-                    //get QSos
-                    IList<CallSign> INewCallSigns = new List<CallSign>();
-
-                    //Save Qsos;
-                }
+                }//stream null
             }
-            catch (Exception ex)
-            {
-                
-                throw;
-            }
-
-
             return result;
         }
 
@@ -291,7 +375,7 @@ namespace L2Sql.BusinessLayer
                         {
                             FoundCall = string.Empty;
                             string line = TxtStream.ReadLine();
-                            if (line.Contains("QSO:"))
+                            if (line .Length >=6 && line.Substring(0,5).Contains("QSO:"))
                             {
                                 if (line.Contains("\t"))
                                 {
@@ -309,26 +393,33 @@ namespace L2Sql.BusinessLayer
                                     }
                                     i++;
                                 }
-                                switch (ContestTypeEnum)
-                                {
-                                    case ContestTypeEnum.CQWW:
-                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
-                                        break;
-                                    case ContestTypeEnum.CQWPX:
-                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
-                                       break;
-                                    case ContestTypeEnum.CQ160:
-                                       FoundCall = QValidcolumns[8].Trim().ToUpper();
-                                        break;
-                                    case ContestTypeEnum.RUSDXC:
-                                        FoundCall = QValidcolumns[8].Trim().ToUpper();
-                                       break;
-                                    default:
-                                        break;
+                                if (QValidcolumns.Length >= 9)
+                                {//QSO could be in comment field
+                                    switch (ContestTypeEnum)
+                                    {
+                                        case ContestTypeEnum.CQWW:
+                                            FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                            break;
+                                        case ContestTypeEnum.CQWPX:
+                                            FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                            break;
+                                        case ContestTypeEnum.CQ160:
+                                            FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                            break;
+                                        case ContestTypeEnum.RUSDXC:
+                                            FoundCall = QValidcolumns[8].Trim().ToUpper();
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                  
                                 }
                             }
-                            else
+                            else if (line.Length >=11 && line.Substring(0, 10).Contains("CALLSIGN:"))
                             {
+#if DEBUG
+                                Debug.WriteLine(line);
+#endif
                                 string[] columns = line.Split(":".ToCharArray());
 
                                 switch (columns[0].ToUpper())
@@ -377,7 +468,7 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private bool GetCabrilloInfo(StreamReader TxtStream, LogCategory LogCategory, CabrilloLTagInfos CInfo)
+        private bool GetCabrilloInfo(StreamReader TxtStream, CabrilloLTagInfos CInfo)
         {
             bool bOK = true;
             bool Version3 = true;
@@ -385,276 +476,274 @@ namespace L2Sql.BusinessLayer
             {
                 if (TxtStream != null )
                 {
-                    using (TxtStream)
+                    string line = TxtStream.ReadLine();
+                    string[] columns = line.Split();
+                    //if (line.Contains("BH4RNX") == true)
+                    //{
+                    //    var vale = 5;
+                    //}
+                    //get cabrillo version
+                    if (columns.Length == 2)
                     {
-                        string line = TxtStream.ReadLine();
-                        string[] columns = line.Split();
-                        //if (line.Contains("BH4RNX") == true)
-                        //{
-                        //    var vale = 5;
-                        //}
-                        //get cabrillo version
-                        if (columns.Length == 2)
+                        if (columns[1].Contains("3.0"))
                         {
-                            if (columns[1].Contains("3.0"))
-                            {
-                                Version3 = true;
-                            }
-                            else
-                            {
-                                Version3 = false;  //version 2
-                            }
+                            Version3 = true;
                         }
-
-                        if (TxtStream.BaseStream.CanSeek == true)
+                        else
                         {
-                            long posseek;
-                            posseek = TxtStream.BaseStream.Seek(0, SeekOrigin.Begin); //rewind
-                            TxtStream.DiscardBufferedData();
+                            Version3 = false;  //version 2
                         }
-
-                        while (TxtStream.Peek() >= 0)
-                        {
-                            line = TxtStream.ReadLine();
-                            if (line.Contains("QSO:") )
-                            {
-                                switch (ContestTypeEnum)
-                                {
-                                    case ContestTypeEnum.CQWW:
-                                        CabrilloQSOCQWWTagInfos QsoInfo = new CabrilloQSOCQWWTagInfos();
-                                        GetCabrilloCqwwQSOInfo(line, QsoInfo);
-                                        CInfo.CallTxZone = QsoInfo.TxZone;
-                                        break;
-                                    case ContestTypeEnum.CQWPX:
-                                        break;
-                                    case ContestTypeEnum.CQ160:
-                                        break;
-                                    case ContestTypeEnum.RUSDXC:
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                break;
-                            }
-                            columns = line.Split(":".ToCharArray());
-
-                            if (Version3)
-                            {
-                                switch (columns[0].ToUpper())
-                                {
-                                    case "CALLSIGN":
-                                        CInfo.Callsign = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-ASSISTED":
-                                        CInfo.CatAssisted = columns[1].Trim().ToUpper();                                        
-                                        break;
-                                    case "CATEGORY-BAND":
-                                        CInfo.CatBand = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-MODE":
-                                        CInfo.CatMode = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-OPERATOR":
-                                        CInfo.CatOperator = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-POWER":
-                                        CInfo.CatPower = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-STATION":
-                                        CInfo.CatStation = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-TRANSMITTER":
-                                        CInfo.CatTx = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-OVERLAY":
-                                        CInfo.CatOverlay = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CLAIMED-SCORE":
-                                        try
-                                        {
-                                            CInfo.ClaimedScore = int.Parse(columns[1].Trim());
-                                        }
-                                        catch
-                                        {
-                                            CInfo.ClaimedScore = 0;
-                                        }
-                                        break;
-                                    case "CLUB":
-                                        CInfo.Club = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CONTEST":
-                                        CInfo.Contest = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CREATED-BY":
-                                        CInfo.CreatedBy = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "OPERATORS":
-                                        if (!string.IsNullOrEmpty(CInfo.Operators))
-                                        {
-                                            columns[1] = columns[1].Replace(',', ' ');
-                                            columns[1] = columns[1].Replace('&', ' ');
-                                            CInfo.Operators += ", " + columns[1].Trim().ToUpper();
-                                        }
-                                        else
-                                        {
-                                            columns[1] = columns[1].Replace(',', ' ');
-                                            columns[1] = columns[1].Replace('&', ' ');
-                                            CInfo.Operators += columns[1].Trim().ToUpper();
-                                        }
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-                            else   //Version 2
-                            {
-                                switch (columns[0].ToUpper())
-                                {
-                                    case "CALLSIGN":
-                                        CInfo.Callsign = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY":
-
-                                        string[] catCol = columns[1].Split(" ".ToCharArray());
-                                        int index = 0;
-                                        while (catCol[index].Length == 0)
-                                        {
-                                            index++;
-                                        }
-                                        switch (catCol[index].Trim().ToUpper())
-                                        {
-                                            case "MULTI-ONE":
-                                                CInfo.CatOperator = "MULTI-OP";
-                                                CInfo.CatTx = "ONE";
-                                                CInfo.CatAssisted = "ASSISTED";
-                                                break;
-                                            case "MULTI-TWO":
-                                                CInfo.CatOperator = "MULTI-OP";
-                                                CInfo.CatTx = "TWO";
-                                                CInfo.CatAssisted = "ASSISTED";
-                                                break;
-                                            case "MULTI-MULTI":
-                                                CInfo.CatOperator = "MULTI-OP";
-                                                CInfo.CatTx = "UNLIMITED";
-                                                CInfo.CatAssisted = "ASSISTED";
-                                                break;
-                                            case "SINGLE-OP":
-                                                CInfo.CatOperator = "SINGLE-OP";
-                                                CInfo.CatTx = "ONE";
-                                                CInfo.CatAssisted = "NON-ASSISTED";
-                                                break;
-                                            case "SINGLE-OP-ASSISTED":
-                                                CInfo.CatOperator = "SINGLE-OP";
-                                                CInfo.CatTx = "ONE";
-                                                CInfo.CatAssisted = "ASSISTED";
-                                                break;
-
-                                            default:
-                                                break;
-                                        }
-                                        if (!string.IsNullOrEmpty(catCol[index + 1].Trim()))
-                                        {
-                                            CInfo.CatBand = catCol[index + 1].Trim().ToUpper();
-                                        }
-                                        if (!string.IsNullOrEmpty(catCol[index + 2].Trim()))
-                                        {
-                                            CInfo.CatPower = catCol[index + 2].Trim().ToUpper();
-                                        }
-                                        if (!string.IsNullOrEmpty(catCol[index + 3].Trim()))
-                                        {
-                                            if (catCol.Length >= 4)
-                                            {
-                                                CInfo.CatMode = catCol[index + 3].Trim().ToUpper();
-                                            }
-                                        }
-                                        break;
-                                    case "CATEGORY-ASSISTED":
-                                        CInfo.CatAssisted = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-BAND":
-                                        CInfo.CatBand = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-MODE":
-                                        CInfo.CatMode = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-OPERATOR":
-                                        CInfo.CatOperator = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-POWER":
-                                        CInfo.CatPower = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-STATION":
-                                        CInfo.CatStation = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-TRANSMITTER":
-                                        CInfo.CatTx = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CATEGORY-OVERLAY":
-                                        CInfo.CatOverlay = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CLAIMED-SCORE":
-                                        try
-                                        {
-                                            CInfo.ClaimedScore = int.Parse(columns[1].Trim());
-                                        }
-                                        catch
-                                        {
-                                            CInfo.ClaimedScore = 0;
-                                        }
-                                        break;
-                                    case "CLUB":
-                                        CInfo.Club = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CONTEST":
-                                        CInfo.Contest = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "CREATED-BY":
-                                        CInfo.CreatedBy = columns[1].Trim().ToUpper();
-                                        break;
-                                    case "OPERATORS":
-                                        if (!string.IsNullOrEmpty(CInfo.Operators))
-                                        {
-                                            columns[1] = columns[1].Replace(',', ' ');
-                                            columns[1] = columns[1].Replace('&', ' ');
-                                            CInfo.Operators += " " + columns[1].Trim().ToUpper();
-                                        }
-                                        else
-                                        {
-                                            columns[1] = columns[1].Replace(',', ' ');
-                                            columns[1] = columns[1].Replace('&', ' ');
-                                            CInfo.Operators += columns[1].Trim().ToUpper();
-                                        } break;
-                                    default:
-                                        break;
-                                }
-                            }
-                        }
-                        if (CInfo.Operators == CInfo.Callsign)
-                        {
-                            CInfo.Operators = "";
-                        }
-                        if (CInfo.CatOverlay == null)
-                        {
-                            //CInfo.CatOverlay = "NONE";
-                        }
-                        if (string.IsNullOrEmpty(CInfo.CatMode))
-                        {
-                            if (CInfo.Contest.Contains("SSB"))
-                            {
-                                CInfo.CatMode = "SSB";
-                            }
-                            else
-                            {
-                                CInfo.CatMode = "CW";
-                            }
-                        }
-
                     }
+
+                    if (TxtStream.BaseStream.CanSeek == true)
+                    {
+                        long posseek;
+                        posseek = TxtStream.BaseStream.Seek(0, SeekOrigin.Begin); //rewind
+                        TxtStream.DiscardBufferedData();
+                    }
+
+                    while (TxtStream.Peek() >= 0)
+                    {
+                        line = TxtStream.ReadLine();
+                        if (line.Contains("QSO:") )
+                        {
+                            switch (ContestTypeEnum)
+                            {
+                                case ContestTypeEnum.CQWW:
+                                    CabrilloQSOCQWWTagInfos QsoInfo = new CabrilloQSOCQWWTagInfos();
+                                    GetCabrilloCqwwQSOInfo(line, QsoInfo);
+                                    CInfo.CallTxZone = QsoInfo.TxZone;
+                                    break;
+                                case ContestTypeEnum.CQWPX:
+                                    break;
+                                case ContestTypeEnum.CQ160:
+                                    break;
+                                case ContestTypeEnum.RUSDXC:
+                                    break;
+                                default:
+                                    break;
+                            }
+                            break;
+                        }
+                        columns = line.Split(":".ToCharArray());
+
+                        if (Version3)
+                        {
+                            switch (columns[0].ToUpper())
+                            {
+                                case "CALLSIGN":
+                                    CInfo.Callsign = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-ASSISTED":
+                                    CInfo.CatAssisted = columns[1].Trim().ToUpper();                                        
+                                    break;
+                                case "CATEGORY-BAND":
+                                    CInfo.CatBand = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-MODE":
+                                    CInfo.CatMode = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-OPERATOR":
+                                    CInfo.CatOperator = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-POWER":
+                                    CInfo.CatPower = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-STATION":
+                                    CInfo.CatStation = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-TRANSMITTER":
+                                    CInfo.CatTx = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-OVERLAY":
+                                    CInfo.CatOverlay = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CLAIMED-SCORE":
+                                    try
+                                    {
+                                        CInfo.ClaimedScore = int.Parse(columns[1].Trim());
+                                    }
+                                    catch
+                                    {
+                                        CInfo.ClaimedScore = 0;
+                                    }
+                                    break;
+                                case "CLUB":
+                                    CInfo.Club = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CONTEST":
+                                    CInfo.Contest = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CREATED-BY":
+                                    CInfo.CreatedBy = columns[1].Trim().ToUpper();
+                                    break;
+                                case "OPERATORS":
+                                    if (!string.IsNullOrEmpty(CInfo.Operators))
+                                    {
+                                        columns[1] = columns[1].Replace(',', ' ');
+                                        columns[1] = columns[1].Replace('&', ' ');
+                                        CInfo.Operators += ", " + columns[1].Trim().ToUpper();
+                                    }
+                                    else
+                                    {
+                                        columns[1] = columns[1].Replace(',', ' ');
+                                        columns[1] = columns[1].Replace('&', ' ');
+                                        CInfo.Operators += columns[1].Trim().ToUpper();
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                        else   //Version 2
+                        {
+                            switch (columns[0].ToUpper())
+                            {
+                                case "CALLSIGN":
+                                    CInfo.Callsign = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY":
+
+                                    string[] catCol = columns[1].Split(" ".ToCharArray());
+                                    int index = 0;
+                                    while (catCol[index].Length == 0)
+                                    {
+                                        index++;
+                                    }
+                                    switch (catCol[index].Trim().ToUpper())
+                                    {
+                                        case "MULTI-ONE":
+                                            CInfo.CatOperator = "MULTI-OP";
+                                            CInfo.CatTx = "ONE";
+                                            CInfo.CatAssisted = "ASSISTED";
+                                            break;
+                                        case "MULTI-TWO":
+                                            CInfo.CatOperator = "MULTI-OP";
+                                            CInfo.CatTx = "TWO";
+                                            CInfo.CatAssisted = "ASSISTED";
+                                            break;
+                                        case "MULTI-MULTI":
+                                            CInfo.CatOperator = "MULTI-OP";
+                                            CInfo.CatTx = "UNLIMITED";
+                                            CInfo.CatAssisted = "ASSISTED";
+                                            break;
+                                        case "SINGLE-OP":
+                                            CInfo.CatOperator = "SINGLE-OP";
+                                            CInfo.CatTx = "ONE";
+                                            CInfo.CatAssisted = "NON-ASSISTED";
+                                            break;
+                                        case "SINGLE-OP-ASSISTED":
+                                            CInfo.CatOperator = "SINGLE-OP";
+                                            CInfo.CatTx = "ONE";
+                                            CInfo.CatAssisted = "ASSISTED";
+                                            break;
+
+                                        default:
+                                            break;
+                                    }
+                                    if (!string.IsNullOrEmpty(catCol[index + 1].Trim()))
+                                    {
+                                        CInfo.CatBand = catCol[index + 1].Trim().ToUpper();
+                                    }
+                                    if (!string.IsNullOrEmpty(catCol[index + 2].Trim()))
+                                    {
+                                        CInfo.CatPower = catCol[index + 2].Trim().ToUpper();
+                                    }
+                                    if (!string.IsNullOrEmpty(catCol[index + 3].Trim()))
+                                    {
+                                        if (catCol.Length >= 4)
+                                        {
+                                            CInfo.CatMode = catCol[index + 3].Trim().ToUpper();
+                                        }
+                                    }
+                                    break;
+                                case "CATEGORY-ASSISTED":
+                                    CInfo.CatAssisted = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-BAND":
+                                    CInfo.CatBand = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-MODE":
+                                    CInfo.CatMode = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-OPERATOR":
+                                    CInfo.CatOperator = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-POWER":
+                                    CInfo.CatPower = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-STATION":
+                                    CInfo.CatStation = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-TRANSMITTER":
+                                    CInfo.CatTx = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CATEGORY-OVERLAY":
+                                    CInfo.CatOverlay = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CLAIMED-SCORE":
+                                    try
+                                    {
+                                        CInfo.ClaimedScore = int.Parse(columns[1].Trim());
+                                    }
+                                    catch
+                                    {
+                                        CInfo.ClaimedScore = 0;
+                                    }
+                                    break;
+                                case "CLUB":
+                                    CInfo.Club = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CONTEST":
+                                    CInfo.Contest = columns[1].Trim().ToUpper();
+                                    break;
+                                case "CREATED-BY":
+                                    CInfo.CreatedBy = columns[1].Trim().ToUpper();
+                                    break;
+                                case "OPERATORS":
+                                    if (!string.IsNullOrEmpty(CInfo.Operators))
+                                    {
+                                        columns[1] = columns[1].Replace(',', ' ');
+                                        columns[1] = columns[1].Replace('&', ' ');
+                                        CInfo.Operators += " " + columns[1].Trim().ToUpper();
+                                    }
+                                    else
+                                    {
+                                        columns[1] = columns[1].Replace(',', ' ');
+                                        columns[1] = columns[1].Replace('&', ' ');
+                                        CInfo.Operators += columns[1].Trim().ToUpper();
+                                    } break;
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    if (CInfo.Operators == CInfo.Callsign)
+                    {
+                        CInfo.Operators = "";
+                    }
+                    if (CInfo.CatOverlay == null)
+                    {
+                        //CInfo.CatOverlay = "NONE";
+                    }
+                    if (string.IsNullOrEmpty(CInfo.CatMode))
+                    {
+                        if (CInfo.Contest.Contains("SSB"))
+                        {
+                            CInfo.CatMode = "SSB";
+                        }
+                        else
+                        {
+                            CInfo.CatMode = "CW";
+                        }
+                    }
+
                 }
             }
-            catch (ArgumentNullException ex)
+            catch (Exception ex)
             {
-                //MessageBox.Show("Error: Could not read file from disk. Original error: " + ex.Message);
+                Debug.WriteLine(string.Format(" Problem in GetCabrilloInfo() log. Call{0} Message {1}"),CInfo.Callsign, ex.Message);
+                throw;
             }
 
             return bOK;
@@ -670,129 +759,142 @@ namespace L2Sql.BusinessLayer
             //http://stackoverflow.com/questions/13527400/entity-framework-5-rtm-code-first-enum-support-broken-enums-in-other-namespaces
             //QsoModeTypeEnum, ContestTypeEnum, QsoRadioTypeEnum are ok to map to enum
             QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.SSB;
-
-            if (CabInfo.CatAssisted == "NON-ASSISTED")
+            try
             {
-                LogCategory.CatAssistedEnum = CatAssistedEnum.NON_ASSISTED;
-            }
-            else
-            {
-                LogCategory.CatAssistedEnum = CatAssistedEnum.ASSISTED;
-            }
-
-            switch (CabInfo.CatBand)
-            {
-                case "10M":
-                    LogCategory.CatBandEnum = CatBandEnum._10M;
-                    break;
-                case "15M":
-                    LogCategory.CatBandEnum = CatBandEnum._15M;
-                    break;
-                case "20M":
-                    LogCategory.CatBandEnum = CatBandEnum._20M;
-                    break;
-                case "40M":
-                    LogCategory.CatBandEnum = CatBandEnum._40M;
-                    break;
-                case "80M":
-                    LogCategory.CatBandEnum = CatBandEnum._80M;
-                    break;
-                case "160M":
-                    LogCategory.CatBandEnum = CatBandEnum._160M;
-                    break;
-                case "ALL":
-                    LogCategory.CatBandEnum = CatBandEnum.ALL;
-                    break;
-                default:
-                    break;
-            }
-
-            switch (CabInfo.CatMode)
-            {
-                case "SSB":
-                    QsoModeTypeEnum = QsoModeTypeEnum.SSB;
-                    break;
-                case "CW":
-                    QsoModeTypeEnum = QsoModeTypeEnum.CW;
-                    break;
-                case "RTTY":
-                    QsoModeTypeEnum = QsoModeTypeEnum.RTTY;
-                    break;
-                case "MIXED":
-                    QsoModeTypeEnum = QsoModeTypeEnum.MIXED;
-                    break;
-                default:
-                    break;
-            }
-
-
-            switch (CabInfo.CatOperator)
-            {
-                case "SINGLE-OP":
-                    LogCategory.CatOperatorEnum = CatOperatorEnum.SINGLE_OP;
-                    break;
-                case "MULTI-OP":
-                    LogCategory.CatOperatorEnum = CatOperatorEnum.MULTI_OP;
-                    break;
-                case "CHECKLOG":
-                    LogCategory.CatOperatorEnum = CatOperatorEnum.CHECKLOG;
-                    break;
-                default:
-                    break;
-            }
-
-
-            switch (CabInfo.CatPower)
-            {
-                case "HIGH":
-                    LogCategory.CatPowerEnum = CatPowerEnum.HIGH;
-                    break;
-                case "LOW":
-                    LogCategory.CatPowerEnum = CatPowerEnum.LOW;
-                    break;
-                case "QRP":
-                    LogCategory.CatPowerEnum = CatPowerEnum.QRP;
-                    break;
-                default:
-                    break;
-            }
-
-            if (!string.IsNullOrEmpty(CabInfo.CatOverlay) )
-            {
-                switch (CabInfo.CatOverlay)
+                if (CabInfo.CatAssisted == "NON-ASSISTED")
                 {
-                    case "SINGLE_OP_CLASSIC":
-                        LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.SINGLE_OP_CLASSIC;
+                    LogCategory.CatAssistedEnum = CatAssistedEnum.NON_ASSISTED;
+                }
+                else
+                {
+                    LogCategory.CatAssistedEnum = CatAssistedEnum.ASSISTED;
+                }
+
+                switch (CabInfo.CatBand)
+                {
+                    case "10M":
+                        LogCategory.CatBandEnum = CatBandEnum._10M;
                         break;
-                    case "SINGLE_OP_ROOKIE":
-                        LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.SINGLE_OP_ROOKIE;
+                    case "15M":
+                        LogCategory.CatBandEnum = CatBandEnum._15M;
                         break;
-                    case "NONE":
-                        LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.NONE;
+                    case "20M":
+                        LogCategory.CatBandEnum = CatBandEnum._20M;
+                        break;
+                    case "40M":
+                        LogCategory.CatBandEnum = CatBandEnum._40M;
+                        break;
+                    case "80M":
+                        LogCategory.CatBandEnum = CatBandEnum._80M;
+                        break;
+                    case "160M":
+                        LogCategory.CatBandEnum = CatBandEnum._160M;
+                        break;
+                    case "ALL":
+                        LogCategory.CatBandEnum = CatBandEnum.ALL;
                         break;
                     default:
+                        LogCategory.CatBandEnum = CatBandEnum.ALL;
+                        break;
+                }
+
+                switch (CabInfo.CatMode)
+                {
+                    case "SSB":
+                        QsoModeTypeEnum = QsoModeTypeEnum.SSB;
+                        break;
+                    case "CW":
+                        QsoModeTypeEnum = QsoModeTypeEnum.CW;
+                        break;
+                    case "RTTY":
+                        QsoModeTypeEnum = QsoModeTypeEnum.RTTY;
+                        break;
+                    case "MIXED":
+                        QsoModeTypeEnum = QsoModeTypeEnum.MIXED;
+                        break;
+                    default:
+                        QsoModeTypeEnum = QsoModeTypeEnum.SSB;
+                        break;
+                }
+
+
+                switch (CabInfo.CatOperator)
+                {
+                    case "SINGLE-OP":
+                        LogCategory.CatOperatorEnum = CatOperatorEnum.SINGLE_OP;
+                        break;
+                    case "MULTI-OP":
+                        LogCategory.CatOperatorEnum = CatOperatorEnum.MULTI_OP;
+                        break;
+                    case "CHECKLOG":
+                        LogCategory.CatOperatorEnum = CatOperatorEnum.CHECKLOG;
+                        break;
+                    default:
+                        LogCategory.CatOperatorEnum = CatOperatorEnum.SINGLE_OP;
+                        break;
+                }
+
+
+                switch (CabInfo.CatPower)
+                {
+                    case "HIGH":
+                        LogCategory.CatPowerEnum = CatPowerEnum.HIGH;
+                        break;
+                    case "LOW":
+                        LogCategory.CatPowerEnum = CatPowerEnum.LOW;
+                        break;
+                    case "QRP":
+                        LogCategory.CatPowerEnum = CatPowerEnum.QRP;
+                        break;
+                    default:
+                        LogCategory.CatPowerEnum = CatPowerEnum.LOW;
+                        break;
+                }
+
+                if (!string.IsNullOrEmpty(CabInfo.CatOverlay))
+                {
+                    switch (CabInfo.CatOverlay)
+                    {
+                        case "SINGLE_OP_CLASSIC":
+                            LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.SINGLE_OP_CLASSIC;
+                            break;
+                        case "SINGLE_OP_ROOKIE":
+                            LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.SINGLE_OP_ROOKIE;
+                            break;
+                        case "NONE":
+                            LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.NONE;
+                            break;
+                        default:
+                            LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.NONE;
+                            break;
+                    }
+                }
+                else
+                {
+                    LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.NONE;
+                }
+
+
+                switch (CabInfo.CatTx)
+                {
+                    case "ONE":
+                        LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.ONE;
+                        break;
+                    case "TWO":
+                        LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.TWO;
+                        break;
+                    case "UNLIMITED":
+                        LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.UNLIMITED;
+                        break;
+                    default:
+                        LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.ONE;
                         break;
                 }
             }
-            else
+            catch (Exception ex)
             {
-                LogCategory.CatOperatorOverlayEnum = CatOperatorOverlayEnum.NONE;
-            }
-
-
-            switch (CabInfo.CatTx)
-            {
-                case "ONE":
-                    LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.ONE;
-                    break;
-                case "TWO":
-                    LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.TWO;
-                    break;
-                case "UNLIMITED":
-                    LogCategory.CatNoOfTxEnum = CatNoOfTxEnum.UNLIMITED;
-                    break;
-                default:
-                    break;
+                Debug.WriteLine(string.Format(" Problem in SetLogCategory {0} log ", CabInfo.Callsign));
+                throw;
             }
 
 
@@ -905,6 +1007,322 @@ namespace L2Sql.BusinessLayer
         }
 
 
-    
+        private void GetCqwwQSOInfo(StreamReader TxtStream,  Log Log)
+        {
+            string line;
+            short QsoNum = 1;
+            short NextDBQsoNum = 0;
+
+            IList<CallSign> ICurrentCallSigns;
+            IList<Qso> Qsos = new List<Qso>();
+            IList<Qso> CurrentQsos;
+
+
+             try
+            {
+                if (TxtStream != null)
+                {
+                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                    CurrentQsos = IBusiness.GetQso(Log.LogId);
+                    if (CurrentQsos.Count != 0)
+	                {//set to last qso in DB
+                        NextDBQsoNum = (short)(CurrentQsos.Count + 1);
+	                }
+
+                    while (TxtStream.Peek() >= 0)
+                    {
+                        Qso Qso = null;
+
+                        line = TxtStream.ReadLine();
+                        if (line.Contains("\t"))
+                        {
+                            line = line.Replace('\t', ' ');
+                        }
+                        if (line.Length >=6 && line.Substring(0,5).Contains("QSO:"))
+                        {
+                            if (QsoNum <  NextDBQsoNum)
+                            {
+                                continue;  
+                            }
+                            Qso = new DomainModel.Qso()
+                            {
+                                LogId = Log.LogId,
+                                QsoNo = QsoNum++,
+                                QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE,
+                                EntityState = EntityState.Added
+                            };
+
+                            string[] Qcolumns = line.Split(" ".ToCharArray());
+                            int i = 1;
+                            int j = 1; //ccqww field counter
+                            Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.NONE;
+                            while (i < Qcolumns.Length)
+                            {
+                                if ((Qcolumns[i] != "") && (Qcolumns[i] != ":") )
+                                {
+                                    switch (j)
+                                    {
+                                        case 1:
+                                            int freq;
+                                            if (int.TryParse(Qcolumns[i], out freq) )
+                                            {
+                                                Qso.Frequency = freq;
+                                            }
+                                            else
+                                            {
+                                                Qso.Frequency = 1;
+                                            }
+                                            break;
+                                        case 2:
+                                            try
+                                            {
+                                                switch (Qcolumns[i])
+                                                {
+                                                    case "PH":
+                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.SSB;
+                                                        break;
+                                                    case "CW":
+                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.CW;
+                                                        break;
+                                                    case "RY":
+                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.RTTY;
+                                                        break;
+                                                    default:
+                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.MIXED;
+                                                        break;
+                                                }
+                                            }
+                                            catch (Exception)
+                                            {
+                                                Debug.WriteLine(string.Format(" bad Mode: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                throw;
+                                            }  
+                                            break;
+                                        case 3:
+                                             try 
+	                                            {
+                                                    DateTime DateTime;
+
+                                                    if (DateTime.TryParse(Qcolumns[i], out DateTime) == true)
+                                                    {
+                                                        Qso.QsoDateTime = DateTime;
+                                                    }
+                                                    else
+                                                    {
+                                                        Qso.QsoDateTime = DateTime.Now;
+                                                        Debug.WriteLine(string.Format(" bad Date: {0} for {1} log ",
+                                                            (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    }
+		
+	                                            }
+	                                            catch (Exception)
+	                                            {
+                                                    Debug.WriteLine(string.Format(" bad Date: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+	                                            } 
+                                            break;
+                                        case 4:
+                                            try
+                                            {
+                                                DateTime DateTime;
+                                                string Date = Qso.QsoDateTime.ToShortDateString();
+                                                if (DateTime.TryParse(Date + " " + Qcolumns[i].Substring(0, 2) + ":" + Qcolumns[i].Substring(2, 2),
+                                                    out DateTime) == true)
+                                                {
+                                                    Qso.QsoDateTime = DateTime;
+                                                }
+                                                else
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad DateTime: {0} for {1} log ", DateTime,
+                                                        (Qcolumns[i] + " " + Qcolumns[i + 1]).ToString(), Log.CallSign.Call));
+                                                }
+                                            }
+                                            catch (Exception)
+                                            {
+                                                Debug.WriteLine(string.Format(" bad Time: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                throw;
+                                            }
+                                            break;
+                                        case 5:
+                                            // station call is alrady in the log
+                                            break;
+                                        case 6:
+                                            try
+                                            {
+                                                short txrpt;
+                                                if (short.TryParse(Qcolumns[i], out txrpt) )
+                                                {
+                                                    Qso.TxRst = txrpt;
+                                                }else
+	                                            {
+                                                    Qso.TxRst = 0xff;
+	                                            }
+                                            }
+                                            catch
+                                            {
+                                                Debug.WriteLine(string.Format(" bad TxRst: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                throw;
+                                            }
+                                            break;
+                                        case 7:
+                                            //try
+                                            //{
+                                            //    Qso.QsoExchangeNumber = short.Parse(Qcolumns[i]);
+                                            //}
+                                            //catch
+                                            //{
+                                            //    Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
+                                            //        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                            //    throw;
+                                            //}
+                                            break;
+                                        case 8:
+                                            try
+                                            {
+                                                if (Qcolumns[i].Contains("OH1LWZ/m") )
+                                                {
+                                                    
+                                                }
+                                                CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i].ToUpper()).SingleOrDefault();
+                                                if (CallSign == null)
+                                                {//new call
+                                                    CallSign = new CallSign
+                                                    {
+                                                        Call = Qcolumns[i],
+                                                        Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
+                                                        Continent = (int)GetContinentEnum(Qcolumns[i]),
+                                                        EntityState = EntityState.Added
+                                                    };
+                                                    //add to new list
+                                                    ICurrentCallSigns.Add(CallSign);
+                                                    //refresh
+                                                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                                                    CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i]).SingleOrDefault();
+                                                }
+                                                Qso.CallsignId = CallSign.CallSignId;
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                Debug.WriteLine(string.Format(" bad CallSign: {0} for {1} log  message {2} ",
+                                                   (Qcolumns[i]).ToString(), Log.CallsignId,ex.Message));                                               
+                                                throw;
+                                            }   
+                                            break;
+                                        case 9:
+                                            try
+                                            {
+                                                short rxrpt;
+                                                if( short.TryParse(Qcolumns[i],out rxrpt  ) )
+                                                {
+                                                    Qso.RxRst =  rxrpt;  
+                                                }else
+	                                            {
+                                                    Qso.RxRst = 0xff;
+	                                            }
+                                            }
+                                            catch
+                                            {
+                                                Debug.WriteLine(string.Format(" bad RxRst: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                throw;
+                                            }
+                                            break;
+                                        case 10:
+                                            //zone I4
+                                            //Qcolumns[i] = Qcolumns[i].Replace('I', '1'); //bad zone I4
+                                            try
+                                            {
+                                                short num;
+                                                if (short.TryParse(Qcolumns[i], out num)  )
+                                                {
+                                                    Qso.QsoExchangeNumber = num;
+                                                }else
+	                                            {
+                                                    Qso.QsoExchangeNumber = 0xff;
+	                                            }
+                                            }
+                                            catch
+                                            {
+                                                Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                Qso.QsoExchangeNumber = 0xff;
+                                                throw;
+                                            }
+                                            break;
+                                        case 11:
+                                            //radio
+                                            try
+                                            {
+                                                switch (byte.Parse(Qcolumns[i]))
+                                                {
+                                                    case 0:
+                                                        Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R1;
+                                                        break;
+                                                    case 1:
+                                                        Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R2;
+                                                        break;
+                                                    default:
+                                                        Qso.QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                                                       break;
+                                                }
+                                            }
+                                            catch
+                                            {
+                                                Debug.WriteLine(string.Format(" bad QsoRadioTypeEnum: {0} for {1} log ",
+                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                throw;
+                                            }
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                    j++;
+                                }
+                                i++;
+                            }
+                        }
+                        if (Qso != null)
+                        {//add to DB if none or not already added
+                            if (Qso.QsoNo >= NextDBQsoNum)
+                            {
+                                try
+                                {
+                                    Qsos.Add(Qso);
+                                }
+                                catch (Exception)
+                                {
+                                    throw;
+                                }        
+                            }
+                        }
+                    }
+                    if (Qsos.Count != 0)
+                    {//add to DB
+                        try
+                        {
+                            IBusiness.AddQso(Qsos.ToArray());
+                        }
+                        catch (Exception)
+                        {
+                            
+                            throw;
+                        }
+                    }
+                }
+             }
+            catch (Exception ex)
+            {
+                
+                Debug.WriteLine(string.Format(" Problem in {0} log ", Log.CallSign.Call ) );
+                throw;
+            }
+  
+
+
+        }
     }
 }
