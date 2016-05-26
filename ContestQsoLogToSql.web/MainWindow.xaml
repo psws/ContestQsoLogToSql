@@ -305,7 +305,7 @@
         <GroupBox Header="SQL Database Server" HorizontalAlignment="Left" Margin="11,108,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray"/>
         <GroupBox Header="Sql Database Instance" HorizontalAlignment="Left" Margin="23,167,0,0" VerticalAlignment="Top" Width="458" Height="164" Background="LightGray"/>
         <Button x:Name="BrowseServerInstance" Content="Get" HorizontalAlignment="Left" Margin="394,127,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseServerInstance_Click"/>
-        <GroupBox Header="Sql Database Qso Table Name" HorizontalAlignment="Left" Margin="20,270,0,0" VerticalAlignment="Top" Width="456" Height="48" Background="LightGray"/>
+        <GroupBox Header="Sql Database Qso Table Name" HorizontalAlignment="Left" Margin="27,270,0,0" VerticalAlignment="Top" Width="449" Height="48" Background="LightGray"/>
         <Grid>
             <Grid.Resources>
                 <src2:InputLogs x:Key="inputLogs"/>
@@ -356,7 +356,7 @@
             </ComboBox.ItemContainerStyle>
         </ComboBox>
         <PasswordBox HorizontalAlignment="Left" Margin="756,108,-356,0" VerticalAlignment="Top" Width="100"/>
-        <ComboBox x:Name="SqlQsoTablesComboBox" HorizontalAlignment="Left" Margin="27,288,0,0" VerticalAlignment="Top" Width="348" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlQsoTablesComboBox_SelectionChanged"/>
+        <ComboBox x:Name="SqlQsoTablesComboBox" HorizontalAlignment="Left" Margin="33,288,0,0" VerticalAlignment="Top" Width="342" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlQsoTablesComboBox_SelectionChanged"/>
         <dialog1:ModalMsgDialog x:Name="ModalMsgDialog"  Margin="0,-2,-12,-30" Visibility="Hidden"/>
         <Button x:Name="GetSqlQsoTables" Content="Get" HorizontalAlignment="Left" Margin="394,290,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetSqlQsoTables_Click"/>
     </Grid>

@@ -24,10 +24,9 @@ namespace L2Sql.DomainModel
         public string AddressState { get; set; }
         public string AddressPostalCode { get; set; }
         public string AddressCountry { get; set; }
-
-        public EntityState EntityState { get; set; }
     
         public virtual CallSign CallSign { get; set; }
         public virtual Contest Contest { get; set; }
+        public EntityState EntityState { get; set; }
     }
 }

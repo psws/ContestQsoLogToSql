@@ -25,7 +25,6 @@ namespace L2Sql.DomainModel
         public Nullable<short> QsoExchangeNumber { get; set; }
         public Logqso.mvc.common.Enum.QsoModeTypeEnum QsoModeTypeEnum { get; set; }
         public Logqso.mvc.common.Enum.QsoRadioTypeEnum QsoRadioTypeEnum { get; set; }
-
         public EntityState EntityState { get; set; }
     
         public virtual CallSign CallSign { get; set; }

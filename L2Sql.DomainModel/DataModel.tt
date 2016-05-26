@@ -3,7 +3,6 @@
  output extension=".cs"#><#
 
 const string inputFile = @"../L2Sql.DataAccessLayer/DataModel.edmx";
-
 var textTransform = DynamicTextTransformation.Create(this);
 var code = new CodeGenerationTools(this);
 var ef = new MetadataTools(this);

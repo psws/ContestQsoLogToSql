@@ -8,6 +8,7 @@ using CtyLib;
 using System.IO;
 using System.ComponentModel;
 using L2Sql.DomainModel;
+using Logqso.mvc.common;
 using Logqso.mvc.common.Enum;
 using System.Diagnostics;
 
@@ -85,9 +86,10 @@ namespace L2Sql.BusinessLayer
                     //worker.ReportProgress(1,new InputLog(item.Name, item.Length) );
                    //get Callsigns already in DB
                     ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    StreamReader TxtStream;
-                    TxtStream = new StreamReader(item.FullName);
-                    GetCabrilloCallsignInfo(TxtStream, ICurrentCallSigns, INewCallSigns);
+                    StreamReader TxtStreambase = new StreamReader(item.FullName);
+                    PeekingStreamReader PeekingStreamReader = new PeekingStreamReader(TxtStreambase.BaseStream);
+
+                    GetCabrilloCallsignInfo(PeekingStreamReader, ICurrentCallSigns, INewCallSigns, CtyObj);
                     //save all new callsigns
                     if (INewCallSigns.Count > 0)
                     {
@@ -149,20 +151,20 @@ namespace L2Sql.BusinessLayer
                     //Create Cabrillo base
                     CabrilloLTagInfos CabInfo;
                     CabInfo = new CabrilloLTagInfos();
-                    StreamReader TxtStream;
-                    TxtStream = new StreamReader(item.FullName);
+                    StreamReader TxtStreambase = new StreamReader(item.FullName);
+                    PeekingStreamReader PeekingStreamReader = new PeekingStreamReader(TxtStreambase.BaseStream);
                     //if (item.FullName.Contains("ai4co"))
                     //{
 
                     //}   
-                    if (TxtStream != null)
+                    if (PeekingStreamReader != null)
                     {
-                        using (TxtStream)
+                        using (PeekingStreamReader)
                         {
                             try
                             {
 
-                            GetCabrilloInfo(TxtStream,  CabInfo);
+                           GetCabrilloInfo(PeekingStreamReader, CabInfo);
 
                             worker.ReportProgress(1, new InputLog(item.Name, item.Length));
                             CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
@@ -234,14 +236,14 @@ namespace L2Sql.BusinessLayer
 
 
                                 //check if the log callsign already exists in DB
-                                CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
+                                //CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                                 if (CallSign == null)
                                 {
                                     CallSign = new CallSign
                                     {
                                         Call = CabInfo.Callsign,
                                         Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                                        Continent = (int)GetContinentEnum(CabInfo.Callsign),
+                                        ContinentEnum = GetContinentEnum(CabInfo.Callsign),
                                         EntityState = EntityState.Added
                                     };
                                     //need to assign CallsignId after saveChanges
@@ -316,13 +318,9 @@ namespace L2Sql.BusinessLayer
                             switch (ContestTypeEnum)
                             {
                                 case ContestTypeEnum.CQWW:
-                                    if (Log.LogId == 1923)
-                                    {
-
-                                    }
                                     try
                                     {
-                                        GetCqwwQSOInfo(TxtStream, Log);
+                                        GetCqwwQSOInfo(PeekingStreamReader, Log);
                                     }
                                     catch (Exception)
                                     {
@@ -360,21 +358,22 @@ namespace L2Sql.BusinessLayer
             return ContinentEnum;
         }
 
-        private bool GetCabrilloCallsignInfo(StreamReader TxtStream, IList<CallSign> ICurrentCallsigns, IList<CallSign> INewCallsigns)
+        private bool GetCabrilloCallsignInfo(PeekingStreamReader PeekingStreamReader, IList<CallSign> ICurrentCallsigns, IList<CallSign> INewCallsigns, CtyLib.CCtyObj CtyObj)
         {
             bool bOK = true;
             string FoundCall;
             CallSign CallSign;
             try
             {
-                if (TxtStream != null)
+                if (PeekingStreamReader != null)
                 {
-                    using (TxtStream)
+                    using (PeekingStreamReader)
                     {
-                        while (TxtStream.Peek() >= 0)
+                        while (PeekingStreamReader.Peek() >= 0)
                         {
                             FoundCall = string.Empty;
-                            string line = TxtStream.ReadLine();
+                            //No queing
+                            string line = PeekingStreamReader.ReadLine();
                             if (line .Length >=6 && line.Substring(0,5).Contains("QSO:"))
                             {
                                 if (line.Contains("\t"))
@@ -441,11 +440,17 @@ namespace L2Sql.BusinessLayer
                                     CallSign = INewCallsigns.Where(c => c.Call == FoundCall).SingleOrDefault();
                                     if (CallSign == null)
                                     {//it is a new call
+                                        string Prefix = CtyObj.GetCountryPrefix(FoundCall);
+                                        if (string.IsNullOrEmpty(Prefix)  )
+                                        {
+                                            Prefix = "none";
+                                        }
                                         CallSign = new CallSign
                                         {
                                             Call = FoundCall,
                                             Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                                            Continent = (int)GetContinentEnum(FoundCall),
+                                            ContinentEnum = GetContinentEnum(FoundCall),
+                                            Prefix = Prefix,
                                             EntityState = EntityState.Added
                                         };
                                         //add to new list
@@ -468,15 +473,15 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private bool GetCabrilloInfo(StreamReader TxtStream, CabrilloLTagInfos CInfo)
+        private bool GetCabrilloInfo(PeekingStreamReader PeekingStreamReader, CabrilloLTagInfos CInfo)
         {
             bool bOK = true;
             bool Version3 = true;
             try
             {
-                if (TxtStream != null )
+                if (PeekingStreamReader != null)
                 {
-                    string line = TxtStream.ReadLine();
+                    string line = PeekingStreamReader.PeekReadLine();
                     string[] columns = line.Split();
                     //if (line.Contains("BH4RNX") == true)
                     //{
@@ -495,16 +500,17 @@ namespace L2Sql.BusinessLayer
                         }
                     }
 
-                    if (TxtStream.BaseStream.CanSeek == true)
+                    if (PeekingStreamReader.BaseStream.CanSeek == true)
                     {
                         long posseek;
-                        posseek = TxtStream.BaseStream.Seek(0, SeekOrigin.Begin); //rewind
-                        TxtStream.DiscardBufferedData();
+                        posseek = PeekingStreamReader.BaseStream.Seek(0, SeekOrigin.Begin); //rewind
+                        PeekingStreamReader.DiscardBufferedData();
+                        PeekingStreamReader.ClearQueue();
                     }
 
-                    while (TxtStream.Peek() >= 0)
+                    while (PeekingStreamReader.Peek() >= 0)
                     {
-                        line = TxtStream.ReadLine();
+                        line = PeekingStreamReader.PeekReadLine();
                         if (line.Contains("QSO:") )
                         {
                             switch (ContestTypeEnum)
@@ -1007,11 +1013,12 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private void GetCqwwQSOInfo(StreamReader TxtStream,  Log Log)
+        private void GetCqwwQSOInfo(PeekingStreamReader PeekingStreamReader, Log Log)
         {
             string line;
             short QsoNum = 1;
             short NextDBQsoNum = 0;
+            bool PartialLog = false;
 
             IList<CallSign> ICurrentCallSigns;
             IList<Qso> Qsos = new List<Qso>();
@@ -1020,27 +1027,28 @@ namespace L2Sql.BusinessLayer
 
              try
             {
-                if (TxtStream != null)
+                if (PeekingStreamReader != null)
                 {
                     ICurrentCallSigns = IBusiness.GetAllCallsigns();
                     CurrentQsos = IBusiness.GetQso(Log.LogId);
                     if (CurrentQsos.Count != 0)
 	                {//set to last qso in DB
                         NextDBQsoNum = (short)(CurrentQsos.Count + 1);
+                        PartialLog = true;
 	                }
 
-                    while (TxtStream.Peek() >= 0)
+                    while (PeekingStreamReader.Peek() >= 0)
                     {
                         Qso Qso = null;
 
-                        line = TxtStream.ReadLine();
+                        line = PeekingStreamReader.ReadLine();
                         if (line.Contains("\t"))
                         {
                             line = line.Replace('\t', ' ');
                         }
                         if (line.Length >=6 && line.Substring(0,5).Contains("QSO:"))
                         {
-                            if (QsoNum <  NextDBQsoNum)
+                            if (PartialLog == true && QsoNum < NextDBQsoNum)
                             {
                                 continue;  
                             }
@@ -1056,52 +1064,54 @@ namespace L2Sql.BusinessLayer
                             int i = 1;
                             int j = 1; //ccqww field counter
                             Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.NONE;
-                            while (i < Qcolumns.Length)
+                            try
                             {
-                                if ((Qcolumns[i] != "") && (Qcolumns[i] != ":") )
+                                while (i < Qcolumns.Length)
                                 {
-                                    switch (j)
+                                    if ((Qcolumns[i] != "") && (Qcolumns[i] != ":"))
                                     {
-                                        case 1:
-                                            int freq;
-                                            if (int.TryParse(Qcolumns[i], out freq) )
-                                            {
-                                                Qso.Frequency = freq;
-                                            }
-                                            else
-                                            {
-                                                Qso.Frequency = 1;
-                                            }
-                                            break;
-                                        case 2:
-                                            try
-                                            {
-                                                switch (Qcolumns[i])
+                                        switch (j)
+                                        {
+                                            case 1:
+                                                int freq;
+                                                if (int.TryParse(Qcolumns[i], out freq))
                                                 {
-                                                    case "PH":
-                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.SSB;
-                                                        break;
-                                                    case "CW":
-                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.CW;
-                                                        break;
-                                                    case "RY":
-                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.RTTY;
-                                                        break;
-                                                    default:
-                                                        Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.MIXED;
-                                                        break;
+                                                    Qso.Frequency = freq;
                                                 }
-                                            }
-                                            catch (Exception)
-                                            {
-                                                Debug.WriteLine(string.Format(" bad Mode: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                throw;
-                                            }  
-                                            break;
-                                        case 3:
-                                             try 
-	                                            {
+                                                else
+                                                {
+                                                    Qso.Frequency = 1;
+                                                }
+                                                break;
+                                            case 2:
+                                                try
+                                                {
+                                                    switch (Qcolumns[i])
+                                                    {
+                                                        case "PH":
+                                                            Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.SSB;
+                                                            break;
+                                                        case "CW":
+                                                            Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.CW;
+                                                            break;
+                                                        case "RY":
+                                                            Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.RTTY;
+                                                            break;
+                                                        default:
+                                                            Qso.QsoModeTypeEnum = Logqso.mvc.common.Enum.QsoModeTypeEnum.MIXED;
+                                                            break;
+                                                    }
+                                                }
+                                                catch (Exception)
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad Mode: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+                                                }
+                                                break;
+                                            case 3:
+                                                try
+                                                {
                                                     DateTime DateTime;
 
                                                     if (DateTime.TryParse(Qcolumns[i], out DateTime) == true)
@@ -1114,175 +1124,192 @@ namespace L2Sql.BusinessLayer
                                                         Debug.WriteLine(string.Format(" bad Date: {0} for {1} log ",
                                                             (Qcolumns[i]).ToString(), Log.CallSign.Call));
                                                     }
-		
-	                                            }
-	                                            catch (Exception)
-	                                            {
+
+                                                }
+                                                catch (Exception)
+                                                {
                                                     Debug.WriteLine(string.Format(" bad Date: {0} for {1} log ",
                                                         (Qcolumns[i]).ToString(), Log.CallSign.Call));
                                                     throw;
-	                                            } 
-                                            break;
-                                        case 4:
-                                            try
-                                            {
-                                                DateTime DateTime;
-                                                string Date = Qso.QsoDateTime.ToShortDateString();
-                                                if (DateTime.TryParse(Date + " " + Qcolumns[i].Substring(0, 2) + ":" + Qcolumns[i].Substring(2, 2),
-                                                    out DateTime) == true)
-                                                {
-                                                    Qso.QsoDateTime = DateTime;
                                                 }
-                                                else
+                                                break;
+                                            case 4:
+                                                try
                                                 {
-                                                    Debug.WriteLine(string.Format(" bad DateTime: {0} for {1} log ", DateTime,
-                                                        (Qcolumns[i] + " " + Qcolumns[i + 1]).ToString(), Log.CallSign.Call));
-                                                }
-                                            }
-                                            catch (Exception)
-                                            {
-                                                Debug.WriteLine(string.Format(" bad Time: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                throw;
-                                            }
-                                            break;
-                                        case 5:
-                                            // station call is alrady in the log
-                                            break;
-                                        case 6:
-                                            try
-                                            {
-                                                short txrpt;
-                                                if (short.TryParse(Qcolumns[i], out txrpt) )
-                                                {
-                                                    Qso.TxRst = txrpt;
-                                                }else
-	                                            {
-                                                    Qso.TxRst = 0xff;
-	                                            }
-                                            }
-                                            catch
-                                            {
-                                                Debug.WriteLine(string.Format(" bad TxRst: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                throw;
-                                            }
-                                            break;
-                                        case 7:
-                                            //try
-                                            //{
-                                            //    Qso.QsoExchangeNumber = short.Parse(Qcolumns[i]);
-                                            //}
-                                            //catch
-                                            //{
-                                            //    Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
-                                            //        (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                            //    throw;
-                                            //}
-                                            break;
-                                        case 8:
-                                            try
-                                            {
-                                                if (Qcolumns[i].Contains("OH1LWZ/m") )
-                                                {
-                                                    
-                                                }
-                                                CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i].ToUpper()).SingleOrDefault();
-                                                if (CallSign == null)
-                                                {//new call
-                                                    CallSign = new CallSign
+                                                    DateTime DateTime;
+                                                    string Date = Qso.QsoDateTime.ToShortDateString();
+                                                    if (DateTime.TryParse(Date + " " + Qcolumns[i].Substring(0, 2) + ":" + Qcolumns[i].Substring(2, 2),
+                                                        out DateTime) == true)
                                                     {
-                                                        Call = Qcolumns[i],
-                                                        Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
-                                                        Continent = (int)GetContinentEnum(Qcolumns[i]),
-                                                        EntityState = EntityState.Added
-                                                    };
-                                                    //add to new list
-                                                    ICurrentCallSigns.Add(CallSign);
-                                                    //refresh
-                                                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                                                    CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i]).SingleOrDefault();
+                                                        Qso.QsoDateTime = DateTime;
+                                                    }
+                                                    else
+                                                    {
+                                                        Debug.WriteLine(string.Format(" bad DateTime: {0} for {1} log ", DateTime,
+                                                            (Qcolumns[i] + " " + Qcolumns[i + 1]).ToString(), Log.CallSign.Call));
+                                                    }
                                                 }
-                                                Qso.CallsignId = CallSign.CallSignId;
-                                            }
-                                            catch (Exception ex)
-                                            {
-                                                Debug.WriteLine(string.Format(" bad CallSign: {0} for {1} log  message {2} ",
-                                                   (Qcolumns[i]).ToString(), Log.CallsignId,ex.Message));                                               
-                                                throw;
-                                            }   
-                                            break;
-                                        case 9:
-                                            try
-                                            {
-                                                short rxrpt;
-                                                if( short.TryParse(Qcolumns[i],out rxrpt  ) )
+                                                catch (Exception)
                                                 {
-                                                    Qso.RxRst =  rxrpt;  
-                                                }else
-	                                            {
-                                                    Qso.RxRst = 0xff;
-	                                            }
-                                            }
-                                            catch
-                                            {
-                                                Debug.WriteLine(string.Format(" bad RxRst: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                throw;
-                                            }
-                                            break;
-                                        case 10:
-                                            //zone I4
-                                            //Qcolumns[i] = Qcolumns[i].Replace('I', '1'); //bad zone I4
-                                            try
-                                            {
-                                                short num;
-                                                if (short.TryParse(Qcolumns[i], out num)  )
+                                                    Debug.WriteLine(string.Format(" bad Time: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+                                                }
+                                                break;
+                                            case 5:
+                                                // station call is alrady in the log
+                                                break;
+                                            case 6:
+                                                try
                                                 {
-                                                    Qso.QsoExchangeNumber = num;
-                                                }else
-	                                            {
+                                                    short txrpt;
+                                                    if (short.TryParse(Qcolumns[i], out txrpt))
+                                                    {
+                                                        Qso.TxRst = txrpt;
+                                                    }
+                                                    else
+                                                    {
+                                                        Qso.TxRst = 0xff;
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad TxRst: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+                                                }
+                                                break;
+                                            case 7:
+                                                //try
+                                                //{
+                                                //    Qso.QsoExchangeNumber = short.Parse(Qcolumns[i]);
+                                                //}
+                                                //catch
+                                                //{
+                                                //    Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
+                                                //        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                //    throw;
+                                                //}
+                                                break;
+                                            case 8:
+                                                try
+                                                {
+                                                    if (Qcolumns[i].Contains("OH1LWZ/m"))
+                                                    {
+
+                                                    }
+                                                    CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i].ToUpper()).SingleOrDefault();
+                                                    if (CallSign == null)
+                                                    {//new call
+                                                        CallSign = new CallSign
+                                                        {
+                                                            Call = Qcolumns[i],
+                                                            Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
+                                                            ContinentEnum = GetContinentEnum(Qcolumns[i]),
+                                                            EntityState = EntityState.Added
+                                                        };
+                                                        //add to new list
+                                                        ICurrentCallSigns.Add(CallSign);
+                                                        //refresh
+                                                        ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                                                        CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i]).SingleOrDefault();
+                                                    }
+                                                    Qso.CallsignId = CallSign.CallSignId;
+                                                }
+                                                catch (Exception ex)
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad CallSign: {0} for {1} log  message {2} ",
+                                                       (Qcolumns[i]).ToString(), Log.CallsignId, ex.Message));
+                                                    throw;
+                                                }
+                                                break;
+                                            case 9:
+                                                try
+                                                {
+                                                    short rxrpt;
+                                                    if (short.TryParse(Qcolumns[i], out rxrpt))
+                                                    {
+                                                        Qso.RxRst = rxrpt;
+                                                    }
+                                                    else
+                                                    {
+                                                        Qso.RxRst = 0xff;
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad RxRst: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+                                                }
+                                                break;
+                                            case 10:
+                                                //zone I4
+                                                //Qcolumns[i] = Qcolumns[i].Replace('I', '1'); //bad zone I4
+                                                try
+                                                {
+                                                    short num;
+                                                    if (short.TryParse(Qcolumns[i], out num))
+                                                    {
+                                                        Qso.QsoExchangeNumber = num;
+                                                    }
+                                                    else
+                                                    {
+                                                        Qso.QsoExchangeNumber = 0xff;
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
                                                     Qso.QsoExchangeNumber = 0xff;
-	                                            }
-                                            }
-                                            catch
-                                            {
-                                                Debug.WriteLine(string.Format(" bad QsoExchangeNumber: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                Qso.QsoExchangeNumber = 0xff;
-                                                throw;
-                                            }
-                                            break;
-                                        case 11:
-                                            //radio
-                                            try
-                                            {
-                                                switch (byte.Parse(Qcolumns[i]))
-                                                {
-                                                    case 0:
-                                                        Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R1;
-                                                        break;
-                                                    case 1:
-                                                        Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R2;
-                                                        break;
-                                                    default:
-                                                        Qso.QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
-                                                       break;
+                                                    throw;
                                                 }
-                                            }
-                                            catch
-                                            {
-                                                Debug.WriteLine(string.Format(" bad QsoRadioTypeEnum: {0} for {1} log ",
-                                                    (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                throw;
-                                            }
-                                            break;
-                                        default:
-                                            break;
+                                                break;
+                                            case 11:
+                                                //radio
+                                                try
+                                                {
+                                                    byte val;
+                                                    if (byte.TryParse(Qcolumns[i], out val))
+                                                    {
+                                                        switch (val)
+                                                        {
+                                                            case 0:
+                                                                Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R1;
+                                                                break;
+                                                            case 1:
+                                                                Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R2;
+                                                                break;
+                                                            default:
+                                                                Qso.QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                                                                break;
+                                                        }
+                                                    }
+                                                    else
+                                                    {
+                                                        Qso.QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                                                    }
+                                                }
+                                                catch
+                                                {
+                                                    Debug.WriteLine(string.Format(" bad QsoRadioTypeEnum: {0} for {1} log ",
+                                                        (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                    throw;
+                                                }
+                                                break;
+                                            default:
+                                                break;
+                                        }
+                                        j++;
                                     }
-                                    j++;
+                                    i++;
                                 }
-                                i++;
+                            }
+                            catch (Exception ex )
+                            {
+                                
+                                continue;
                             }
                         }
                         if (Qso != null)

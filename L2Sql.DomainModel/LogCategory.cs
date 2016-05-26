@@ -11,7 +11,7 @@ namespace L2Sql.DomainModel
 {
     using System;
     using System.Collections.Generic;
-    
+
     public partial class LogCategory : IEntity
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
@@ -28,7 +28,6 @@ namespace L2Sql.DomainModel
         public Logqso.mvc.common.Enum.CatPowerEnum CatPowerEnum { get; set; }
         public Logqso.mvc.common.Enum.CatAssistedEnum CatAssistedEnum { get; set; }
         public Logqso.mvc.common.Enum.CatNoOfTxEnum CatNoOfTxEnum { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

@@ -24,13 +24,12 @@ namespace L2Sql.DomainModel
         public string SessionName { get; set; }
         public bool Disabled { get; set; }
         public Logqso.mvc.common.Enum.QsoRadioTypeEnum QsoRadioTypeEnum { get; set; }
-
-        public EntityState EntityState { get; set; }
     
         public virtual CallSign CallSign { get; set; }
         public virtual Contest Contest { get; set; }
         public virtual QsoRadioType QsoRadioType { get; set; }
         public virtual Session Session { get; set; }
         public virtual Station Station { get; set; }
+        public EntityState EntityState { get; set; }
     }
 }

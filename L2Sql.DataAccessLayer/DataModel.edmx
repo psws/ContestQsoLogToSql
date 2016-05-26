@@ -4,7 +4,7 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-      <Schema Namespace="LogqsoDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+      <Schema Namespace="ContestqsoDataModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="__MigrationHistory">
           <Key>
             <PropertyRef Name="MigrationId" />
@@ -53,7 +53,8 @@
           </Key>
           <Property Name="CallSignId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="Call" Type="varchar" MaxLength="20" Nullable="false" />
-          <Property Name="Continent" Type="int" Nullable="false" />
+          <Property Name="Prefix" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="ContinentEnum" Type="int" Nullable="false" />
           <Property Name="Accuracy" Type="int" Nullable="false" />
           <Property Name="Latitude" Type="float" />
           <Property Name="Longitude" Type="float" />
@@ -90,7 +91,7 @@
           <Property Name="LogId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="ContestYear" Type="datetime" Nullable="false" />
           <Property Name="CallsignId" Type="int" Nullable="false" />
-          <Property Name="ContestId" Type="varchar" MaxLength="35" />
+          <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
           <Property Name="LogCategoryId" Type="int" Nullable="false" />
           <Property Name="QsoExchangeNumber" Type="smallint" />
           <Property Name="QsoDatabaseServerInstance" Type="varchar" MaxLength="100" Nullable="false" />
@@ -203,7 +204,7 @@
           </Key>
           <Property Name="QsoNo" Type="smallint" Nullable="false" />
           <Property Name="LogId" Type="int" Nullable="false" />
-          <Property Name="CorrectCall" Type="nvarchar(max)" />
+          <Property Name="CorrectCall" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <EntityType Name="UbnIncorrectExchange">
           <Key>
@@ -212,7 +213,7 @@
           </Key>
           <Property Name="QsoNo" Type="smallint" Nullable="false" />
           <Property Name="LogId" Type="int" Nullable="false" />
-          <Property Name="CorrectExchange" Type="nvarchar(max)" />
+          <Property Name="CorrectExchange" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
         <EntityType Name="UbnNotInLog">
           <Key>
@@ -231,6 +232,65 @@
           <Property Name="ContestId" Type="varchar" MaxLength="35" Nullable="false" />
           <Property Name="ContestYear" Type="datetime" Nullable="false" />
           <Property Name="LogCategoryId" Type="int" Nullable="false" />
+          <Property Name="DuplicateCount" Type="int" Nullable="false" />
+          <Property Name="Claimed160Qso" Type="smallint" />
+          <Property Name="Claimed160Points" Type="int" />
+          <Property Name="Claimed160Countries" Type="smallint" />
+          <Property Name="Claimed160Zones" Type="smallint" />
+          <Property Name="Claimed80Qso" Type="smallint" />
+          <Property Name="Claimed80Points" Type="int" />
+          <Property Name="Claimed80Countries" Type="smallint" />
+          <Property Name="Claimed80Zones" Type="smallint" />
+          <Property Name="Claimed40Qso" Type="smallint" />
+          <Property Name="Claimed40Points" Type="int" />
+          <Property Name="Claimed40Countries" Type="smallint" />
+          <Property Name="Claimed40Zones" Type="smallint" />
+          <Property Name="Claimed20Qso" Type="smallint" />
+          <Property Name="Claimed20Points" Type="int" />
+          <Property Name="Claimed20Countries" Type="smallint" />
+          <Property Name="Claimed20Zones" Type="smallint" />
+          <Property Name="Claimed15Qso" Type="smallint" />
+          <Property Name="Claimed15Points" Type="int" />
+          <Property Name="Claimed15Countries" Type="smallint" />
+          <Property Name="Claimed15Zone3" Type="smallint" />
+          <Property Name="Claimed10Qso" Type="smallint" />
+          <Property Name="Claimed10Points" Type="int" />
+          <Property Name="Claimed10Countries" Type="smallint" />
+          <Property Name="Claimed10Zones" Type="smallint" />
+          <Property Name="ClaimedTotalQSO" Type="int" />
+          <Property Name="ClaimedCountries" Type="smallint" />
+          <Property Name="ClaimedZones" Type="smallint" />
+          <Property Name="ClaimedTotalPoints" Type="int" />
+          <Property Name="ClaimedScore" Type="int" />
+          <Property Name="Final160Qso" Type="smallint" />
+          <Property Name="Final160Points" Type="int" />
+          <Property Name="Final160Countries" Type="smallint" />
+          <Property Name="Final160Zones" Type="smallint" />
+          <Property Name="Final80Qso" Type="smallint" />
+          <Property Name="Final80Points" Type="int" />
+          <Property Name="Final80Countries" Type="smallint" />
+          <Property Name="Final80Zones" Type="smallint" />
+          <Property Name="Final40Qso" Type="smallint" />
+          <Property Name="Final40Points" Type="int" />
+          <Property Name="Final40Countries" Type="smallint" />
+          <Property Name="Final40Zones" Type="smallint" />
+          <Property Name="Final20Qso" Type="smallint" />
+          <Property Name="Final20Points" Type="int" />
+          <Property Name="Final20Countries" Type="smallint" />
+          <Property Name="Final20Zones" Type="smallint" />
+          <Property Name="Final15Qso" Type="int" />
+          <Property Name="Final15Points" Type="int" />
+          <Property Name="Final15Countries" Type="int" />
+          <Property Name="Final15Zones" Type="int" />
+          <Property Name="Final10Qso" Type="smallint" />
+          <Property Name="Final10Points" Type="int" />
+          <Property Name="Final10Countries" Type="smallint" />
+          <Property Name="Final10Zones" Type="smallint" />
+          <Property Name="FinalTotalQSO" Type="int" />
+          <Property Name="FinalCountries" Type="smallint" />
+          <Property Name="FinalZones" Type="smallint" />
+          <Property Name="FinalTotalPoints" Type="int" />
+          <Property Name="FinalScore" Type="int" />
         </EntityType>
         <EntityType Name="UbnUniques">
           <Key>
@@ -395,7 +455,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_dbo_Log_dbo_Contest_ContestId">
-          <End Role="Contest" Type="Self.Contest" Multiplicity="0..1" />
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="Log" Type="Self.Log" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contest">
@@ -433,9 +495,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_dbo_Qso_dbo_Log_LogId">
-          <End Role="Log" Type="Self.Log" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="1" />
           <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Log">
@@ -572,7 +632,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="LogqsoDataModelStoreContainer">
+        <EntityContainer Name="ContestqsoDataModelStoreContainer">
           <EntitySet Name="__MigrationHistory" EntityType="Self.__MigrationHistory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CabrilloInfo" EntityType="Self.CabrilloInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CallInfo" EntityType="Self.CallInfo" Schema="dbo" store:Type="Tables" />
@@ -696,7 +756,7 @@
     </edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
-      <Schema Namespace="LogqsoDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+      <Schema Namespace="ContestqsoDataModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
         <EntityType Name="C__MigrationHistory">
           <Key>
             <PropertyRef Name="MigrationId" />
@@ -739,7 +799,7 @@
           <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="SessionName" Type="String" MaxLength="256" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="Disabled" Type="Boolean" Nullable="false" />
-          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="ContestqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
           <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_CallInfo_dbo_CallSign_CallsignId" FromRole="CallInfo" ToRole="CallSign" />
           <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_CallInfo_dbo_Contest_ContestId" FromRole="CallInfo" ToRole="Contest" />
           <NavigationProperty Name="QsoRadioType" Relationship="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="CallInfo" ToRole="QsoRadioType" />
@@ -752,7 +812,8 @@
           </Key>
           <Property Name="CallSignId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="Call" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="Continent" Type="Int32" Nullable="false" />
+          <Property Name="Prefix" Type="String" MaxLength="10" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ContinentEnum" Type="ContestqsoDataModel.ContinentEnum" Nullable="false" />
           <Property Name="Accuracy" Type="Int32" Nullable="false" />
           <Property Name="Latitude" Type="Double" />
           <Property Name="Longitude" Type="Double" />
@@ -769,8 +830,8 @@
           </Key>
           <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ContestName" Type="String" MaxLength="30" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ContestTypeEnum" Type="LogqsoDataModel.ContestTypeEnum" Nullable="false" />
-          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="ContestTypeEnum" Type="ContestqsoDataModel.ContestTypeEnum" Nullable="false" />
+          <Property Name="QsoModeTypeEnum" Type="ContestqsoDataModel.QsoModeTypeEnum" Nullable="false" />
           <Property Name="StartDateTime" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="EndDateTime" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="Active" Type="Boolean" Nullable="false" />
@@ -785,9 +846,9 @@
           <Key>
             <PropertyRef Name="ContestTypeEnum" />
           </Key>
-          <Property Name="ContestTypeEnum" Type="LogqsoDataModel.ContestTypeEnum" Nullable="false" />
+          <Property Name="ContestTypeEnum" Type="ContestqsoDataModel.ContestTypeEnum" Nullable="false" />
           <Property Name="ContestTypeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="QsoExchangeTypeEnum" Type="LogqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnum" Type="ContestqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
           <Property Name="QsoExchangeName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="QsoMultName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="QsoMult2Name" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
@@ -802,7 +863,7 @@
           <Property Name="LogId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="ContestYear" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="CallsignId" Type="Int32" Nullable="false" />
-          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" />
+          <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="LogCategoryId" Type="Int32" Nullable="false" />
           <Property Name="QsoExchangeNumber" Type="Int16" />
           <Property Name="QsoDatabaseServerInstance" Type="String" MaxLength="100" FixedLength="false" Unicode="false" Nullable="false" />
@@ -821,12 +882,12 @@
             <PropertyRef Name="LogCategoryId" />
           </Key>
           <Property Name="LogCategoryId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CatOperatorEnum" Type="LogqsoDataModel.CatOperatorEnum" Nullable="false" />
-          <Property Name="CatOperatorOverlayEnum" Type="LogqsoDataModel.CatOperatorOverlayEnum" Nullable="false" />
-          <Property Name="CatBandEnum" Type="LogqsoDataModel.CatBandEnum" Nullable="false" />
-          <Property Name="CatPowerEnum" Type="LogqsoDataModel.CatPowerEnum" Nullable="false" />
-          <Property Name="CatAssistedEnum" Type="LogqsoDataModel.CatAssistedEnum" Nullable="false" />
-          <Property Name="CatNoOfTxEnum" Type="LogqsoDataModel.CatNoOfTxEnum" Nullable="false" />
+          <Property Name="CatOperatorEnum" Type="ContestqsoDataModel.CatOperatorEnum" Nullable="false" />
+          <Property Name="CatOperatorOverlayEnum" Type="ContestqsoDataModel.CatOperatorOverlayEnum" Nullable="false" />
+          <Property Name="CatBandEnum" Type="ContestqsoDataModel.CatBandEnum" Nullable="false" />
+          <Property Name="CatPowerEnum" Type="ContestqsoDataModel.CatPowerEnum" Nullable="false" />
+          <Property Name="CatAssistedEnum" Type="ContestqsoDataModel.CatAssistedEnum" Nullable="false" />
+          <Property Name="CatNoOfTxEnum" Type="ContestqsoDataModel.CatNoOfTxEnum" Nullable="false" />
           <NavigationProperty Name="Logs" Relationship="Self.FK_dbo_Log_dbo_LogCategory_LogCategoryId" FromRole="LogCategory" ToRole="Log" />
           <NavigationProperty Name="UbnSummaries" Relationship="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" FromRole="LogCategory" ToRole="UbnSummary" />
         </EntityType>
@@ -844,8 +905,8 @@
           <Property Name="RxRst" Type="Int16" Nullable="false" />
           <Property Name="TxRst" Type="Int16" Nullable="false" />
           <Property Name="QsoExchangeNumber" Type="Int16" />
-          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
-          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <Property Name="QsoModeTypeEnum" Type="ContestqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="ContestqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
           <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_Qso_dbo_CallSign_CallsignId" FromRole="Qso" ToRole="CallSign" />
           <NavigationProperty Name="Log" Relationship="Self.FK_dbo_Qso_dbo_Log_LogId" FromRole="Qso" ToRole="Log" />
           <NavigationProperty Name="QsoModeType" Relationship="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" FromRole="Qso" ToRole="QsoModeType" />
@@ -868,7 +929,7 @@
           <Key>
             <PropertyRef Name="QsoExchangeTypeEnum" />
           </Key>
-          <Property Name="QsoExchangeTypeEnum" Type="LogqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
+          <Property Name="QsoExchangeTypeEnum" Type="ContestqsoDataModel.QsoExchangeTypeEnum" Nullable="false" />
           <Property Name="QsoExchangeTypeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="ContestTypes" Relationship="Self.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" FromRole="QsoExchangeType" ToRole="ContestType" />
         </EntityType>
@@ -886,7 +947,7 @@
           <Key>
             <PropertyRef Name="QsoModeTypeEnum" />
           </Key>
-          <Property Name="QsoModeTypeEnum" Type="LogqsoDataModel.QsoModeTypeEnum" Nullable="false" />
+          <Property Name="QsoModeTypeEnum" Type="ContestqsoDataModel.QsoModeTypeEnum" Nullable="false" />
           <Property Name="QsoModeEnumName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="Contests" Relationship="Self.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" FromRole="QsoModeType" ToRole="Contest" />
           <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_QsoModeType_QsoModeTypeEnum" FromRole="QsoModeType" ToRole="Qso" />
@@ -895,7 +956,7 @@
           <Key>
             <PropertyRef Name="QsoRadioTypeEnum" />
           </Key>
-          <Property Name="QsoRadioTypeEnum" Type="LogqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
+          <Property Name="QsoRadioTypeEnum" Type="ContestqsoDataModel.QsoRadioTypeEnum" Nullable="false" />
           <Property Name="QsoRadioTypeName" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
           <NavigationProperty Name="CallInfoes" Relationship="Self.FK_dbo_CallInfo_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="QsoRadioType" ToRole="CallInfo" />
           <NavigationProperty Name="Qsoes" Relationship="Self.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" FromRole="QsoRadioType" ToRole="Qso" />
@@ -940,7 +1001,7 @@
           </Key>
           <Property Name="QsoNo" Type="Int16" Nullable="false" />
           <Property Name="LogId" Type="Int32" Nullable="false" />
-          <Property Name="CorrectCall" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CorrectCall" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
         <EntityType Name="UbnIncorrectExchange">
           <Key>
@@ -949,7 +1010,7 @@
           </Key>
           <Property Name="QsoNo" Type="Int16" Nullable="false" />
           <Property Name="LogId" Type="Int32" Nullable="false" />
-          <Property Name="CorrectExchange" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="CorrectExchange" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
         </EntityType>
         <EntityType Name="UbnNotInLog">
           <Key>
@@ -968,6 +1029,65 @@
           <Property Name="ContestId" Type="String" MaxLength="35" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ContestYear" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="LogCategoryId" Type="Int32" Nullable="false" />
+          <Property Name="DuplicateCount" Type="Int32" Nullable="false" />
+          <Property Name="Claimed160Qso" Type="Int16" />
+          <Property Name="Claimed160Points" Type="Int32" />
+          <Property Name="Claimed160Countries" Type="Int16" />
+          <Property Name="Claimed160Zones" Type="Int16" />
+          <Property Name="Claimed80Qso" Type="Int16" />
+          <Property Name="Claimed80Points" Type="Int32" />
+          <Property Name="Claimed80Countries" Type="Int16" />
+          <Property Name="Claimed80Zones" Type="Int16" />
+          <Property Name="Claimed40Qso" Type="Int16" />
+          <Property Name="Claimed40Points" Type="Int32" />
+          <Property Name="Claimed40Countries" Type="Int16" />
+          <Property Name="Claimed40Zones" Type="Int16" />
+          <Property Name="Claimed20Qso" Type="Int16" />
+          <Property Name="Claimed20Points" Type="Int32" />
+          <Property Name="Claimed20Countries" Type="Int16" />
+          <Property Name="Claimed20Zones" Type="Int16" />
+          <Property Name="Claimed15Qso" Type="Int16" />
+          <Property Name="Claimed15Points" Type="Int32" />
+          <Property Name="Claimed15Countries" Type="Int16" />
+          <Property Name="Claimed15Zone3" Type="Int16" />
+          <Property Name="Claimed10Qso" Type="Int16" />
+          <Property Name="Claimed10Points" Type="Int32" />
+          <Property Name="Claimed10Countries" Type="Int16" />
+          <Property Name="Claimed10Zones" Type="Int16" />
+          <Property Name="ClaimedTotalQSO" Type="Int32" />
+          <Property Name="ClaimedCountries" Type="Int16" />
+          <Property Name="ClaimedZones" Type="Int16" />
+          <Property Name="ClaimedTotalPoints" Type="Int32" />
+          <Property Name="ClaimedScore" Type="Int32" />
+          <Property Name="Final160Qso" Type="Int16" />
+          <Property Name="Final160Points" Type="Int32" />
+          <Property Name="Final160Countries" Type="Int16" />
+          <Property Name="Final160Zones" Type="Int16" />
+          <Property Name="Final80Qso" Type="Int16" />
+          <Property Name="Final80Points" Type="Int32" />
+          <Property Name="Final80Countries" Type="Int16" />
+          <Property Name="Final80Zones" Type="Int16" />
+          <Property Name="Final40Qso" Type="Int16" />
+          <Property Name="Final40Points" Type="Int32" />
+          <Property Name="Final40Countries" Type="Int16" />
+          <Property Name="Final40Zones" Type="Int16" />
+          <Property Name="Final20Qso" Type="Int16" />
+          <Property Name="Final20Points" Type="Int32" />
+          <Property Name="Final20Countries" Type="Int16" />
+          <Property Name="Final20Zones" Type="Int16" />
+          <Property Name="Final15Qso" Type="Int32" />
+          <Property Name="Final15Points" Type="Int32" />
+          <Property Name="Final15Countries" Type="Int32" />
+          <Property Name="Final15Zones" Type="Int32" />
+          <Property Name="Final10Qso" Type="Int16" />
+          <Property Name="Final10Points" Type="Int32" />
+          <Property Name="Final10Countries" Type="Int16" />
+          <Property Name="Final10Zones" Type="Int16" />
+          <Property Name="FinalTotalQSO" Type="Int32" />
+          <Property Name="FinalCountries" Type="Int16" />
+          <Property Name="FinalZones" Type="Int16" />
+          <Property Name="FinalTotalPoints" Type="Int32" />
+          <Property Name="FinalScore" Type="Int32" />
           <NavigationProperty Name="CallSign" Relationship="Self.FK_dbo_UbnSummary_dbo_CallSign_CallsignId" FromRole="UbnSummary" ToRole="CallSign" />
           <NavigationProperty Name="Contest" Relationship="Self.FK_dbo_UbnSummary_dbo_Contest_ContestId" FromRole="UbnSummary" ToRole="Contest" />
           <NavigationProperty Name="LogCategory" Relationship="Self.FK_dbo_UbnSummary_dbo_LogCategory_LogCategoryId" FromRole="UbnSummary" ToRole="LogCategory" />
@@ -1147,7 +1267,9 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_dbo_Log_dbo_Contest_ContestId">
-          <End Role="Contest" Type="Self.Contest" Multiplicity="0..1" />
+          <End Role="Contest" Type="Self.Contest" Multiplicity="1">
+            <OnDelete Action="Cascade" />
+          </End>
           <End Role="Log" Type="Self.Log" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contest">
@@ -1201,9 +1323,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_dbo_Qso_dbo_Log_LogId">
-          <End Role="Log" Type="Self.Log" Multiplicity="1">
-            <OnDelete Action="Cascade" />
-          </End>
+          <End Role="Log" Type="Self.Log" Multiplicity="1" />
           <End Role="Qso" Type="Self.Qso" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Log">
@@ -1312,7 +1432,7 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityContainer Name="LogqsoDataEntities" annotation:LazyLoadingEnabled="true">
+        <EntityContainer Name="ContestqsoDataEntities" annotation:LazyLoadingEnabled="true">
           <EntitySet Name="C__MigrationHistory" EntityType="Self.C__MigrationHistory" />
           <EntitySet Name="CabrilloInfoes" EntityType="Self.CabrilloInfo" />
           <EntitySet Name="CallInfoes" EntityType="Self.CallInfo" />
@@ -1432,11 +1552,12 @@
             <End Role="QsoExtraData" EntitySet="QsoExtraDatas" />
           </AssociationSet>
         </EntityContainer>
-        <EnumType Name="ContestTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.ContestTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
         <EnumType Name="QsoExchangeTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoExchangeTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
-        <EnumType Name="QsoModeTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoModeTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="ContestTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.ContestTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
         <EnumType Name="QsoRadioTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoRadioTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
-        <EnumType Name="CatOperatorEnum" a:ExternalTypeName="CatOperatorEnumLogqso.mvc.common.Enum." xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="QsoModeTypeEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.QsoModeTypeEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="ContinentEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.ContinentEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
+        <EnumType Name="CatOperatorEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatOperatorEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
         <EnumType Name="CatOperatorOverlayEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatOperatorOverlayEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
         <EnumType Name="CatBandEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatBandEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
         <EnumType Name="CatPowerEnum" a:ExternalTypeName="Logqso.mvc.common.Enum.CatPowerEnum" xmlns:a="http://schemas.microsoft.com/ado/2006/04/codegeneration" />
@@ -1447,9 +1568,9 @@
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
-        <EntityContainerMapping StorageEntityContainer="LogqsoDataModelStoreContainer" CdmEntityContainer="LogqsoDataEntities">
+        <EntityContainerMapping StorageEntityContainer="ContestqsoDataModelStoreContainer" CdmEntityContainer="ContestqsoDataEntities">
           <EntitySetMapping Name="C__MigrationHistory">
-            <EntityTypeMapping TypeName="LogqsoDataModel.C__MigrationHistory">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.C__MigrationHistory">
               <MappingFragment StoreEntitySet="__MigrationHistory">
                 <ScalarProperty Name="MigrationId" ColumnName="MigrationId" />
                 <ScalarProperty Name="ContextKey" ColumnName="ContextKey" />
@@ -1459,7 +1580,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="CabrilloInfoes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.CabrilloInfo">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.CabrilloInfo">
               <MappingFragment StoreEntitySet="CabrilloInfo">
                 <ScalarProperty Name="ContestId" ColumnName="ContestId" />
                 <ScalarProperty Name="CallSignId" ColumnName="CallSignId" />
@@ -1475,7 +1596,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="CallInfoes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.CallInfo">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.CallInfo">
               <MappingFragment StoreEntitySet="CallInfo">
                 <ScalarProperty Name="CallInfoId" ColumnName="CallInfoId" />
                 <ScalarProperty Name="CallGroup" ColumnName="CallGroup" />
@@ -1491,11 +1612,12 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="CallSigns">
-            <EntityTypeMapping TypeName="LogqsoDataModel.CallSign">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.CallSign">
               <MappingFragment StoreEntitySet="CallSign">
                 <ScalarProperty Name="CallSignId" ColumnName="CallSignId" />
                 <ScalarProperty Name="Call" ColumnName="Call" />
-                <ScalarProperty Name="Continent" ColumnName="Continent" />
+                <ScalarProperty Name="Prefix" ColumnName="Prefix" />
+                <ScalarProperty Name="ContinentEnum" ColumnName="ContinentEnum" />
                 <ScalarProperty Name="Accuracy" ColumnName="Accuracy" />
                 <ScalarProperty Name="Latitude" ColumnName="Latitude" />
                 <ScalarProperty Name="Longitude" ColumnName="Longitude" />
@@ -1504,7 +1626,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Contests">
-            <EntityTypeMapping TypeName="LogqsoDataModel.Contest">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.Contest">
               <MappingFragment StoreEntitySet="Contest">
                 <ScalarProperty Name="ContestId" ColumnName="ContestId" />
                 <ScalarProperty Name="ContestName" ColumnName="ContestName" />
@@ -1517,7 +1639,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="ContestTypes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.ContestType">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.ContestType">
               <MappingFragment StoreEntitySet="ContestType">
                 <ScalarProperty Name="ContestTypeEnum" ColumnName="ContestTypeEnum" />
                 <ScalarProperty Name="ContestTypeEnumName" ColumnName="ContestTypeEnumName" />
@@ -1530,7 +1652,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Logs">
-            <EntityTypeMapping TypeName="LogqsoDataModel.Log">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.Log">
               <MappingFragment StoreEntitySet="Log">
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
                 <ScalarProperty Name="ContestYear" ColumnName="ContestYear" />
@@ -1547,7 +1669,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="LogCategories">
-            <EntityTypeMapping TypeName="LogqsoDataModel.LogCategory">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.LogCategory">
               <MappingFragment StoreEntitySet="LogCategory">
                 <ScalarProperty Name="LogCategoryId" ColumnName="LogCategoryId" />
                 <ScalarProperty Name="CatOperatorEnum" ColumnName="CatOperatorEnum" />
@@ -1560,7 +1682,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Qsoes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.Qso">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.Qso">
               <MappingFragment StoreEntitySet="Qso">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1577,7 +1699,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="QsoExchangeAlphas">
-            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExchangeAlpha">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.QsoExchangeAlpha">
               <MappingFragment StoreEntitySet="QsoExchangeAlpha">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1586,7 +1708,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="QsoExchangeTypes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExchangeType">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.QsoExchangeType">
               <MappingFragment StoreEntitySet="QsoExchangeType">
                 <ScalarProperty Name="QsoExchangeTypeEnum" ColumnName="QsoExchangeTypeEnum" />
                 <ScalarProperty Name="QsoExchangeTypeEnumName" ColumnName="QsoExchangeTypeEnumName" />
@@ -1594,7 +1716,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="QsoExtraDatas">
-            <EntityTypeMapping TypeName="LogqsoDataModel.QsoExtraData">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.QsoExtraData">
               <MappingFragment StoreEntitySet="QsoExtraData">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1603,7 +1725,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="QsoModeTypes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.QsoModeType">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.QsoModeType">
               <MappingFragment StoreEntitySet="QsoModeType">
                 <ScalarProperty Name="QsoModeTypeEnum" ColumnName="QsoModeTypeEnum" />
                 <ScalarProperty Name="QsoModeEnumName" ColumnName="QsoModeEnumName" />
@@ -1611,7 +1733,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="QsoRadioTypes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.QsoRadioType">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.QsoRadioType">
               <MappingFragment StoreEntitySet="QsoRadioType">
                 <ScalarProperty Name="QsoRadioTypeEnum" ColumnName="QsoRadioTypeEnum" />
                 <ScalarProperty Name="QsoRadioTypeName" ColumnName="QsoRadioTypeName" />
@@ -1619,7 +1741,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Sessions">
-            <EntityTypeMapping TypeName="LogqsoDataModel.Session">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.Session">
               <MappingFragment StoreEntitySet="Session">
                 <ScalarProperty Name="SessionName" ColumnName="SessionName" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
@@ -1633,7 +1755,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="Stations">
-            <EntityTypeMapping TypeName="LogqsoDataModel.Station">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.Station">
               <MappingFragment StoreEntitySet="Station">
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
                 <ScalarProperty Name="StationName" ColumnName="StationName" />
@@ -1641,7 +1763,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnDupes">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnDupe">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnDupe">
               <MappingFragment StoreEntitySet="UbnDupes">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1649,7 +1771,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnIncorrectCalls">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnIncorrectCall">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnIncorrectCall">
               <MappingFragment StoreEntitySet="UbnIncorrectCall">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1658,7 +1780,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnIncorrectExchanges">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnIncorrectExchange">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnIncorrectExchange">
               <MappingFragment StoreEntitySet="UbnIncorrectExchange">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1667,7 +1789,7 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnNotInLogs">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnNotInLog">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnNotInLog">
               <MappingFragment StoreEntitySet="UbnNotInLog">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />
@@ -1675,17 +1797,76 @@
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnSummaries">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnSummary">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnSummary">
               <MappingFragment StoreEntitySet="UbnSummary">
                 <ScalarProperty Name="CallsignId" ColumnName="CallsignId" />
                 <ScalarProperty Name="ContestId" ColumnName="ContestId" />
                 <ScalarProperty Name="ContestYear" ColumnName="ContestYear" />
                 <ScalarProperty Name="LogCategoryId" ColumnName="LogCategoryId" />
+                <ScalarProperty Name="DuplicateCount" ColumnName="DuplicateCount" />
+                <ScalarProperty Name="Claimed160Qso" ColumnName="Claimed160Qso" />
+                <ScalarProperty Name="Claimed160Points" ColumnName="Claimed160Points" />
+                <ScalarProperty Name="Claimed160Countries" ColumnName="Claimed160Countries" />
+                <ScalarProperty Name="Claimed160Zones" ColumnName="Claimed160Zones" />
+                <ScalarProperty Name="Claimed80Qso" ColumnName="Claimed80Qso" />
+                <ScalarProperty Name="Claimed80Points" ColumnName="Claimed80Points" />
+                <ScalarProperty Name="Claimed80Countries" ColumnName="Claimed80Countries" />
+                <ScalarProperty Name="Claimed80Zones" ColumnName="Claimed80Zones" />
+                <ScalarProperty Name="Claimed40Qso" ColumnName="Claimed40Qso" />
+                <ScalarProperty Name="Claimed40Points" ColumnName="Claimed40Points" />
+                <ScalarProperty Name="Claimed40Countries" ColumnName="Claimed40Countries" />
+                <ScalarProperty Name="Claimed40Zones" ColumnName="Claimed40Zones" />
+                <ScalarProperty Name="Claimed20Qso" ColumnName="Claimed20Qso" />
+                <ScalarProperty Name="Claimed20Points" ColumnName="Claimed20Points" />
+                <ScalarProperty Name="Claimed20Countries" ColumnName="Claimed20Countries" />
+                <ScalarProperty Name="Claimed20Zones" ColumnName="Claimed20Zones" />
+                <ScalarProperty Name="Claimed15Qso" ColumnName="Claimed15Qso" />
+                <ScalarProperty Name="Claimed15Points" ColumnName="Claimed15Points" />
+                <ScalarProperty Name="Claimed15Countries" ColumnName="Claimed15Countries" />
+                <ScalarProperty Name="Claimed15Zone3" ColumnName="Claimed15Zone3" />
+                <ScalarProperty Name="Claimed10Qso" ColumnName="Claimed10Qso" />
+                <ScalarProperty Name="Claimed10Points" ColumnName="Claimed10Points" />
+                <ScalarProperty Name="Claimed10Countries" ColumnName="Claimed10Countries" />
+                <ScalarProperty Name="Claimed10Zones" ColumnName="Claimed10Zones" />
+                <ScalarProperty Name="ClaimedTotalQSO" ColumnName="ClaimedTotalQSO" />
+                <ScalarProperty Name="ClaimedCountries" ColumnName="ClaimedCountries" />
+                <ScalarProperty Name="ClaimedZones" ColumnName="ClaimedZones" />
+                <ScalarProperty Name="ClaimedTotalPoints" ColumnName="ClaimedTotalPoints" />
+                <ScalarProperty Name="ClaimedScore" ColumnName="ClaimedScore" />
+                <ScalarProperty Name="Final160Qso" ColumnName="Final160Qso" />
+                <ScalarProperty Name="Final160Points" ColumnName="Final160Points" />
+                <ScalarProperty Name="Final160Countries" ColumnName="Final160Countries" />
+                <ScalarProperty Name="Final160Zones" ColumnName="Final160Zones" />
+                <ScalarProperty Name="Final80Qso" ColumnName="Final80Qso" />
+                <ScalarProperty Name="Final80Points" ColumnName="Final80Points" />
+                <ScalarProperty Name="Final80Countries" ColumnName="Final80Countries" />
+                <ScalarProperty Name="Final80Zones" ColumnName="Final80Zones" />
+                <ScalarProperty Name="Final40Qso" ColumnName="Final40Qso" />
+                <ScalarProperty Name="Final40Points" ColumnName="Final40Points" />
+                <ScalarProperty Name="Final40Countries" ColumnName="Final40Countries" />
+                <ScalarProperty Name="Final40Zones" ColumnName="Final40Zones" />
+                <ScalarProperty Name="Final20Qso" ColumnName="Final20Qso" />
+                <ScalarProperty Name="Final20Points" ColumnName="Final20Points" />
+                <ScalarProperty Name="Final20Countries" ColumnName="Final20Countries" />
+                <ScalarProperty Name="Final20Zones" ColumnName="Final20Zones" />
+                <ScalarProperty Name="Final15Qso" ColumnName="Final15Qso" />
+                <ScalarProperty Name="Final15Points" ColumnName="Final15Points" />
+                <ScalarProperty Name="Final15Countries" ColumnName="Final15Countries" />
+                <ScalarProperty Name="Final15Zones" ColumnName="Final15Zones" />
+                <ScalarProperty Name="Final10Qso" ColumnName="Final10Qso" />
+                <ScalarProperty Name="Final10Points" ColumnName="Final10Points" />
+                <ScalarProperty Name="Final10Countries" ColumnName="Final10Countries" />
+                <ScalarProperty Name="Final10Zones" ColumnName="Final10Zones" />
+                <ScalarProperty Name="FinalTotalQSO" ColumnName="FinalTotalQSO" />
+                <ScalarProperty Name="FinalCountries" ColumnName="FinalCountries" />
+                <ScalarProperty Name="FinalZones" ColumnName="FinalZones" />
+                <ScalarProperty Name="FinalTotalPoints" ColumnName="FinalTotalPoints" />
+                <ScalarProperty Name="FinalScore" ColumnName="FinalScore" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UbnUniques">
-            <EntityTypeMapping TypeName="LogqsoDataModel.UbnUnique">
+            <EntityTypeMapping TypeName="ContestqsoDataModel.UbnUnique">
               <MappingFragment StoreEntitySet="UbnUniques">
                 <ScalarProperty Name="QsoNo" ColumnName="QsoNo" />
                 <ScalarProperty Name="LogId" ColumnName="LogId" />

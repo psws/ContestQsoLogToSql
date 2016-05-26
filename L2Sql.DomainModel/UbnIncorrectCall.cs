@@ -17,7 +17,6 @@ namespace L2Sql.DomainModel
         public short QsoNo { get; set; }
         public int LogId { get; set; }
         public string CorrectCall { get; set; }
-
         public EntityState EntityState { get; set; }
     }
 }

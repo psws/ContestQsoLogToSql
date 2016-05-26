@@ -17,7 +17,7 @@ namespace L2Sql.DataAccessLayer
         public virtual IList<T> GetAll(params Expression<Func<T, object>>[] navigationProperties)
         {
             List<T> list;
-            using (var context = new LogqsoDataEntities())
+            using (var context = new ContestqsoDataEntities())
             {
                 IQueryable<T> dbQuery = context.Set<T>();
 
@@ -36,7 +36,7 @@ namespace L2Sql.DataAccessLayer
              params Expression<Func<T,object>>[] navigationProperties)
         {
             List<T> list;
-            using (var context = new LogqsoDataEntities())
+            using (var context = new ContestqsoDataEntities())
             {
                 IQueryable<T> dbQuery = context.Set<T>();
                  
@@ -56,7 +56,7 @@ namespace L2Sql.DataAccessLayer
              params Expression<Func<T, object>>[] navigationProperties)
         {
             T item = null;
-            using (var context = new LogqsoDataEntities())
+            using (var context = new ContestqsoDataEntities())
             {
                 IQueryable<T> dbQuery = context.Set<T>();
                  
@@ -79,7 +79,7 @@ namespace L2Sql.DataAccessLayer
         }
         public virtual void AddRange(params T[] items)
         {
-            using (var context = new LogqsoDataEntities())
+            using (var context = new ContestqsoDataEntities())
             {
                 context.Configuration.AutoDetectChangesEnabled = false;
 
@@ -94,7 +94,7 @@ namespace L2Sql.DataAccessLayer
 
         public virtual void Update(params T[] items)
         {
-            using (var context = new LogqsoDataEntities())
+            using (var context = new ContestqsoDataEntities())
             {
                 DbSet<T> dbSet = context.Set<T>();
                 foreach (T item in items)

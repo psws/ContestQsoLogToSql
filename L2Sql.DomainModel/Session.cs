@@ -28,7 +28,6 @@ namespace L2Sql.DomainModel
         public string XaxisSettings { get; set; }
         public string YaxisSettings { get; set; }
         public Nullable<decimal> Subscription { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

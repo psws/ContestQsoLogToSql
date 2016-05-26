@@ -23,7 +23,6 @@ namespace L2Sql.DomainModel
     
         public Logqso.mvc.common.Enum.QsoModeTypeEnum QsoModeTypeEnum { get; set; }
         public string QsoModeEnumName { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

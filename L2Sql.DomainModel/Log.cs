@@ -32,7 +32,6 @@ namespace L2Sql.DomainModel
         public string QsoDatabaseTableName { get; set; }
         public Nullable<int> WintestDataID { get; set; }
         public Nullable<int> N1mmDataID { get; set; }
-
         public EntityState EntityState { get; set; }
     
         public virtual CallSign CallSign { get; set; }

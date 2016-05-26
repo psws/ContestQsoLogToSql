@@ -30,7 +30,6 @@ namespace L2Sql.DomainModel
         public System.DateTime StartDateTime { get; set; }
         public System.DateTime EndDateTime { get; set; }
         public bool Active { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

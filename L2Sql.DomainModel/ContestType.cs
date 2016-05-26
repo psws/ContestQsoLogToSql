@@ -27,7 +27,6 @@ namespace L2Sql.DomainModel
         public string QsoMultName { get; set; }
         public string QsoMult2Name { get; set; }
         public string ExtraDataName { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

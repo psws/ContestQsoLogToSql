@@ -26,12 +26,12 @@ namespace L2Sql.DomainModel
     
         public int CallSignId { get; set; }
         public string Call { get; set; }
-        public int Continent { get; set; }
+        public string Prefix { get; set; }
+        public Logqso.mvc.common.Enum.ContinentEnum ContinentEnum { get; set; }
         public int Accuracy { get; set; }
         public Nullable<double> Latitude { get; set; }
         public Nullable<double> Longitude { get; set; }
         public Nullable<bool> GeoCodeChk { get; set; }
-
         public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]

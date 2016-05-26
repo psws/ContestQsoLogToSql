@@ -18,8 +18,7 @@ namespace L2Sql.DomainModel
         public int LogId { get; set; }
         public string QsoExhangeAlphaValue { get; set; }
 
-        public EntityState EntityState { get; set; }
-    
         public virtual Qso Qso { get; set; }
+        public EntityState EntityState { get; set; }
     }
 }

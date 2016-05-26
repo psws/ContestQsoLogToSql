@@ -12,12 +12,12 @@ namespace L2Sql.DataAccessLayer
     using System;
     using System.Data.Entity;
     using System.Data.Entity.Infrastructure;
-    using L2Sql.DomainModel;
+    using L2Sql.DomainModel; 
     
-    public partial class LogqsoDataEntities : DbContext
+    public partial class ContestqsoDataEntities : DbContext
     {
-        public LogqsoDataEntities()
-            : base("name=LogqsoDataEntities")
+        public ContestqsoDataEntities()
+            : base("name=ContestqsoDataEntities")
         {
         }
     
