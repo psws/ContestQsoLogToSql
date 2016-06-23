@@ -10,6 +10,7 @@ using System.ComponentModel;
 using L2Sql.DomainModel;
 using Logqso.mvc.common;
 using Logqso.mvc.common.Enum;
+using L2Sql.Dto;
 using System.Diagnostics;
 
 
@@ -29,6 +30,23 @@ namespace L2Sql.BusinessLayer
         private string SqlDatabase { get; set; }
         private string SqlQsoTable { get; set; }
 
+        private HashSet<short?> Zones160 { get; set; }
+        private HashSet<short?> Zones80 { get; set; }
+        private HashSet<short?> Zones40 { get; set; }
+        private HashSet<short?> Zones20 { get; set; }
+        private HashSet<short?> Zones15 { get; set; }
+        private HashSet<short?> Zones10 { get; set; }
+
+        private HashSet<string> Countries160 { get; set; }
+        private HashSet<string> Countries80 { get; set; }
+        private HashSet<string> Countries40 { get; set; }
+        private HashSet<string> Countries20 { get; set; }
+        private HashSet<string> Countries15 { get; set; }
+        private HashSet<string> Countries10 { get; set; }
+
+        private HashSet<string> Prefixes { get; set; }
+
+
         public ProcessLogs(string CtyFile, string LogFileDirectory, 
             string SqlServerInstance, string SqlDatabase, string SqlQsoTable)
         {
@@ -37,6 +55,22 @@ namespace L2Sql.BusinessLayer
             this.SqlServerInstance = SqlServerInstance;
             this.SqlDatabase = SqlDatabase;
             this.SqlQsoTable = SqlQsoTable;
+
+            Countries160 = null;
+            Countries80 = null;
+            Countries40 = null;
+            Countries20 = null;
+            Countries15 = null;
+            Countries10 = null;
+
+            Prefixes = null;
+
+            Zones160 = null;
+            Zones80 = null;
+            Zones40 = null;
+            Zones20 = null;
+            Zones15 = null;
+            Zones10 = null;
 
 
             if (LogFileDirectory.ToLower().Contains("cqww") )
@@ -126,10 +160,12 @@ namespace L2Sql.BusinessLayer
                 CtyObj.Load();
                 string ContestId = di.Name.ToUpper();
                 DateTime ContestYear;
-                if (DateTime.TryParse("1,1," + di.Name.Substring(di.Name.Length - 4, 4), out ContestYear) == false)
-                {
-                    return false;
-                }
+                Contest Contest = IBusiness.GetContest(ContestId);
+                ContestYear = Contest.StartDateTime;
+                //if (DateTime.TryParse("1,1," + di.Name.Substring(di.Name.Length - 4, 4), out ContestYear) == false)
+                //{
+                //    return false;
+                //}
 
                 FileInfo[] rgFiles = di.GetFiles("*.log");
 
@@ -172,6 +208,12 @@ namespace L2Sql.BusinessLayer
                             {
                                 Log = IBusiness.GetLog(ContestId, CallSign.CallSignId); ;
                             }
+
+                            //logCategory used in WPX QSO parsing
+                            LogCategory = new DomainModel.LogCategory();
+
+                            SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
+
                             if (Log == null)
                             {
 
@@ -189,10 +231,6 @@ namespace L2Sql.BusinessLayer
                                 {//only set if contest has zone
                                     Log.QsoExchangeNumber = CabInfo.CallTxZone;
                                 }
-                                //logCategory
-                                LogCategory = new DomainModel.LogCategory();
-
-                                SetLogCategory(LogCategory, out QsoModeTypeEnum, CabInfo);
 
                                 //find LogCategory, if it exists
                                 LogCategory DBLogCategory;
@@ -221,6 +259,8 @@ namespace L2Sql.BusinessLayer
                                         IBusiness.AddLogCategory(LogCategory);
                                         LogCategorys = IBusiness.GetAllLogCategorys();
                                         Log.LogCategoryId = LogCategory.LogCategoryId;
+                                        //get new LogCategory
+
                                     }
                                     else
                                     {
@@ -320,7 +360,7 @@ namespace L2Sql.BusinessLayer
                                 case ContestTypeEnum.CQWW:
                                     try
                                     {
-                                        GetCqwwQSOInfo(PeekingStreamReader, Log);
+                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ContestTypeEnum);
                                     }
                                     catch (Exception)
                                     {
@@ -329,6 +369,19 @@ namespace L2Sql.BusinessLayer
                                     }
                                     break;
                                 case ContestTypeEnum.CQWPX:
+                                    //Multi twq and multi multi 
+                                    //  have to store their sent serial number in QsoExchangeNumber
+                                    //Single and Multi One 
+                                     // Store there sent serial number in Qso.QsoNo
+                                    try
+                                    {
+                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ContestTypeEnum);
+                                    }
+                                    catch (Exception)
+                                    {
+                                        
+                                        throw;
+                                    }
                                     break;
                                 case ContestTypeEnum.CQ160:
                                     break;
@@ -348,6 +401,402 @@ namespace L2Sql.BusinessLayer
                 }//stream null
             }
             return result;
+        }
+
+        public bool Mults_PointsToDatabase(BackgroundWorker worker)
+        {
+            bool result = true;
+            IBusiness = new Business();
+            DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
+
+            //create cty file
+            CtyObj = new CtyLib.CCtyObj(CtyLib.CCtyObj.DatType.CtyDat, CtyFile);
+            CtyObj.Load();
+            string ContestId = di.Name.ToUpper();
+
+            ContestTypeEnum ContestTypeEnum;
+            var Contest = IBusiness.GetContest(ContestId);
+            ContestTypeEnum = Contest.ContestTypeEnum;
+
+            IList<Log> Logs = IBusiness.GetAllLogs(ContestId);      //includes CallSign , logcategory
+
+
+            foreach (var log in Logs)
+            {
+
+                //clear hashes
+                Countries160 = new HashSet<string>();
+                Countries80 = new HashSet<string>();
+                Countries40 = new HashSet<string>();
+                Countries20 = new HashSet<string>();
+                Countries15 = new HashSet<string>();
+                Countries10 = new HashSet<string>();
+
+                Prefixes = new HashSet<string>();
+
+                Zones160 =  new HashSet<short?>();
+                Zones80 = new HashSet<short?>();
+                Zones40 = new HashSet<short?>();
+                Zones20 = new HashSet<short?>();
+                Zones15 = new HashSet<short?>();
+                Zones10 = new HashSet<short?>();
+
+                CatBandEnum LogBandEnum = CatBandEnum.ALL; 
+                //IList<Qso> Qsos = IBusiness.GetQsos(log.LogId);  //include related Callsign
+                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);  //include related Callsign
+
+                //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
+
+                if (QsoAddPoinsMultsDTOs.Count != 0)
+	            {
+                    //check if SOSB entry
+                    if (log.LogCategory.CatBandEnum != LogBandEnum)
+                    {//SOSB
+                        LogBandEnum = log.LogCategory.CatBandEnum; 
+                    }
+                   QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion =  
+                       SetMult_Points(QsoAddPoinsMultsDTOs, CtyObj, ContestTypeEnum, log.CallSign.ContinentEnum, log.LogId,
+                        LogBandEnum, log.CallSign.Prefix);
+                   IBusiness.UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion);
+	            }
+                
+            }
+            return result;
+        }
+
+        private QsoUpdatePoinsMultsDTOCollextion SetMult_Points(IList<QsoAddPoinsMultsDTO> Qsos, CtyLib.CCtyObj CtyObj, ContestTypeEnum ContestTypeEnum,
+                                    ContinentEnum LogContinentEnum, int LogId, CatBandEnum LogBandEnum, string LogPrefix)
+        {
+            //get all callsigns for this log
+            IList<CallSign> Callsigns = IBusiness.GetCallSignsFromLog(LogId);
+            int ctyCount = 0;
+            //init collection
+            QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion = new QsoUpdatePoinsMultsDTOCollextion();
+            foreach (QsoAddPoinsMultsDTO Qso in Qsos)
+            {
+                string Prefix = string.Empty;
+                CallSign QsoCallSign = Callsigns.Where(d => d.CallSignId == Qso.CallsignId).FirstOrDefault();
+                if (QsoCallSign.Call.Length >= 3)
+                {
+
+                    //get bandenum
+                    CatBandEnum CatBandEnumQso = GetBandEnum(Qso.Frequency);
+
+                    QsoUpdatePoinsMultsDTO QsoUpdatePoinsMultsDTO = new QsoUpdatePoinsMultsDTO()
+                        {
+                            QsoNo = Qso.QsoNo,
+                            LogId = Qso.LogId
+                        };
+
+                    if (CatBandEnumQso != CatBandEnum.ALL) //ALL should never Occur on Qso
+                    { //check if freq is valid valid
+
+                        HashSet<short?> SelectedZoneHash = null;
+                        HashSet<string> SelectedCountryHash = null;
+                        HashSet<string> SelectedPrefixHash = null;
+                        bool QsoValid = false;
+                        switch (CatBandEnumQso)
+                        {
+                            case CatBandEnum.ALL:  //does not occur
+                                break;
+                            case CatBandEnum._160M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._160M)
+                                {
+                                    SelectedZoneHash = Zones160;
+                                    SelectedCountryHash = Countries160;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            case CatBandEnum._80M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._80M)
+                                {
+                                    SelectedZoneHash = Zones80;
+                                    SelectedCountryHash = Countries80;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            case CatBandEnum._40M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._40M)
+                                {
+                                    SelectedZoneHash = Zones40;
+                                    SelectedCountryHash = Countries40;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            case CatBandEnum._20M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._20M)
+                                {
+                                    SelectedZoneHash = Zones20;
+                                    SelectedCountryHash = Countries20;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            case CatBandEnum._15M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._15M)
+                                {
+                                    SelectedZoneHash = Zones15;
+                                    SelectedCountryHash = Countries15;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            case CatBandEnum._10M:
+                                if (LogBandEnum == CatBandEnum.ALL || LogBandEnum == CatBandEnum._10M)
+                                {
+                                    SelectedZoneHash = Zones10;
+                                    SelectedCountryHash = Countries10;
+                                    SelectedPrefixHash = Prefixes;
+                                    QsoValid = true;
+                                }
+                                break;
+                            default:
+                                break;
+                        }
+
+                        switch (ContestTypeEnum)
+                        {
+                            case ContestTypeEnum.CQWW:
+                                //QsoExchangeNumber is a zone, zones/band
+
+                                if (Qso.QsoExchangeNumber != null && SelectedZoneHash != null && SelectedZoneHash.Contains(Qso.QsoExchangeNumber) == false)
+                                { //mult
+                                    SelectedZoneHash.Add(Qso.QsoExchangeNumber);
+                                    QsoUpdatePoinsMultsDTO.QZoneMult = true;
+                                    QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                }
+
+                                //Countries per band via the country prefix
+                                if (QsoCallSign != null && QsoCallSign.Prefix != null && SelectedCountryHash != null && SelectedCountryHash.Contains(QsoCallSign.Prefix) == false)
+                                { //mult
+                                    SelectedCountryHash.Add(QsoCallSign.Prefix);
+                                    QsoUpdatePoinsMultsDTO.QCtyMult = true;
+                                    QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                }
+
+                                //Prefixes total per contest
+                                Prefix = string.Empty;
+                                if (QsoCallSign.Call != null)
+                                {
+                                    Prefix = CtyObj.GetCallPrefix(QsoCallSign.Call);
+                                    //testing
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/KP4");
+                                    //Prefix = CtyObj.GetCallPrefix("KP4/W1AA");
+                                    //Prefix = CtyObj.GetCallPrefix("W1ABC/F");
+                                    //Prefix = CtyObj.GetCallPrefix("F/W1ABC");
+                                    //Prefix = CtyObj.GetCallPrefix("W1ABC/9");
+                                    //Prefix = CtyObj.GetCallPrefix("W1ABC");
+                                    //Prefix = CtyObj.GetCallPrefix("8P6AH/7");
+                                    //Prefix = CtyObj.GetCallPrefix("W1ABC/S5");
+                                    //Prefix = CtyObj.GetCallPrefix("F5/W1ABC");
+                                    //Prefix = CtyObj.GetCallPrefix("W1ABC/PA");
+                                    //Prefix = CtyObj.GetCallPrefix("PA/W1ABC");
+                                    //Prefix = CtyObj.GetCallPrefix("LY1000B");
+                                    //Prefix = CtyObj.GetCallPrefix("LY1000B/7");
+                                    //Prefix = CtyObj.GetCallPrefix("LY1000B/8");
+                                    //Prefix = CtyObj.GetCallPrefix("XEFTJW");
+                                    //Prefix = CtyObj.GetCallPrefix("d4B/xe1");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/A");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/E");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/J");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/P");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/QRP");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/QRP/A");
+                                    //Prefix = CtyObj.GetCallPrefix("W1AA/A/QRP");
+                                    //Prefix = CtyObj.GetCallPrefix("8P6AH");
+                                    //Prefix = CtyObj.GetCallPrefix("IG9/S50X/P");
+
+                                }
+                                if (string.IsNullOrEmpty(Prefix) == false && Prefixes != null && Prefixes.Contains(Prefix) == false)
+                                { //mult
+                                    Prefixes.Add(Prefix);
+                                    QsoUpdatePoinsMultsDTO.QPrefixMult = true;
+                                    QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                }
+
+                                //points
+                                if (QsoCallSign != null && QsoValid == true)
+                                {
+                                    if (LogContinentEnum == QsoCallSign.ContinentEnum)
+                                    { //same contient
+                                        //check for different country in NA
+                                        if (QsoCallSign.Prefix != LogPrefix)
+                                        {//different then Log country  0 pts for same country
+                                            if (LogContinentEnum == ContinentEnum.NA)
+                                            { //2 points
+                                                QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                            }
+                                            else
+                                            {//1 point
+                                                QsoUpdatePoinsMultsDTO.QPts1 = true;
+                                            }
+                                            QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                        }
+
+                                    }
+                                    else
+                                    { //different continent
+                                        QsoUpdatePoinsMultsDTO.QPts1 = true;
+                                        QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                        QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                    }
+                                }
+
+                                break;
+                            case ContestTypeEnum.CQWPX:
+
+                                if (QsoCallSign != null)
+                                {
+
+                                    //QsoExchangeNumber is the received serial number
+                                    CtyLib.CCtyInfoRO CCtyInfoRO = null;
+                                    CtyObj.GetReadOnlyCtyInfoObj(out CCtyInfoRO, QsoCallSign.Call);
+                                    if (CCtyInfoRO != null)
+                                    {
+                                        //zone
+                                        short wpxZone = CCtyInfoRO.wCQZone;
+                                        if (Qso.QsoExchangeNumber != null && SelectedZoneHash != null && SelectedZoneHash.Contains(wpxZone) == false)
+                                        { //mult
+                                            SelectedZoneHash.Add(wpxZone);
+                                            QsoUpdatePoinsMultsDTO.QZoneMult = true;
+                                            QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                        }
+                                    }
+                                    //Countries per band via the country prefix
+                                    if (QsoCallSign.Prefix != null && SelectedCountryHash != null && SelectedCountryHash.Contains(QsoCallSign.Prefix) == false)
+                                    { //mult
+                                        SelectedCountryHash.Add(QsoCallSign.Prefix);
+                                        QsoUpdatePoinsMultsDTO.QCtyMult = true;
+                                        QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                    }
+
+                                    //Prefixes total per contest
+                                    Prefix = string.Empty;
+                                    if (QsoCallSign.Call != null)
+                                    {
+                                        Prefix = CtyObj.GetCallPrefix(QsoCallSign.Call);
+                                    }
+                                    if (string.IsNullOrEmpty(Prefix) == false && Prefixes != null && Prefixes.Contains(Prefix) == false)
+                                    { //mult
+                                        Prefixes.Add(Prefix);
+                                        QsoUpdatePoinsMultsDTO.QPrefixMult = true;
+                                        QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                    }
+
+                                    //points
+                                    if (QsoValid == true)
+                                    {
+                                        if (LogContinentEnum == QsoCallSign.ContinentEnum)
+                                        { //same contient
+                                            //check for different country in NA
+                                            if (QsoCallSign.Prefix != LogPrefix)
+                                            {//different then Log country  0 pts for same country
+                                                if (LogContinentEnum == ContinentEnum.NA)
+                                                { //same NA continent, different countries
+                                                    if (Qso.Frequency <= 4000.0m)
+                                                    { //4 point
+                                                        QsoUpdatePoinsMultsDTO.QPts4 = true;
+                                                    }
+                                                    else
+                                                    { //2 points
+                                                        QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                                    }
+                                                }
+                                                else
+                                                { //same not NA continent, different countries 
+                                                    if (Qso.Frequency <= 4000.0m)
+                                                    { //2 point
+                                                        QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                                    }
+                                                    else
+                                                    { //1 points
+                                                        QsoUpdatePoinsMultsDTO.QPts1 = true;
+                                                    }
+                                                }
+                                            }
+                                            else
+                                            { //same continent, same Country
+                                                QsoUpdatePoinsMultsDTO.QPts1 = true;
+                                            }
+                                            QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                        }
+                                        else
+                                        { //different continent 
+                                            if (Qso.Frequency <= 4000.0m)
+                                            { //6 point
+                                                QsoUpdatePoinsMultsDTO.QPts4 = true;
+                                                QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                            }
+                                            else
+                                            { //3 points
+                                                QsoUpdatePoinsMultsDTO.QPts1 = true;
+                                                QsoUpdatePoinsMultsDTO.QPts2 = true;
+                                            }
+                                            QsoUpdatePoinsMultsDTO.EntityState = EntityState.Modified;
+                                        }
+                                    }
+                                }
+                                break;
+                            case ContestTypeEnum.CQ160:
+
+                                break;
+                            case ContestTypeEnum.RUSDXC:
+                                //QsoExchangeNumber is a serial number and Oblasts is a QsoExchangeAlpha
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    if (QsoUpdatePoinsMultsDTO.EntityState == EntityState.Modified)
+                    {
+                        if (QsoUpdatePoinsMultsDTO.QCtyMult == true)
+                        {
+                            ctyCount++;
+                        }
+                        QsoUpdatePoinsMultsDTOCollextion.Add(QsoUpdatePoinsMultsDTO);
+                    }
+                }
+            }
+            return QsoUpdatePoinsMultsDTOCollextion;
+
+        }
+
+
+
+        private CatBandEnum GetBandEnum(decimal Frequency)
+        {
+            CatBandEnum CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum.ALL;
+            if (Frequency >= 1800.0m && Frequency <= 2000.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._160M;
+            }
+            else if (Frequency >= 3500.0m && Frequency <= 4000.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._80M;
+            }
+            else if (Frequency >= 7000.0m && Frequency <= 7300.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._40M;
+            }
+            else if (Frequency >= 14000.0m && Frequency <= 14350.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._20M;
+            }
+            else if (Frequency >= 21000.0m && Frequency <= 21450.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._15M;
+            }
+            else if (Frequency >= 28000.0m && Frequency <= 29700.0m)
+            {
+                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._10M;
+            }
+
+            return CatBandEnum;
+
         }
 
         private ContinentEnum GetContinentEnum(string Call)
@@ -521,6 +970,9 @@ namespace L2Sql.BusinessLayer
                                     CInfo.CallTxZone = QsoInfo.TxZone;
                                     break;
                                 case ContestTypeEnum.CQWPX:
+
+                                    CabrilloQSOCQWPXTagInfos WpxQsoInfo = new CabrilloQSOCQWPXTagInfos();
+                                    GetCabrilloWpxQsoInfoQSOInfo(line, WpxQsoInfo);
                                     break;
                                 case ContestTypeEnum.CQ160:
                                     break;
@@ -1007,22 +1459,123 @@ namespace L2Sql.BusinessLayer
                 }
                 i++;
             }
+        }
 
-
-
+        private void GetCabrilloWpxQsoInfoQSOInfo(string line, CabrilloQSOCQWPXTagInfos QsoInfo)
+        {
+            if (line.Contains("\t"))
+            {
+                line = line.Replace('\t', ' ');
+            }
+            string[] Qcolumns = line.Split(" ".ToCharArray());
+            int i = 1;
+            int j = 1; //ccqww field counter
+            QsoInfo.Radio = 0;
+            while (i < Qcolumns.Length)
+            {
+                if (Qcolumns[i] != "")
+                {
+                    switch (j)
+                    {
+                        case 1:
+                            try
+                            {
+                                QsoInfo.QFreq = int.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                            }
+                            break;
+                        case 2:
+                            QsoInfo.Mode = Qcolumns[i];
+                            break;
+                        case 3:
+                            QsoInfo.QDate = Qcolumns[i];
+                            break;
+                        case 4:
+                            QsoInfo.QTime = Qcolumns[i];
+                            break;
+                        case 5:
+                            QsoInfo.Call = Qcolumns[i];
+                            break;
+                        case 6:
+                            try
+                            {
+                                QsoInfo.TxRpt = short.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                            }
+                            break;
+                        case 7:
+                            try
+                            {
+                                QsoInfo.TxNum = byte.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                            }
+                            break;
+                        case 8:
+                            QsoInfo.QCall = Qcolumns[i];
+                            break;
+                        case 9:
+                            try
+                            {
+                                QsoInfo.RxRpt = short.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                            }
+                            break;
+                        case 10:
+                            try
+                            {
+                                QsoInfo.RxNum = byte.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                                QsoInfo.RxNum = -1;
+                            }
+                            break;
+                        case 11:
+                            //radio
+                            try
+                            {
+                                QsoInfo.Radio = byte.Parse(Qcolumns[i]);
+                            }
+                            catch
+                            {
+                                QsoInfo.Radio = 0;
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                    j++;
+                }
+                i++;
+            }
         }
 
 
-        private void GetCqwwQSOInfo(PeekingStreamReader PeekingStreamReader, Log Log)
+        private void GetQSOInfo(PeekingStreamReader PeekingStreamReader, Log Log, LogCategory LogCategory, ContestTypeEnum ContestTypeEnum)
         {
             string line;
             short QsoNum = 1;
+            short QsoNum160 = 1;
+            short QsoNum80 = 1;
+            short QsoNum40 = 1;
+            short QsoNum20 = 1;
+            short QsoNum15 = 1;
+            short QsoNum10 = 1;
             short NextDBQsoNum = 0;
             bool PartialLog = false;
 
             IList<CallSign> ICurrentCallSigns;
             IList<Qso> Qsos = new List<Qso>();
             IList<Qso> CurrentQsos;
+            IList<QsoExchangeNumber> QsoExchangeNumbers = new List<QsoExchangeNumber>();
 
 
              try
@@ -1030,7 +1583,7 @@ namespace L2Sql.BusinessLayer
                 if (PeekingStreamReader != null)
                 {
                     ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    CurrentQsos = IBusiness.GetQso(Log.LogId);
+                    CurrentQsos = IBusiness.GetQsos(Log.LogId);
                     if (CurrentQsos.Count != 0)
 	                {//set to last qso in DB
                         NextDBQsoNum = (short)(CurrentQsos.Count + 1);
@@ -1060,7 +1613,7 @@ namespace L2Sql.BusinessLayer
                                 EntityState = EntityState.Added
                             };
 
-                            string[] Qcolumns = line.Split(" ".ToCharArray());
+                            string[] Qcolumns = line.Split(" ".ToCharArray(),  StringSplitOptions.RemoveEmptyEntries );
                             int i = 1;
                             int j = 1; //ccqww field counter
                             Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.NONE;
@@ -1180,6 +1733,57 @@ namespace L2Sql.BusinessLayer
                                                 }
                                                 break;
                                             case 7:
+                                                if (ContestTypeEnum == Logqso.mvc.common.Enum.ContestTypeEnum.CQWPX)
+                                                {
+                                                    //if LogCategory is Multi mo of TX = Unlimited or two, we need to store the sent serial number 
+                                                    //in the QSOExchangeNumber table.
+                                                    if (LogCategory.CatOperatorEnum == CatOperatorEnum.MULTI_OP &&
+                                                        (LogCategory.CatNoOfTxEnum == CatNoOfTxEnum.TWO || 
+                                                        LogCategory.CatNoOfTxEnum == CatNoOfTxEnum.UNLIMITED ) )
+                                                    {
+                                                        if (Qso.Frequency != 1)
+	                                                    {
+                                                            CatBandEnum CatBandEnum = GetBandEnum(Qso.Frequency);
+                                                            short  QsoExhangeNumberValue= 0;
+                                                            switch (CatBandEnum)
+                                                            {
+                                                                case CatBandEnum.ALL:
+                                                                 break;
+                                                                case CatBandEnum._160M:
+                                                                    QsoExhangeNumberValue = QsoNum160++;
+                                                                    break;
+                                                                case CatBandEnum._80M:
+                                                                     QsoExhangeNumberValue = QsoNum80++;
+                                                                break;
+                                                                case CatBandEnum._40M:
+                                                                     QsoExhangeNumberValue = QsoNum40++;
+                                                                    break;
+                                                                case CatBandEnum._20M:
+                                                                     QsoExhangeNumberValue = QsoNum20++;
+                                                                    break;
+                                                                case CatBandEnum._15M:
+                                                                     QsoExhangeNumberValue = QsoNum15++;
+                                                                    break;
+                                                                case CatBandEnum._10M:
+                                                                     QsoExhangeNumberValue = QsoNum10++;
+                                                                    break;
+                                                                default:
+                                                                 break;
+	                                                       }
+                                                            QsoExchangeNumber QsoExchangeNumber = new DomainModel.QsoExchangeNumber()
+                                                            {
+                                                                LogId = Qso.LogId,
+                                                                QsoNo = Qso.QsoNo,
+                                                                QsoExhangeNumberValue = QsoExhangeNumberValue,
+                                                                EntityState = EntityState.Added
+                                                            };
+
+                                                            QsoExchangeNumbers.Add(QsoExchangeNumber);
+                                                            		 
+	                                                    }
+
+                                                    }  
+                                                }
                                                 //try
                                                 //{
                                                 //    Qso.QsoExchangeNumber = short.Parse(Qcolumns[i]);
@@ -1273,18 +1877,7 @@ namespace L2Sql.BusinessLayer
                                                     byte val;
                                                     if (byte.TryParse(Qcolumns[i], out val))
                                                     {
-                                                        switch (val)
-                                                        {
-                                                            case 0:
-                                                                Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R1;
-                                                                break;
-                                                            case 1:
-                                                                Qso.QsoRadioTypeEnum = QsoRadioTypeEnum.R2;
-                                                                break;
-                                                            default:
-                                                                Qso.QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
-                                                                break;
-                                                        }
+                                                        Qso.QsoRadioTypeEnum  = SetRadioTypeEnum(val, LogCategory);
                                                     }
                                                     else
                                                     {
@@ -1339,6 +1932,19 @@ namespace L2Sql.BusinessLayer
                             throw;
                         }
                     }
+                    if (QsoExchangeNumbers.Count != 0)
+                    {//add to DB
+                        try
+                        {
+                            IBusiness.AddQsoExchangeNumber(QsoExchangeNumbers.ToArray());
+                        }
+                        catch (Exception)
+                        {
+                            
+                            throw;
+                        }
+                    }
+                   
                 }
              }
             catch (Exception ex)
@@ -1350,6 +1956,71 @@ namespace L2Sql.BusinessLayer
   
 
 
+        }
+
+        public QsoRadioTypeEnum  SetRadioTypeEnum(byte val, LogCategory LogCategory)
+        {
+            QsoRadioTypeEnum QsoRadioTypeEnum = QsoRadioTypeEnum.NONE;
+            switch (LogCategory.CatOperatorEnum)
+            {
+                case CatOperatorEnum.SINGLE_OP:
+                    switch (val)
+                    {
+                        case 0:
+                            QsoRadioTypeEnum = QsoRadioTypeEnum.Run;
+                            break;
+                        case 1:
+                            QsoRadioTypeEnum = QsoRadioTypeEnum.S_P;
+                            break;
+                        default:
+                            QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                            break;
+                    }
+                    break;
+                case CatOperatorEnum.MULTI_OP:
+                    switch (LogCategory.CatNoOfTxEnum)
+	                {
+                        case CatNoOfTxEnum.ONE:
+                            switch (val)
+                            {
+                                case 0:
+                                    QsoRadioTypeEnum = QsoRadioTypeEnum.Run;
+                                    break;
+                                case 1:
+                                    QsoRadioTypeEnum = QsoRadioTypeEnum.Mult;
+                                    break;
+                                default:
+                                    QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                                    break;
+                            }
+                            break;
+                        case CatNoOfTxEnum.TWO:
+                            switch (val)
+                            {
+                                case 0:
+                                    QsoRadioTypeEnum = QsoRadioTypeEnum.R1;
+                                    break;
+                                case 1:
+                                    QsoRadioTypeEnum = QsoRadioTypeEnum.R2;
+                                    break;
+                                default:
+                                    QsoRadioTypeEnum = Logqso.mvc.common.Enum.QsoRadioTypeEnum.NONE;
+                                    break;
+                            }
+                            break;
+                        case CatNoOfTxEnum.UNLIMITED:
+                            QsoRadioTypeEnum = QsoRadioTypeEnum.Run;
+                            break;
+                        default:
+                            break;
+	                }
+                    break;
+                case CatOperatorEnum.CHECKLOG:
+                    break;
+                default:
+                    break;
+            }
+            return QsoRadioTypeEnum;
         }
     }
 }

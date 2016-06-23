@@ -14,22 +14,22 @@ namespace L2Sql.DomainModel
 
     public partial class CallInfo : IEntity
     {
-        public int CallInfoId { get; set; }
-        public int CallGroup { get; set; }
         public int LogId { get; set; }
         public string StationName { get; set; }
+        public int CallInfoId { get; set; }
+        public int CallGroup { get; set; }
+        public string UserName { get; set; }
         public string ContestId { get; set; }
         public int CallsignId { get; set; }
-        public string UserName { get; set; }
         public string SessionName { get; set; }
         public bool Disabled { get; set; }
         public Logqso.mvc.common.Enum.QsoRadioTypeEnum QsoRadioTypeEnum { get; set; }
+        public EntityState EntityState { get; set; }
     
         public virtual CallSign CallSign { get; set; }
         public virtual Contest Contest { get; set; }
         public virtual QsoRadioType QsoRadioType { get; set; }
         public virtual Session Session { get; set; }
         public virtual Station Station { get; set; }
-        public EntityState EntityState { get; set; }
     }
 }

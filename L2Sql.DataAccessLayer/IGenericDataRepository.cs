@@ -18,6 +18,7 @@ namespace L2Sql.DataAccessLayer
         void AddRange(params T[] items);
         void Update(params T[] items);
         void Remove(params T[] items);
+        IQueryable<T> Queryable(bool tracking);
     }
 
 }

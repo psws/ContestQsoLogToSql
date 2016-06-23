@@ -21,6 +21,8 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -87,7 +89,9 @@
   <ItemGroup>
     <Content Include="AppNotes\Creating DataModel edmx.txt" />
     <Content Include="AppNotes\Creating DomainModel.txt" />
+    <Content Include="AppNotes\How to add a TVP stored procedure.txt" />
     <Content Include="AppNotes\Mapping Enums in EF 6 edmx model.txt" />
+    <Content Include="App_Stored_Procedures\TVP\CQD_sp_QsoUpdatePointsMults.sql" />
     <Content Include="DataModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>DataModel.edmx</DependentUpon>
@@ -95,11 +99,20 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\vwd projects mvc\Logqso.mvc\logqso.mvc.common\Logqso.mvc.common.csproj">
+      <Project>{7d8dad53-fc2e-4812-a636-be213a28fb0f}</Project>
+      <Name>Logqso.mvc.common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\L2Sql.DomainModel\L2Sql.DomainModel.csproj">
       <Project>{ecffe740-9d5a-4ec8-b75b-79bf95961101}</Project>
       <Name>L2Sql.DomainModel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\L2sql.Dto\L2Sql.Dto.csproj">
+      <Project>{52b849bc-c73b-4b1e-b57a-d77044bc6a70}</Project>
+      <Name>L2Sql.Dto</Name>
+    </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

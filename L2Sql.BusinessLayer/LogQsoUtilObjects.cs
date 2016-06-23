@@ -62,8 +62,8 @@ namespace L2Sql.BusinessLayer
         public short TxRpt { get; set; }
         public short TxNum { get; set; }
         public string QCall { get; set; }
-        public short QRpt { get; set; }
-        public short QNum { get; set; }
+        public short RxRpt { get; set; }
+        public short RxNum { get; set; }
         public byte Radio { get; set; }
 
         public CabrilloQSOCQWPXTagInfos()
@@ -71,8 +71,8 @@ namespace L2Sql.BusinessLayer
             QFreq = 0;
             TxRpt = 0;
             TxNum = 0;
-            QRpt = 0;
-            QNum = 0;
+            RxRpt = 0;
+            RxNum = 0;
         }
     }
 

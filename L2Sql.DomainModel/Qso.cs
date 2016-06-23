@@ -26,6 +26,13 @@ namespace L2Sql.DomainModel
         public Logqso.mvc.common.Enum.QsoModeTypeEnum QsoModeTypeEnum { get; set; }
         public Logqso.mvc.common.Enum.QsoRadioTypeEnum QsoRadioTypeEnum { get; set; }
         public EntityState EntityState { get; set; }
+        public bool QZoneMult { get; set; }
+        public bool QCtyMult { get; set; }
+        public bool QPrefixMult { get; set; }
+        public bool QPts1 { get; set; }
+        public bool QPts2 { get; set; }
+        public bool QPts4 { get; set; }
+        public bool QPts8 { get; set; }
     
         public virtual CallSign CallSign { get; set; }
         public virtual Log Log { get; set; }
@@ -33,6 +40,7 @@ namespace L2Sql.DomainModel
         public virtual QsoRadioType QsoRadioType { get; set; }
         public virtual Station Station { get; set; }
         public virtual QsoExchangeAlpha QsoExchangeAlpha { get; set; }
+        public virtual QsoExchangeNumber QsoExchangeNumber1 { get; set; }
         public virtual QsoExtraData QsoExtraData { get; set; }
     }
 }

@@ -12,12 +12,18 @@ namespace L2Sql.DomainModel
     using System;
     using System.Collections.Generic;
 
-    public partial class C__MigrationHistory : IEntity
+    public partial class Spot : IEntity
     {
-        public string MigrationId { get; set; }
-        public string ContextKey { get; set; }
-        public byte[] Model { get; set; }
-        public string ProductVersion { get; set; }
+        public int SpotId { get; set; }
+        public string ContestId { get; set; }
+        public int CallSignId { get; set; }
+        public int SpoterCallSignId { get; set; }
+        public System.DateTime SpotDateTime { get; set; }
+        public decimal Frequency { get; set; }
         public EntityState EntityState { get; set; }
+    
+        public virtual CallSign CallSign { get; set; }
+        public virtual CallSign CallSign1 { get; set; }
+        public virtual Contest Contest { get; set; }
     }
 }

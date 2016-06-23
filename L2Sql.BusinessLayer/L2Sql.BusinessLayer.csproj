@@ -66,6 +66,10 @@
       <Project>{ecffe740-9d5a-4ec8-b75b-79bf95961101}</Project>
       <Name>L2Sql.DomainModel</Name>
     </ProjectReference>
+    <ProjectReference Include="..\L2sql.Dto\L2Sql.Dto.csproj">
+      <Project>{52b849bc-c73b-4b1e-b57a-d77044bc6a70}</Project>
+      <Name>L2Sql.Dto</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

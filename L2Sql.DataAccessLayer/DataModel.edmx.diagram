@@ -4,28 +4,30 @@
   <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
     <!-- Diagram content (shape and connector positions) -->
     <edmx:Diagrams>
-      <Diagram DiagramId="90c0994e1d3f430d90ccaad22ced3b66" Name="Diagram1">
-        <EntityTypeShape EntityType="ContestqsoDataModel.CabrilloInfo" Width="2" PointX="3" PointY="15.875" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.CallInfo" Width="1.875" PointX="6" PointY="15.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.CallSign" Width="1.875" PointX="0.5" PointY="15.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.Contest" Width="2.25" PointX="0.5" PointY="9" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.ContestType" Width="2.375" PointX="0.625" PointY="5.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.Log" Width="2.125" PointX="3" PointY="10.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.LogCategory" Width="1.875" PointX="0.5" PointY="23.25" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.Qso" Width="2.125" PointX="10.875" PointY="14.375" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExchangeAlpha" Width="2" PointX="13.75" PointY="14.5" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExchangeType" Width="2.25" PointX="1.25" PointY="2.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExtraData" Width="1.5" PointX="13.75" PointY="17" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.QsoModeType" Width="2.125" PointX="0.875" PointY="20.625" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.QsoRadioType" Width="2.25" PointX="8.5" PointY="7.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.Session" Width="1.5" PointX="3.75" PointY="24.125" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.Station" Width="1.5" PointX="5.25" PointY="20.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnDupe" Width="1.5" PointX="3.75" PointY="3.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnIncorrectCall" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnIncorrectExchange" Width="1.5" PointX="5.75" PointY="3.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnNotInLog" Width="1.5" PointX="3.75" PointY="6.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnSummary" Width="1.5" PointX="9" PointY="10.75" IsExpanded="true" />
-        <EntityTypeShape EntityType="ContestqsoDataModel.UbnUnique" Width="1.5" PointX="5.75" PointY="6.75" IsExpanded="true" />
+      <Diagram DiagramId="06d9647d2e90403ca14d6d19026939b1" Name="Diagram1">
+        <EntityTypeShape EntityType="ContestqsoDataModel.CabrilloInfo" Width="1.5" PointX="3" PointY="19.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.CallInfo" Width="2.25" PointX="6" PointY="18.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.CallSign" Width="2" PointX="0.5" PointY="18.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Contest" Width="2" PointX="0.5" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.ContestType" Width="2.5" PointX="1.5" PointY="8.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Log" Width="2.25" PointX="3" PointY="13.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.LogCategory" Width="2" PointX="0.5" PointY="24.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Qso" Width="2.125" PointX="10.875" PointY="17" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExchangeAlpha" Width="2.375" PointX="13.75" PointY="16.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExchangeNumber" Width="2.125" PointX="13.75" PointY="19.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExchangeType" Width="2.5" PointX="1" PointY="6" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoExtraData" Width="2.125" PointX="13.75" PointY="21.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoModeType" Width="2" PointX="1.5" PointY="2.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.QsoRadioType" Width="2.125" PointX="8.625" PointY="11.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Session" Width="1.5" PointX="3.75" PointY="27.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Spot" Width="1.5" PointX="3" PointY="23.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.Station" Width="1.5" PointX="5.25" PointY="24.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnDupe" Width="1.5" PointX="3.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnIncorrectCall" Width="1.5" PointX="3.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnIncorrectExchange" Width="1.5" PointX="5.75" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnNotInLog" Width="1.5" PointX="5.75" PointY="3.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnSummary" Width="1.5" PointX="9" PointY="13.875" IsExpanded="true" />
+        <EntityTypeShape EntityType="ContestqsoDataModel.UbnUnique" Width="1.5" PointX="3.75" PointY="6.75" IsExpanded="true" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_CabrilloInfo_dbo_CallSign_CallSignId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_CabrilloInfo_dbo_Contest_ContestId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_CallInfo_dbo_CallSign_CallsignId" ManuallyRouted="false" />
@@ -35,10 +37,13 @@
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_CallInfo_dbo_Station_LogId_StationName" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Log_dbo_CallSign_CallsignId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Qso_dbo_CallSign_CallsignId" ManuallyRouted="false" />
+        <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Spot_dbo_CallSign_CallSignId" ManuallyRouted="false" />
+        <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Spot_dbo_CallSign_SpoterCallSignId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_UbnSummary_dbo_CallSign_CallsignId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Contest_dbo_ContestType_ContestTypeEnum" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Contest_dbo_QsoModeType_QsoModeTypeEnum" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Log_dbo_Contest_ContestId" ManuallyRouted="false" />
+        <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Spot_dbo_Contest_ContestId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_UbnSummary_dbo_Contest_ContestId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_ContestType_dbo_QsoExchangeType_QsoExchangeTypeEnum" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Log_dbo_LogCategory_LogCategoryId" ManuallyRouted="false" />
@@ -49,6 +54,7 @@
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Qso_dbo_QsoRadioType_QsoRadioTypeEnum" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_Qso_dbo_Station_LogId_StationName" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_QsoExchangeAlpha_dbo_Qso_QsoNo_LogId" ManuallyRouted="false" />
+        <AssociationConnector Association="ContestqsoDataModel.FK_dbo_QsoExchangeNumber_dbo_Qso_QsoNo_LogId" ManuallyRouted="false" />
         <AssociationConnector Association="ContestqsoDataModel.FK_dbo_QsoExtraData_dbo_Qso_QsoNo_LogId" ManuallyRouted="false" />
       </Diagram>
     </edmx:Diagrams>

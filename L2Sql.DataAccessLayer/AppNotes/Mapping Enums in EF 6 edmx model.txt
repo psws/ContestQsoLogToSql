@@ -21,7 +21,8 @@ After DomainModel is created:
 saving DataModel.tt, in doamin project, will create the table files with the correct enums from aboce.
 You need to add the Logqso.mvc.common reference to the domain project
 
-modify every file in DomaonModel to derive from IEntity and have a 'public EntityState EntityState { get; set; }' property
+modify every file in DomaonModel
+ to derive from IEntity and have a 'public EntityState EntityState { get; set; }' property
 example:
 public partial class CabrilloInfo : IEntity
     {

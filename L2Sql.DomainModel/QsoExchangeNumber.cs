@@ -12,11 +12,11 @@ namespace L2Sql.DomainModel
     using System;
     using System.Collections.Generic;
 
-    public partial class QsoExchangeAlpha : IEntity
+    public partial class QsoExchangeNumber : IEntity
     {
         public short QsoNo { get; set; }
         public int LogId { get; set; }
-        public string QsoExhangeAlphaValue { get; set; }
+        public short QsoExhangeNumberValue { get; set; }
         public EntityState EntityState { get; set; }
     
         public virtual Qso Qso { get; set; }

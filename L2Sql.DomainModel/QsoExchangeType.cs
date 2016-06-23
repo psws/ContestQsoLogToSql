@@ -22,9 +22,9 @@ namespace L2Sql.DomainModel
     
         public Logqso.mvc.common.Enum.QsoExchangeTypeEnum QsoExchangeTypeEnum { get; set; }
         public string QsoExchangeTypeEnumName { get; set; }
+        public EntityState EntityState { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ContestType> ContestTypes { get; set; }
-        public EntityState EntityState { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using L2Sql.DomainModel;
 using L2Sql.DataAccessLayer;
+using L2Sql.Dto;
 
 namespace L2Sql.BusinessLayer
 {
@@ -16,6 +17,8 @@ namespace L2Sql.BusinessLayer
         private readonly ICallSignRepository ICallSignRepository;
         private readonly ILogCategoryRepository ILogCategoryRepository;
         private readonly ICabrilloInfoRepository ICabrilloInfoRepository;
+        private readonly IContestRepository IContestRepository;
+        private readonly IQsoExchangeNumberRepository IQsoExchangeNumberRepository;
 
         public Business()
         {
@@ -24,6 +27,9 @@ namespace L2Sql.BusinessLayer
             ICallSignRepository = new CallSignRepository();
             ILogCategoryRepository = new LogCategoryRepository();
             ICabrilloInfoRepository = new CabrilloInfoRepository();
+            IContestRepository = new ContestRepository();
+            IQsoExchangeNumberRepository = new QsoExchangeNumberRepository();
+
         }
 
         public Business(ILogRepository LogRepository,
@@ -36,7 +42,7 @@ namespace L2Sql.BusinessLayer
         public IList<Log> GetAllLogs(string ContestId)
         {
             return ILogRepository.GetList(d => d.ContestId.Equals(ContestId), 
-                d => d.CallSign ); //include related 
+                d => d.CallSign, d=>d.LogCategory ); //include related 
         }
 
         public Log GetLog(string ContestId, int CallsignId)
@@ -66,6 +72,12 @@ namespace L2Sql.BusinessLayer
         }
  
         //CallSigns
+        public CallSign GetCallSign(int CallSignId)
+        {
+            return ICallSignRepository.GetSingle(d => d.CallSignId == CallSignId);
+        }
+
+
         public IList<CallSign> GetAllCallsigns()
         {
             return ICallSignRepository.GetAll(); 
@@ -85,15 +97,18 @@ namespace L2Sql.BusinessLayer
             }
         }
 
-        public void AddQso(params Qso[] Qsos)
+        public IList<CallSign> GetCallSignsFromLog(int Logid)
         {
-            /* Validation and error handling omitted */
-                IQsoRepository.AddRange(Qsos);
+
+            var Callsigns = ICallSignRepository.GetCallSignsFromLog(Logid);
+            return Callsigns;
         }
 
-        public IList<Qso> GetQso(int LogId)
+
+        public void RemoveCallSign(params CallSign[] CallSigns)
         {
-            return IQsoRepository.GetList(d => d.LogId.Equals(LogId)); //include related 
+            /* Validation and error handling omitted */
+            ICallSignRepository.Remove(CallSigns);
         }
 
 
@@ -103,11 +118,39 @@ namespace L2Sql.BusinessLayer
             ICallSignRepository.Update(CallSigns);
         }
 
-        public void RemoveCallSign(params CallSign[] CallSigns)
+
+        public void AddQso(params Qso[] Qsos)
         {
             /* Validation and error handling omitted */
-            ICallSignRepository.Remove(CallSigns);
+                IQsoRepository.AddRange(Qsos);
         }
+
+        public IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId)
+        {
+            return IQsoRepository.GetQsoPointsMults(LogId);
+        }
+
+        public void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion)
+        {
+            IQsoRepository.UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion);
+                //d => d.CallSign); //include related 
+        }
+
+
+        public IList<Qso> GetQsos(int LogId)
+        {
+            return IQsoRepository.GetList(d => d.LogId.Equals(LogId));
+            //d => d.CallSign); //include related 
+        }
+
+        public void UpdateQso(params Qso[] Qsos)
+        {
+            /* Validation and error handling omitted */
+            IQsoRepository.Update(Qsos);
+        }
+
+
+
 
         public IList<LogCategory> GetAllLogCategorys()
         {
@@ -126,6 +169,11 @@ namespace L2Sql.BusinessLayer
 
                 throw;
             }
+        }
+
+        public Contest GetContest(string ContestId)
+        {
+            return IContestRepository.GetSingle(d => d.ContestId.Equals(ContestId));
         }
 
         public void AddCabrilloInfo(params CabrilloInfo[] CabrilloInfos)
@@ -149,6 +197,11 @@ namespace L2Sql.BusinessLayer
                 d => d.CallSign); //include related )
         }
 
+        public void AddQsoExchangeNumber(params QsoExchangeNumber[] QsoExchangeNumbers)
+        {
+            /* Validation and error handling omitted */
+            IQsoExchangeNumberRepository.AddRange(QsoExchangeNumbers);
+        }
 
     }
 }

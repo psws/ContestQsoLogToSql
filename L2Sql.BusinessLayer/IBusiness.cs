@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using L2Sql.DomainModel;
 using L2Sql.DataAccessLayer;
+using L2Sql.Dto;
 
 namespace L2Sql.BusinessLayer
 {
@@ -20,6 +21,8 @@ namespace L2Sql.BusinessLayer
         void UpdateCallSign(params CallSign[] CallSigns);
         void RemoveCallSign(params CallSign[] CallSigns);
         IList<CallSign> GetAllCallsigns();
+        IList<CallSign> GetCallSignsFromLog(int Logid);
+        CallSign GetCallSign(int CallSignId);
 
         void AddCabrilloInfo(params CabrilloInfo[] CabrilloInfos);
         CabrilloInfo GetCabrilloInfo(string ContestId, int CallSignId);
@@ -28,7 +31,15 @@ namespace L2Sql.BusinessLayer
         IList<LogCategory> GetAllLogCategorys();
         void AddLogCategory(params LogCategory[] LogCategorys);
 
+        Contest GetContest(string ContestId);
+
         void AddQso(params Qso[] Qsos);
-        IList<Qso> GetQso(int LogId);
+        IList<Qso> GetQsos(int LogId);
+        void UpdateQso(params Qso[] Qsos);
+        IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId);
+        void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion);
+
+        void AddQsoExchangeNumber(params QsoExchangeNumber[] QsoExchangeNumbers);
+
     }
 }

@@ -26,7 +26,6 @@ namespace L2Sql.DataAccessLayer
             throw new UnintentionalCodeFirstException();
         }
     
-        public virtual DbSet<C__MigrationHistory> C__MigrationHistory { get; set; }
         public virtual DbSet<CabrilloInfo> CabrilloInfoes { get; set; }
         public virtual DbSet<CallInfo> CallInfoes { get; set; }
         public virtual DbSet<CallSign> CallSigns { get; set; }
@@ -36,11 +35,13 @@ namespace L2Sql.DataAccessLayer
         public virtual DbSet<LogCategory> LogCategories { get; set; }
         public virtual DbSet<Qso> Qsoes { get; set; }
         public virtual DbSet<QsoExchangeAlpha> QsoExchangeAlphas { get; set; }
+        public virtual DbSet<QsoExchangeNumber> QsoExchangeNumbers { get; set; }
         public virtual DbSet<QsoExchangeType> QsoExchangeTypes { get; set; }
         public virtual DbSet<QsoExtraData> QsoExtraDatas { get; set; }
         public virtual DbSet<QsoModeType> QsoModeTypes { get; set; }
         public virtual DbSet<QsoRadioType> QsoRadioTypes { get; set; }
         public virtual DbSet<Session> Sessions { get; set; }
+        public virtual DbSet<Spot> Spots { get; set; }
         public virtual DbSet<Station> Stations { get; set; }
         public virtual DbSet<UbnDupe> UbnDupes { get; set; }
         public virtual DbSet<UbnIncorrectCall> UbnIncorrectCalls { get; set; }

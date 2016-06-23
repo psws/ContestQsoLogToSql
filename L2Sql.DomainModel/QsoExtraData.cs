@@ -17,8 +17,8 @@ namespace L2Sql.DomainModel
         public short QsoNo { get; set; }
         public int LogId { get; set; }
         public string QsoExtraDataValue { get; set; }
-
-        public virtual Qso Qso { get; set; }
         public EntityState EntityState { get; set; }
+    
+        public virtual Qso Qso { get; set; }
     }
 }

@@ -333,6 +333,7 @@
                 </ListBox.ItemTemplate>
             </ListBox>
             <Button x:Name="ImportCalls" Content="Import Calls" HorizontalAlignment="Left" Margin="292,345,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportCalls_Click"/>
+            <Button x:Name="CalculateMult_Points" Content="Calculate Mults and Points" HorizontalAlignment="Left" Margin="292,421,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcMults_Click"/>
         </Grid>
         <Label Content="Processed Logs" HorizontalAlignment="Left" Margin="50,345,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
         <Button x:Name="ImportLogs" Content="Import Logs" HorizontalAlignment="Left" Margin="292,385,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportLogs_Click"/>

@@ -20,6 +20,7 @@ namespace L2Sql.DomainModel
             this.CabrilloInfoes = new HashSet<CabrilloInfo>();
             this.CallInfoes = new HashSet<CallInfo>();
             this.Logs = new HashSet<Log>();
+            this.Spots = new HashSet<Spot>();
             this.UbnSummaries = new HashSet<UbnSummary>();
         }
     
@@ -40,6 +41,8 @@ namespace L2Sql.DomainModel
         public virtual QsoModeType QsoModeType { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Log> Logs { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Spot> Spots { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UbnSummary> UbnSummaries { get; set; }
     }

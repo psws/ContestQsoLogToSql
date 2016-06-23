@@ -641,8 +641,102 @@ namespace ContestQsoLogToSql.web
         {
             ImportLogs.IsEnabled = true;
             ImportCalls.IsEnabled = true;
+            CalculateMult_Points.IsEnabled = true;
+
         }
 
+        private void CalcMults_Click(object sender, RoutedEventArgs e)
+        {
+            string instance = null;
+            if (SqlServerInstanceCombobox.SelectedValue != null &&
+                string.IsNullOrEmpty(SqlServerInstanceCombobox.SelectedValue.ToString()) == false )
+            {
+                instance = SqlServerInstanceCombobox.SelectedValue.ToString();
+                string Login = SQLLoginTextbox.Text;
+                string Pwd = SqlPasswordTextbox.Text;
+
+                if (string.IsNullOrEmpty(Login) == true)
+                {//check registry
+                    try
+                    {
+                        Login = ((App)(Application.Current)).AppRegHKLM.rkRun.GetValue("SqlDatabaseLogin").ToString();
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
+                if (string.IsNullOrEmpty(Pwd) == true)
+                {//check registry
+                    try
+                    {
+                        Pwd = ((App)(Application.Current)).AppRegHKLM.rkRun.GetValue("SqlDatabasePwd").ToString();
+                    }
+                    catch (Exception)
+                    {
+                        // ignore
+                    }
+                }
+
+                if (string.IsNullOrEmpty(Login) || string.IsNullOrEmpty(Pwd))
+                {
+                    ModalMsgDialog.ShowHandlerDialog(string.Format("Please specify the Login and Password for the {0} instabce", instance));
+                    //MessageBox.Show(string.Format("Unable to create ctyobj {0}", "test"));
+                }
+                else
+                {
+                    try
+                    {
+
+                        ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+                           SqlServerInstanceCombobox.SelectedValue.ToString(),
+                           SqlDatabaseCombobox.SelectedValue.ToString(),
+                           SqlQsoTablesComboBox.SelectedValue.ToString());
+                        //http://stackoverflow.com/questions/5483565/how-to-use-wpf-background-worker
+                        BackgroundWorker worker = new BackgroundWorker();
+                        worker.WorkerReportsProgress = true;
+                        worker.DoWork += worker_DoWorkMult;
+                        worker.ProgressChanged += worker_ProgressChanged;
+                        worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+                        ImportLogs.IsEnabled = false;
+                        ImportCalls.IsEnabled = false;
+                        CalculateMult_Points.IsEnabled = false;
+
+                        worker.RunWorkerAsync(ProcessLogsobj);
+                    }
+                    catch (Exception ex)
+                    {
+                        ModalMsgDialog.ShowHandlerDialog(string.Format("Unable to create ctyobj {0}", ex.Message));
+                        //MessageBox.Show(string.Format("Unable to create ctyobj {0}", ex.Message));
+                    }
+
+                }
+            }
+            else
+            {
+                ModalMsgDialog.ShowHandlerDialog(string.Format("Please set the Sql Server Instance by selecting the associated Get button"));
+                //MessageBox.Show(string.Format("Please set the Sql Server Instance by selecting the associated Get button")  );
+            }
+
+        }
+
+        private void worker_DoWorkMult(object sender, DoWorkEventArgs e)
+        {
+            // run all background tasks here
+            //Dispatcher.BeginInvoke(new Action(() =>
+            //{
+            //    ProcessLogs ProcessLogsobj = new ProcessLogs(CtyTextBox.Text, LogsTextBox.Text,
+            //        SqlServerInstanceCombobox.SelectedValue.ToString(),
+            //        SqlDatabaseCombobox.SelectedValue.ToString(),
+            //        SqlQsoTablesComboBox.SelectedValue.ToString());
+            //})); 
+             //Get the BackgroundWorker that raised this event.
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            ProcessLogs ProcessLogsobj = e.Argument as ProcessLogs;
+            ProcessLogsobj.Mults_PointsToDatabase(worker);
+
+        }
 
 
 

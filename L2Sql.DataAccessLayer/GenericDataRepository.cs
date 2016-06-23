@@ -115,6 +115,22 @@ namespace L2Sql.DataAccessLayer
             Update(items);
         }
 
+        public virtual IQueryable<T> Queryable(bool tracking)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<T> dbQuery;
+                if (tracking == false)
+                {
+                    dbQuery = context.Set<T>().AsNoTracking();
+                }
+                else
+                {
+                    dbQuery = context.Set<T>();
+                }
+                return dbQuery;
+            }
+        }
 
 
         protected static System.Data.Entity.EntityState GetEntityState(L2Sql.DomainModel.EntityState entityState)

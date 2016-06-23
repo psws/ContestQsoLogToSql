@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.DomainModel", "L2Sql.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.BusinessLayer", "L2Sql.BusinessLayer\L2Sql.BusinessLayer.csproj", "{A2916863-14AB-4D4C-A475-2D08935503A3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "L2Sql.Dto", "L2sql.Dto\L2Sql.Dto.csproj", "{52B849BC-C73B-4B1E-B57A-D77044BC6A70}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{A2916863-14AB-4D4C-A475-2D08935503A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2916863-14AB-4D4C-A475-2D08935503A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2916863-14AB-4D4C-A475-2D08935503A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52B849BC-C73B-4B1E-B57A-D77044BC6A70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52B849BC-C73B-4B1E-B57A-D77044BC6A70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52B849BC-C73B-4B1E-B57A-D77044BC6A70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52B849BC-C73B-4B1E-B57A-D77044BC6A70}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
