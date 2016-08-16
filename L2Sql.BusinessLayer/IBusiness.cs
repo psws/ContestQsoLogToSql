@@ -15,6 +15,7 @@ namespace L2Sql.BusinessLayer
         void UpdateLog(params Log[] Logs);
         void RemoveLog(params Log[] Logs);
         IList<Log> GetAllLogs(string ContestId);
+        IList<Log> GetAllLogsWithCallsign(string ContestId);
         Log GetLog(string ContestId, int CallsignId);
 
          void AddCallSign(params CallSign[] CallSigns);
@@ -34,12 +35,20 @@ namespace L2Sql.BusinessLayer
         Contest GetContest(string ContestId);
 
         void AddQso(params Qso[] Qsos);
+        IList<Qso> GetQsoContacts(int Logid);
         IList<Qso> GetQsos(int LogId);
         void UpdateQso(params Qso[] Qsos);
         IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId);
         void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion);
-
+        void AddQsoInsertContacts(QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion);
         void AddQsoExchangeNumber(params QsoExchangeNumber[] QsoExchangeNumbers);
+
+        IList<short> GetUniquesFromContest(string ContestId, int LogId);
+        void GetBadCallsNils(string ContestId, int LogId, int CallSignId,
+                        out IList<UbnIncorrectCall> UbnIncorrectCalls, out IList<UbnNotInLog> UbnNotInLogs, out IList<UbnDupe> UbnDupes);
+        void UpdateUniquesFromContest(IList<UbnUnique> UbnUniques);
+
+        void UpdateQsoUbnxds(IList<QsoUpdateUbnxdDTO> QsoUpdateUbnxdDTOs);
 
     }
 }

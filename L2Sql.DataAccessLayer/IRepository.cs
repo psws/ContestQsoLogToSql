@@ -17,9 +17,22 @@ namespace L2Sql.DataAccessLayer
     public interface IContestTypeRepository : IGenericDataRepository<ContestType> { }
     public interface ILogRepository : IGenericDataRepository<Log> { }
     public interface ILogCategoryRepository : IGenericDataRepository<LogCategory> { }
-    public interface IQsoRepository : IGenericDataRepository<Qso> {
+    public interface IQsoRepository : IGenericDataRepository<Qso>
+    {
         IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId);
         void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion);
+        void AddQsoInsertContacts(QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion);
+        IList<Qso> GetQsoContacts(int Logid);
+        IList<QsoWorkedLogDTO> GetWorkedQsosFromContestInWorkesLog(string ContestId, int LogCallsignId, int NotCallsignId);
+        // get all Qsos, with callsignId in ContestId, within freq range in QSo table, with no includes
+        void GetQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
+                     out IList<QsoBadNilContact> QsoInMyLogBand);
+        // gest all Qsos, with callsignId for Logs in Log table, within freq range 
+        void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
+            out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog);
+        // get logid dupes, with callsignId in ContestId, within freq range in QSo table
+        void GetDupeQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
+                    out IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand);
     }
     public interface IQsoExchangeAlphaRepository : IGenericDataRepository<QsoExchangeAlpha> { }
     public interface IQsoExchangeNumberRepository : IGenericDataRepository<QsoExchangeNumber> { }
@@ -35,5 +48,7 @@ namespace L2Sql.DataAccessLayer
     public interface IUbnIncorrectExchangeRepository : IGenericDataRepository<UbnIncorrectExchange> { }
     public interface IUbnNotInLogRepository : IGenericDataRepository<UbnNotInLog> { }
     public interface IUbnSummaryRepository : IGenericDataRepository<UbnSummary> { }
-    public interface IUbnUniqueRepository : IGenericDataRepository<UbnUnique> { }
+    public interface IUbnUniqueRepository : IGenericDataRepository<UbnUnique> {
+        IList<short> GetUniquesFromContest(string ContestId, int LogId);
+    }
 }

@@ -71,6 +71,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QsoAddPoinsMults.cs" />
     <Compile Include="QsoInsertContact.cs" />
+    <Compile Include="QsoUBNDX.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\vwd projects mvc\Logqso.mvc\logqso.mvc.common\Logqso.mvc.common.csproj">

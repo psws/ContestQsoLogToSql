@@ -114,7 +114,7 @@ namespace L2Sql.BusinessLayer
                 FileInfo[] rgFiles = di.GetFiles("*.log");
 
                 //go through all logs and capture the callsigns
-                //  sae changes after every log is orocessed.
+                //  sae changes after every log is processed.
                 foreach (var item in rgFiles)
                 {
                     //worker.ReportProgress(1,new InputLog(item.Name, item.Length) );
@@ -279,11 +279,17 @@ namespace L2Sql.BusinessLayer
                                 //CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                                 if (CallSign == null)
                                 {
+                                    string Prefix = CtyObj.GetCallPrefix(CabInfo.Callsign.ToUpper());
+                                    if (string.IsNullOrEmpty(Prefix))
+                                    {
+                                        Prefix = "none";
+                                    }
                                     CallSign = new CallSign
                                     {
                                         Call = CabInfo.Callsign,
                                         Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
                                         ContinentEnum = GetContinentEnum(CabInfo.Callsign),
+                                        Prefix = Prefix,
                                         EntityState = EntityState.Added
                                     };
                                     //need to assign CallsignId after saveChanges
@@ -394,7 +400,7 @@ namespace L2Sql.BusinessLayer
                         catch (Exception ex)
                         {
                             Debug.WriteLine(string.Format(" Problem in LogsToDatabase() stream: {0}  message {1}"),item.FullName,  ex.Message);
-                            throw;
+                            //throw;
                         }
                     }//stream 
 
@@ -823,13 +829,13 @@ namespace L2Sql.BusinessLayer
                             FoundCall = string.Empty;
                             //No queing
                             string line = PeekingStreamReader.ReadLine();
-                            if (line .Length >=6 && line.Substring(0,5).Contains("QSO:"))
+                            if (line.Length >=6 && line.Substring(0,5).Contains("QSO:"))
                             {
                                 if (line.Contains("\t"))
                                 {
                                     line = line.Replace('\t', ' ');
                                 }
-                                string[] Qcolumns = line.Split(" ".ToCharArray());
+                                string[] Qcolumns = line.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
                                 int i=0;
                                 int j=0;
                                 string[] QValidcolumns= new string[Qcolumns.Length] ;
@@ -1573,9 +1579,10 @@ namespace L2Sql.BusinessLayer
             bool PartialLog = false;
 
             IList<CallSign> ICurrentCallSigns;
-            IList<Qso> Qsos = new List<Qso>();
+            //IList<Qso> Qsos = new List<Qso>();
             IList<Qso> CurrentQsos;
             IList<QsoExchangeNumber> QsoExchangeNumbers = new List<QsoExchangeNumber>();
+            QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion = new QsoInsertContactsDTOCollextion();
 
 
              try
@@ -1583,7 +1590,7 @@ namespace L2Sql.BusinessLayer
                 if (PeekingStreamReader != null)
                 {
                     ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    CurrentQsos = IBusiness.GetQsos(Log.LogId);
+                    CurrentQsos = IBusiness.GetQsoContacts(Log.LogId);
                     if (CurrentQsos.Count != 0)
 	                {//set to last qso in DB
                         NextDBQsoNum = (short)(CurrentQsos.Count + 1);
@@ -1592,7 +1599,7 @@ namespace L2Sql.BusinessLayer
 
                     while (PeekingStreamReader.Peek() >= 0)
                     {
-                        Qso Qso = null;
+                        QsoInsertContactsDTO Qso = null;
 
                         line = PeekingStreamReader.ReadLine();
                         if (line.Contains("\t"))
@@ -1605,7 +1612,7 @@ namespace L2Sql.BusinessLayer
                             {
                                 continue;  
                             }
-                            Qso = new DomainModel.Qso()
+                            Qso = new QsoInsertContactsDTO()
                             {
                                 LogId = Log.LogId,
                                 QsoNo = QsoNum++,
@@ -1659,7 +1666,7 @@ namespace L2Sql.BusinessLayer
                                                 {
                                                     Debug.WriteLine(string.Format(" bad Mode: {0} for {1} log ",
                                                         (Qcolumns[i]).ToString(), Log.CallSign.Call));
-                                                    throw;
+                                                    //throw;
                                                 }
                                                 break;
                                             case 3:
@@ -1770,6 +1777,10 @@ namespace L2Sql.BusinessLayer
                                                                 default:
                                                                  break;
 	                                                       }
+                                                            if (Qso.QsoNo != QsoInsertContactsDTOCollextion.Count + 1)
+                                                            {
+                                                                
+                                                            }
                                                             QsoExchangeNumber QsoExchangeNumber = new DomainModel.QsoExchangeNumber()
                                                             {
                                                                 LogId = Qso.LogId,
@@ -1798,22 +1809,28 @@ namespace L2Sql.BusinessLayer
                                             case 8:
                                                 try
                                                 {
-                                                    if (Qcolumns[i].Contains("OH1LWZ/m"))
-                                                    {
+                                                    //if (Qcolumns[i].Contains("OH1LWZ/m"))
+                                                    //{
 
-                                                    }
+                                                    //}
                                                     CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i].ToUpper()).SingleOrDefault();
                                                     if (CallSign == null)
                                                     {//new call
+                                                        string Prefix = CtyObj.GetCallPrefix(Qcolumns[i].ToUpper());
+                                                        if (string.IsNullOrEmpty(Prefix))
+                                                        {
+                                                            Prefix = "none";
+                                                        }
                                                         CallSign = new CallSign
                                                         {
-                                                            Call = Qcolumns[i],
+                                                            Call = Qcolumns[i].ToUpper(),
                                                             Accuracy = (short)googleutils.Geo.GAccuracyCode.G_Null,
                                                             ContinentEnum = GetContinentEnum(Qcolumns[i]),
+                                                            Prefix = Prefix,
                                                             EntityState = EntityState.Added
                                                         };
                                                         //add to new list
-                                                        ICurrentCallSigns.Add(CallSign);
+                                                        IBusiness.AddCallSign(CallSign);
                                                         //refresh
                                                         ICurrentCallSigns = IBusiness.GetAllCallsigns();
                                                         CallSign = ICurrentCallSigns.Where(c => c.Call == Qcolumns[i]).SingleOrDefault();
@@ -1911,7 +1928,7 @@ namespace L2Sql.BusinessLayer
                             {
                                 try
                                 {
-                                    Qsos.Add(Qso);
+                                    QsoInsertContactsDTOCollextion.Add(Qso);
                                 }
                                 catch (Exception)
                                 {
@@ -1920,11 +1937,11 @@ namespace L2Sql.BusinessLayer
                             }
                         }
                     }
-                    if (Qsos.Count != 0)
+                    if (QsoInsertContactsDTOCollextion.Count != 0)
                     {//add to DB
                         try
                         {
-                            IBusiness.AddQso(Qsos.ToArray());
+                             IBusiness.AddQsoInsertContacts(QsoInsertContactsDTOCollextion);
                         }
                         catch (Exception)
                         {

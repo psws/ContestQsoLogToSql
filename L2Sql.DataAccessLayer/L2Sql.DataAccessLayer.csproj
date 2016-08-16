@@ -69,6 +69,8 @@
     <Compile Include="GenericDataRepository.cs" />
     <Compile Include="IGenericDataRepository.cs" />
     <Compile Include="IRepository.cs" />
+    <Compile Include="JoinExtensions.cs" />
+    <Compile Include="Lambda.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Repository.cs" />
   </ItemGroup>
@@ -91,12 +93,20 @@
     <Content Include="AppNotes\Creating DomainModel.txt" />
     <Content Include="AppNotes\How to add a TVP stored procedure.txt" />
     <Content Include="AppNotes\Mapping Enums in EF 6 edmx model.txt" />
+    <Content Include="App_Stored_Procedures\TVP\CQD_sp_QsoInsertContacts.sql" />
     <Content Include="App_Stored_Procedures\TVP\CQD_sp_QsoUpdatePointsMults.sql" />
     <Content Include="DataModel.Context.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <DependentUpon>DataModel.edmx</DependentUpon>
       <LastGenOutput>DataModel.Context.cs</LastGenOutput>
     </Content>
+    <Content Include="sql\CQD_GetDupesJoin.sql" />
+    <Content Include="sql\CQD_GetNilJoin.sql" />
+    <Content Include="sql\CQD_GetNilJoinTest.sql" />
+    <Content Include="sql\CQD_GetNoLogsWithBadCallsJoin.sql" />
+    <Content Include="sql\CQD_GetNotInMyLog.sql" />
+    <Content Include="sql\CQD_GetUniquesIntersect.sql" />
+    <Content Include="sql\CQD_GetUniquesJoin.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\vwd projects mvc\Logqso.mvc\logqso.mvc.common\Logqso.mvc.common.csproj">

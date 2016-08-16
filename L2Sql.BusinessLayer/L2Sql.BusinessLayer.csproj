@@ -51,6 +51,7 @@
     <Compile Include="InputLog.cs" />
     <Compile Include="LogQsoUtilObjects.cs" />
     <Compile Include="ProcessLog.cs" />
+    <Compile Include="ProcessUBNDX.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
