@@ -229,6 +229,16 @@ namespace L2Sql.BusinessLayer
 
                                 if (CabInfo.CallTxZone != 0)
                                 {//only set if contest has zone
+                                    //check for log with 0 zone => badzone in log
+                                    if (CabInfo.CallTxZone == 0xff)
+                                    {//bad zone in log
+                                        CtyLib.CCtyEntryObj CCtyEntryObj = null;
+                                        CtyObj.Lookup(CabInfo.Callsign, out CCtyEntryObj);
+                                        if (CCtyEntryObj != null)
+                                        {
+                                            CabInfo.CallTxZone = (byte)CtyObj.GetCQZone(CCtyEntryObj.iIndex);
+                                        }
+                                    }
                                     Log.QsoExchangeNumber = CabInfo.CallTxZone;
                                 }
 
@@ -973,7 +983,14 @@ namespace L2Sql.BusinessLayer
                                 case ContestTypeEnum.CQWW:
                                     CabrilloQSOCQWWTagInfos QsoInfo = new CabrilloQSOCQWWTagInfos();
                                     GetCabrilloCqwwQSOInfo(line, QsoInfo);
-                                    CInfo.CallTxZone = QsoInfo.TxZone;
+                                    if (QsoInfo.TxZone == 0)
+                                    {
+                                        CInfo.CallTxZone = 0xff;
+                                    }
+                                    else
+                                    {
+                                        CInfo.CallTxZone = QsoInfo.TxZone;
+                                    }
                                     break;
                                 case ContestTypeEnum.CQWPX:
 
@@ -1421,6 +1438,7 @@ namespace L2Sql.BusinessLayer
                             }
                             catch
                             {
+
                             }
                             break;
                         case 8:

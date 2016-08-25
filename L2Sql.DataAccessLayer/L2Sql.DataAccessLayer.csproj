@@ -100,6 +100,7 @@
       <DependentUpon>DataModel.edmx</DependentUpon>
       <LastGenOutput>DataModel.Context.cs</LastGenOutput>
     </Content>
+    <Content Include="sql\CQD_FindCallsignBadPrefixAndContinent.sql" />
     <Content Include="sql\CQD_GetDupesJoin.sql" />
     <Content Include="sql\CQD_GetNilJoin.sql" />
     <Content Include="sql\CQD_GetNilJoinTest.sql" />

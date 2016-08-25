@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using L2Sql.DomainModel;
 using L2Sql.Dto;
+using Logqso.mvc.common.Enum;
 
 namespace L2Sql.DataAccessLayer
 {
@@ -161,9 +162,41 @@ namespace L2Sql.DataAccessLayer
 
                                       })
                               .ToList();
+
+                
             }
         }
 
+        public void GetAllQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
+                    out IList<QsoBadNilContact> QsoInThereLogBand)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+                IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
+
+                //All Qsos with submitted logs
+                QsoInThereLogBand = (from lq in QsoQuery
+                                join ll in LogQuery on lq.LogId equals ll.LogId
+                                join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                where ll.ContestId == ContestId && lq.CallsignId == CallsignId
+                                    && ll.LogId != LogId
+                                    && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
+                                select new QsoBadNilContact
+                                {
+                                    CallsignId = ll.CallsignId,
+                                    Call = (from cl in CallsignQuery
+                                            where cl.CallSignId == ll.CallsignId
+                                            select cl.Call).FirstOrDefault(),
+                                    Frequency = lq.Frequency,
+                                    QsoDateTime = lq.QsoDateTime,
+                                    QsoExchangeNumber = ll.QsoExchangeNumber,
+                                    QsoNo = lq.QsoNo,
+                                    LogId = ll.LogId
+                                }).OrderBy(x => x.QsoDateTime).ToList();
+            }
+      }
 
 
         public void GetDupeQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
@@ -194,7 +227,40 @@ namespace L2Sql.DataAccessLayer
                                                  QsoExchangeNumber = ll.QsoExchangeNumber,
                                                  QsoNo = lq.QsoNo,
                                                  LogId = ll.LogId
-                                             })
+                                             }).OrderBy(x => x.QsoDateTime)
+                                             .AsQueryable();
+                QsoDupesBand = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
+            }
+        }
+
+        public void GetDupeQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
+                    ref IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand)
+        {
+            //dupes inlude my call QSOs
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+                IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
+
+                //All Qsos with submitted logs
+                var AllQsoWithLogsFromLog = (from lq in QsoQuery
+                                             join ll in LogQuery on lq.LogId equals ll.LogId
+                                             join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                             where ll.ContestId == ContestId && lq.LogId == LogId
+                                                 && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
+                                             select new QsoBadNilContact
+                                             {
+                                                 CallsignId = lq.CallsignId,
+                                                 Call = (from cl in CallsignQuery
+                                                         where cl.CallSignId == lq.CallsignId
+                                                         select cl.Call).FirstOrDefault(),
+                                                 Frequency = lq.Frequency,
+                                                 QsoDateTime = lq.QsoDateTime,
+                                                 QsoExchangeNumber = ll.QsoExchangeNumber,
+                                                 QsoNo = lq.QsoNo,
+                                                 LogId = ll.LogId
+                                             }).OrderBy(x=>x.QsoDateTime)
                                              .AsQueryable();
                 QsoDupesBand = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
             }
@@ -202,7 +268,96 @@ namespace L2Sql.DataAccessLayer
 
 
 
-        public void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
+        public void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
+                    ref IList<QsoBadNilContact> BadXchgQsos)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+                IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
+
+                if (ContestTypeEnum == Logqso.mvc.common.Enum.ContestTypeEnum.CQWPX && CatOperatorEnum == Logqso.mvc.common.Enum.CatOperatorEnum.MULTI_OP)
+                {
+                    IQueryable<QsoExchangeNumber> QsoExchangeNumberQuery = context.Set<QsoExchangeNumber>().AsNoTracking();
+                    //All Qsos with submitted logs
+                    BadXchgQsos = (from lq in QsoQuery
+                                   join ll in LogQuery on lq.CallsignId equals ll.CallsignId
+                                   join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                   join xc in QsoExchangeNumberQuery on lq.LogId equals xc.LogId
+                                   where ll.ContestId == ContestId && lq.LogId == LogId
+                                       && lq.QsoNo == xc.QsoNo
+                                       && xc.QsoExhangeNumberValue != ll.QsoExchangeNumber
+                                   select new QsoBadNilContact
+                                   {
+                                       CallsignId = lq.CallsignId,
+                                       Call = (from cl in CallsignQuery
+                                               where cl.CallSignId == lq.CallsignId
+                                               select cl.Call).FirstOrDefault(),
+                                       Frequency = lq.Frequency,
+                                       QsoDateTime = lq.QsoDateTime,
+                                       QsoExchangeNumber = ll.QsoExchangeNumber, //corected xchng
+                                       //QsoExchangeNumber = (from xc in QsoExchangeNumberQuery
+                                       //                     where xc.LogId == LogId &&
+                                       //                     xc.QsoNo == lq.QsoNo
+                                       //                     select xc.QsoExhangeNumberValue).FirstOrDefault(),
+                                       QsoNo = lq.QsoNo,
+                                       LogId = ll.LogId
+                                   }).OrderBy(x => x.QsoDateTime)
+                                                 .ToList();
+                }
+                else 
+                {
+                    //All Qsos with submitted logs
+                    BadXchgQsos = (from lq in QsoQuery
+                                   join ll in LogQuery on lq.CallsignId equals ll.CallsignId
+                                   join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                   where ll.ContestId == ContestId && lq.LogId == LogId
+                                       && lq.QsoExchangeNumber != ll.QsoExchangeNumber
+                                   select new QsoBadNilContact
+                                   {
+                                       CallsignId = lq.CallsignId,
+                                       Call = (from cl in CallsignQuery
+                                               where cl.CallSignId == lq.CallsignId
+                                               select cl.Call).FirstOrDefault(),
+                                       Frequency = lq.Frequency,
+                                       QsoDateTime = lq.QsoDateTime,
+                                       QsoExchangeNumber = ll.QsoExchangeNumber,
+                                       QsoNo = lq.QsoNo,
+                                       LogId = ll.LogId
+                                   }).OrderBy(x => x.QsoDateTime)
+                                                 .ToList();
+                }
+            }
+        }
+
+
+
+        public void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<QsoBadNilContact> BadQsosNoCountry)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
+
+                BadQsosNoCountry = (from lc in CallsignQuery
+                                   join lq in QsoQuery on lc.CallSignId equals lq.CallsignId
+                                   where lc.Prefix == "none" && lq.LogId == LogId
+                                   select new QsoBadNilContact
+                                   {
+                                       CallsignId = lq.CallsignId,
+                                       Call = lc.Call,
+                                       Frequency = lq.Frequency,
+                                       QsoDateTime = lq.QsoDateTime,
+                                       QsoExchangeNumber = lq.QsoExchangeNumber,
+                                       QsoNo = lq.QsoNo,
+                                       LogId = LogId
+                                   }).ToList();
+            }
+
+        }
+
+        public void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh,
                         out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact>  QsoBadOrNotInMyLog)
         {
             //the return value represents all QSOs in my log that have not been verified with All contest Qso with mycall in the Qso table.
@@ -232,11 +387,11 @@ namespace L2Sql.DataAccessLayer
                 IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
                 IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
 
-                //All Qsos with submitted logs
+                //All Qsos in table with my call(via submitted logs) excluding mt QSOs
                 var AllQsoWithLogsFromLog = (from lq in QsoQuery
                                              join ll in LogQuery on lq.LogId equals ll.LogId
                                              join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
-                                             where ll.ContestId == ContestId && lq.CallsignId == 1
+                                             where ll.ContestId == ContestId && lq.CallsignId == CallSignId
                                                  && ll.LogId != LogId
                                                  && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
                                              select new QsoBadNilContact
@@ -252,7 +407,7 @@ namespace L2Sql.DataAccessLayer
                                                 LogId = ll.LogId
                                              })
                                              .AsEnumerable();
-
+                //var AllQsoWithLogsFromLog2 = AllQsoWithLogsFromLog.Where(x => x.Call == "CN2R").ToList();
                 //All Qsos with my call
                 var AllQsosFromLog = (from lq in QsoQuery
                                       join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
@@ -270,26 +425,21 @@ namespace L2Sql.DataAccessLayer
 
                                       })
                                       .AsEnumerable();
+                //var AllQsosFromLog2 = AllQsosFromLog.Where(x => x.Call == "CN2R").ToList();
 
-                var tmp = AllQsoWithLogsFromLog.ToList();
-                var tmp2 = AllQsosFromLog.ToList();
-                var ik2ycw = tmp.Where(x=>x.Call == "IK2YCW").ToList();
-                var ik2cyw = tmp.Where(x => x.Call == "IK2CYW").ToList();;
-                var ik2ycw2 = tmp2.Where(x => x.Call == "IK2YCW").ToList();
-                var ik2cyw2 = tmp2.Where(x => x.Call == "IK2CYW").ToList();
-                var res = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g=>g.Count() > 1).ToList();
-                    //.OrderByDescending(g => g.Count())
-                    //.Select(g => new { Brand = g.Key, Count =  g.Count()})
-                    //.First();
-                var inyrt = AllQsoWithLogsFromLog.Intersect(AllQsosFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.Call).ToList();
-                ik2ycw =inyrt.Where(x => x.Call == "IK2YCW").ToList();
-                var inyrt2 = AllQsosFromLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.Call).ToList();
-                ik2ycw2 = inyrt2.Where(x => x.Call == "IK2YCW").ToList();
                 //Left Exclude join  CQD_GetNotInMyLog.sql
-                QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.Call).ToList();
+                //QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.Call == y.Call).OrderBy(x => x.Call).ToList();
+                //Left Exclude join  CQD_GetNotInMyLog.sql
+                //we need time because K4LR could have worked us more then once on a band.
+                //We nned to catch the K3LR QSO that is not in myLog, since my log has only one K3LR band Qso. K3RL is a bad call in my log
+                QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.Call == y.Call &&
+                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-3) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(3))).OrderBy(x => x.Call).ToList();
                 //Right Exclude join  CQD_GetNoLogsWithBadCallsJoin.sql
-                QsoBadOrNotInMyLog = AllQsosFromLog.Except(AllQsoWithLogsFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x=>x.Call).ToList();
-            
+                QsoBadOrNotInMyLog = AllQsosFromLog.Except(AllQsoWithLogsFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.Call).ToList();
+
+                //var QsoNotInMyLog2 = QsoNotInMyLog.Where(x => x.Call == "CN2R").ToList();
+                //var QsoBadOrNotInMyLog2 = QsoBadOrNotInMyLog.Where(x => x.Call == "CN2R").ToList();
+          
                 
             }
 
@@ -334,13 +484,34 @@ namespace L2Sql.DataAccessLayer
     }
     public class UbnNotInLogRepository : GenericDataRepository<UbnNotInLog>, IUbnNotInLogRepository
     {
+
+        public IList<UbnNotInLog> GetBandUbnNotInLogs(int LogId, decimal FreqLow, decimal FreqHigh)
+        {
+            List<UbnNotInLog> UbnNotInLogs = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<UbnNotInLog> UbnNotInLogQuery = context.Set<UbnNotInLog>().AsNoTracking();
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+
+                UbnNotInLogs = (from Nil in UbnNotInLogQuery
+                                join qq in QsoQuery on Nil.QsoNo equals (qq.QsoNo)
+                                where Nil.LogId == qq.LogId &&
+                                    (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) 
+                                select Nil 
+                                ).OrderBy(x=>x.QsoNo).ToList();
+
+            }
+
+            return UbnNotInLogs;
+        }
+
     }
     public class UbnSummaryRepository : GenericDataRepository<UbnSummary>, IUbnSummaryRepository
     {
     }
     public class UbnUniqueRepository : GenericDataRepository<UbnUnique>, IUbnUniqueRepository
     {
-        public IList<short> GetUniquesFromContest(string ContestId, int LogId)
+        public IList<short> GetUniquesFromContest(string ContestId, int LogId, ref IList<UbnUnique> UbnUniques)
         {
             //http://stackoverflow.com/questions/1406962/entity-framework-t-sql-having-equivalent 
             List<short> QsoNos = null;
@@ -385,6 +556,40 @@ namespace L2Sql.DataAccessLayer
 
         }
 
+
+        public bool? CheckCallIsUniqueInQsos(string ContestId, int CallsignId)
+        {
+            //http://stackoverflow.com/questions/1406962/entity-framework-t-sql-having-equivalent 
+            bool? results = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+
+                try
+                {
+                    var Qsos =  (from lq in QsoQuery  //all unique callsignid in ContestId
+                                 join ll in LogQuery on lq.LogId equals ll.LogId
+                                 where ll.ContestId == ContestId &&
+                                    lq.CallsignId == CallsignId 
+                                    select CallsignId ).Count();
+                    if (Qsos == 1 )
+                    {
+                        results = true;
+                    }
+                    else if (Qsos > 1)
+                    {
+                        results = false;
+                    }
+                }
+                catch (Exception ex)
+                {
+
+                    //throw;
+                }
+            }
+            return results;
+        }
 
     }
 

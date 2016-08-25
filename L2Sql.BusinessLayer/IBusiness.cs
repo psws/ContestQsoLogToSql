@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using L2Sql.DomainModel;
 using L2Sql.DataAccessLayer;
 using L2Sql.Dto;
+using Logqso.mvc.common.Enum;
+
 
 namespace L2Sql.BusinessLayer
 {
@@ -28,7 +30,7 @@ namespace L2Sql.BusinessLayer
         void AddCabrilloInfo(params CabrilloInfo[] CabrilloInfos);
         CabrilloInfo GetCabrilloInfo(string ContestId, int CallSignId);
 
-
+        LogCategory GetLogCategory(int LogCategoryId);
         IList<LogCategory> GetAllLogCategorys();
         void AddLogCategory(params LogCategory[] LogCategorys);
 
@@ -43,12 +45,31 @@ namespace L2Sql.BusinessLayer
         void AddQsoInsertContacts(QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion);
         void AddQsoExchangeNumber(params QsoExchangeNumber[] QsoExchangeNumbers);
 
-        IList<short> GetUniquesFromContest(string ContestId, int LogId);
-        void GetBadCallsNils(string ContestId, int LogId, int CallSignId,
-                        out IList<UbnIncorrectCall> UbnIncorrectCalls, out IList<UbnNotInLog> UbnNotInLogs, out IList<UbnDupe> UbnDupes);
+        void GetUniquesFromContest(string ContestId, int LogId, ref IList<UbnUnique> UbnUniques,
+                ref  IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
+        void GetBadCallsNils(IList<Log> Logs, string ContestId, int LogId, int CallSignId,
+                        ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
+        void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<UbnIncorrectCall> UbnIncorrectCalls);
+        void GetDupesFromMyLog(string ContestId, int LogId,
+                        ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
+        void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
+            ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
+            ref IList<UbnDupe> UbnDupes, ref IList<UbnIncorrectExchange> UbnIncorrectExchanges);
+
+        void UpdateIncorrectCallsFromContest(IList<UbnIncorrectCall> UbnIncorrectCalls);
+        void UpdateIncorrectExchangesFromContest(IList<UbnIncorrectExchange> UbnIncorrectExchanges);
+        void UpdateDupesFromContest(IList<UbnDupe> UbnDupes);
+        void UpdateNilsFromContest(IList<UbnNotInLog> UbnNotInLogs);
+
         void UpdateUniquesFromContest(IList<UbnUnique> UbnUniques);
 
-        void UpdateQsoUbnxds(IList<QsoUpdateUbnxdDTO> QsoUpdateUbnxdDTOs);
+        IList<UbnIncorrectCall> GetUbnIncorrectCalls(int LogId);
+        IList<UbnIncorrectExchange> GetUbnIncorrectExchanges(int LogId);
+        IList<UbnNotInLog> GetUbnNotInLogs(int LogId);
+        IList<UbnNotInLog> GetBandUbnNotInLogs(int LogId, decimal FreqLow, decimal FreqHigh );
+        IList<UbnDupe> GetUbnDupes(int LogId);
+        IList<UbnUnique> GetUbnUnique(int LogId);
+
 
     }
 }

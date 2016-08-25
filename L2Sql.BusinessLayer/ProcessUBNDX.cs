@@ -49,30 +49,62 @@ namespace L2Sql.BusinessLayer
             string ContestId = di.Name.ToUpper();
 
             ContestTypeEnum ContestTypeEnum;
+            CatOperatorEnum CatOperatorEnum;
             var Contest = IBusiness.GetContest(ContestId);
             ContestTypeEnum = Contest.ContestTypeEnum;
 
+
             IList<Log> Logs = IBusiness.GetAllLogsWithCallsign(ContestId);      //includes CallSign , logcategory
+
+            //foreach (var log in Logs)
+            //{ //for individual log2 testing
+            //    var log2 = Logs.Where(x => x.LogId == 20964).FirstOrDefault();
+            //    var Logcategory = IBusiness.GetLogCategory(log2.LogCategoryId);
+            //    CatOperatorEnum = Logcategory.CatOperatorEnum;
+
+            //    IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log2.LogId);
+            //    //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
+            //    worker.ReportProgress(1, new InputLog(log2.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
+            //    if (QsoAddPoinsMultsDTOs.Count != 0)
+            //    {
+            //        //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
+            //        SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log2.LogId, log2.CallSign.Prefix, log2.CallSign.CallSignId);
+
+            //    }
+            //}
 
 
             foreach (var log in Logs)
             {
+                var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
+                CatOperatorEnum = Logcategory.CatOperatorEnum;
+
                 IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);  
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
                 worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
                 if (QsoAddPoinsMultsDTOs.Count != 0)
                 {
+                    //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
+                    SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
 
-                    SetUbnxdDTOs(QsoAddPoinsMultsDTOs, Contest.ContestId, ContestTypeEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
-                    break;
-                    //IBusiness.UpdateQsoUbnxds(QsoUpdateUbnxdDTOs);
+//break;
                 }
+            }
 
-                QsoUpdateUbnxdDTO QsoUpdateUbnxdDTO = new QsoUpdateUbnxdDTO();
- 
-                //Uniques: get all calls inlg that only occur once in Db using contestid
+            //Uniques
+            foreach (var log in Logs)
+            {
+                //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
+                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
+                //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-2", QsoAddPoinsMultsDTOs.Count));
+                if (QsoAddPoinsMultsDTOs.Count != 0)
+                {
+                    //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
+                    SetuDTOs(Contest.ContestId, log.LogId);
 
-
+//break;
+                }
             }
 
             return result;
@@ -80,50 +112,74 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private void SetUbnxdDTOs(IList<QsoAddPoinsMultsDTO> Qsos, string ContestId, ContestTypeEnum ContestTypeEnum, int LogId, string LogPrefix, int CallSignId)
+        private void SetbnxdDTOs( IList<Log> Logs, string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
+                    string LogPrefix, int CallSignId)
         {
-            //get all callsigns for this log
-            //IList<CallSign> Callsigns = IBusiness.GetCallSignsFromLog(LogId);
+            IList<UbnIncorrectCall> UbnIncorrectCalls = new List<UbnIncorrectCall>();
+            IList<UbnNotInLog> UbnNotInLogs = new List<UbnNotInLog>();
+            IList<UbnDupe> UbnDupes = new List<UbnDupe>();
+            IList<UbnIncorrectExchange> UbnIncorrectExchanges = new List<UbnIncorrectExchange>();
 
-            //IList<QsoUpdateUbnxdDTO> QsoUpdateUbnxdDTOs = new List<QsoUpdateUbnxdDTO>();
-            // get allworked QSOs from worked contest log
 
-            //UNIQUES
-            QsoUpdateUniquNilDupeDTOCollextion QsoUpdateUniquNilDupeDTOCollextion = new QsoUpdateUniquNilDupeDTOCollextion();
+            IBusiness.GetBadCallsNils(Logs, ContestId, LogId, CallSignId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
-            IList<UbnIncorrectCall> UbnIncorrectCalls = null;
-            IList<UbnNotInLog> UbnNotInLogs = null;
-            IList<UbnDupe> UbnDupes = null;
-            IBusiness.GetBadCallsNils(ContestId, LogId, CallSignId, out UbnIncorrectCalls, out UbnNotInLogs, out UbnDupes);
-UbnIncorrectCalls = UbnIncorrectCalls.OrderBy(x => x.QsoNo).ToList();
-return;
-           
-            IList<UbnUnique> UbnUniques = new List<UbnUnique>();
-            IList<short> UniqieCallsignIDs = IBusiness.GetUniquesFromContest(ContestId, LogId);
+            //check for callsigns in my log with no prefix (Country)
+            IBusiness.GetBadQsosNoCountry(ContestId, LogId, ref UbnIncorrectCalls);
 
-            //(UniqieCallsignIDs as List<int>).Sort();
-            foreach (var item in UniqieCallsignIDs)
-            {
-                UbnUnique UbnUnique = new UbnUnique()
-                {
-                    LogId = LogId,
-                    QsoNo = item,
-                    EntityState = EntityState.Added
-                };
-                UbnUniques.Add(UbnUnique);
+            IBusiness.GetDupesFromMyLog(ContestId, LogId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
+
+
+            IBusiness.GetBadXchgsFromMyLog(ContestId, ContestTypeEnum, CatOperatorEnum, LogId, 
+                ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes, ref UbnIncorrectExchanges);
+
+            if (UbnIncorrectCalls.Count > 0)
+            {//store in DB
+                IBusiness.UpdateIncorrectCallsFromContest(UbnIncorrectCalls);
             }
 
-            if (QsoUpdateUniquNilDupeDTOCollextion.Count > 0)
+            if (UbnNotInLogs.Count > 0)
+            {//store in DB
+                IBusiness.UpdateNilsFromContest(UbnNotInLogs);
+            }
+
+            if (UbnDupes.Count > 0)
+            {//store in DB
+                IBusiness.UpdateDupesFromContest(UbnDupes);
+            }
+
+            if (UbnIncorrectExchanges.Count > 0)
+            {//store in DB
+                IBusiness.UpdateIncorrectExchangesFromContest(UbnIncorrectExchanges);
+            }
+        
+//return;
+
+        }
+
+
+
+        private void SetuDTOs( string ContestId, int LogId)
+        {
+
+            IList<UbnUnique> UbnUniques = new List<UbnUnique>();
+
+            IList<UbnIncorrectCall> UbnIncorrectCalls = IBusiness.GetUbnIncorrectCalls(LogId);
+            IList<UbnNotInLog> UbnNotInLogs = IBusiness.GetUbnNotInLogs(LogId);
+            IList<UbnDupe> UbnDupes = IBusiness.GetUbnDupes(LogId);
+            //IList<UbnIncorrectExchange> UbnIncorrectExchanges = IBusiness.GetUbnIncorrectExchanges(LogId);
+
+
+            //Uniques
+            IBusiness.GetUniquesFromContest(ContestId, LogId, ref UbnUniques,
+                 ref  UbnIncorrectCalls, ref  UbnNotInLogs, ref  UbnDupes );
+ //return;
+
+            if (UbnUniques.Count > 0)
             {//store in DB
                 IBusiness.UpdateUniquesFromContest(UbnUniques);
             }
-
-
-            //Not In Log
-            
-
-
         }
+
 
 
     }
