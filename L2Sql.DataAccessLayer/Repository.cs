@@ -140,7 +140,7 @@ namespace L2Sql.DataAccessLayer
         }
 
         public void GetQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
-                    out IList<QsoBadNilContact> QsoInMyLogBand)
+                    out IList<QsoBadNilContact> QsoInMyLogBand, bool bPass2)
         {
             using (var context = new ContestqsoDataEntities())
             {
@@ -162,13 +162,34 @@ namespace L2Sql.DataAccessLayer
 
                                       })
                               .ToList();
+                if (bPass2 == true)
+                {
+                    //Check if bad calls already exist where the corrected call is CallSignId
+                    IList<UbnIncorrectCall> IncorrectCallsInMyLog = GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
+                    if (IncorrectCallsInMyLog.Count != 0)
+                    {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                        foreach (var item in IncorrectCallsInMyLog)
+                        {//correct call
+                            foreach (var qso in QsoInMyLogBand)
+                            {
+                                if (qso.QsoNo == item.QsoNo)
+                                {
+                                    int CorrectedCallSignId = CallsignQuery.Where(x => x.Call == item.CorrectCall).Select(x => x.CallSignId).FirstOrDefault();
 
-                
+                                    qso.Call = item.CorrectCall;
+                                    qso.CallsignId = CorrectedCallSignId;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
             }
         }
 
         public void GetAllQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
-                    out IList<QsoBadNilContact> QsoInThereLogBand)
+                    out IList<QsoBadNilContact> QsoInThereLogBand,bool bPass2)
         {
             using (var context = new ContestqsoDataEntities())
             {
@@ -195,6 +216,25 @@ namespace L2Sql.DataAccessLayer
                                     QsoNo = lq.QsoNo,
                                     LogId = ll.LogId
                                 }).OrderBy(x => x.QsoDateTime).ToList();
+                if (bPass2 == true)
+                {
+                    //get Call for this log
+                    String Call = CallsignQuery.Where(x => x.CallSignId == CallsignId).Select(x => x.Call).FirstOrDefault();
+                    //Check if bad calls already exist where the corrected call is CallSignId
+                    IList<QsoBadNilContact> IncorrectQsosInThereLog = GetBandUbnIncorrectQsosForCall(ContestId, Call, FreqLow, FreqHigh);
+                    if (IncorrectQsosInThereLog.Count != 0)
+                    {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                        foreach (var item in IncorrectQsosInThereLog)
+                        {
+                            //correct the qso record to CN2R
+                            item.Call = Call;
+                            item.CallsignId = CallsignId;
+                            //http://stackoverflow.com/questions/1210295/how-can-i-add-an-item-to-a-ienumerablet-collection
+                            //add the corrected qso to AllQsoWithLogsFromLog
+                            QsoInThereLogBand.Add(item);
+                        }
+                    }
+                }
             }
       }
 
@@ -228,7 +268,24 @@ namespace L2Sql.DataAccessLayer
                                                  QsoNo = lq.QsoNo,
                                                  LogId = ll.LogId
                                              }).OrderBy(x => x.QsoDateTime)
-                                             .AsQueryable();
+                                             .ToList();
+                //get Call for this log
+                String Call = CallsignQuery.Where(x => x.CallSignId == CallsignId).Select(x => x.Call).FirstOrDefault();
+                //Check if bad calls already exist where the corrected call is CallSignId
+                IList<QsoBadNilContact> IncorrectQsosInThereLog = GetBandUbnIncorrectQsosForCall(ContestId, Call, FreqLow, FreqHigh);
+                if (IncorrectQsosInThereLog.Count != 0)
+                {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                    foreach (var item in IncorrectQsosInThereLog)
+                    {
+                        //correct the qso record to CN2R
+                        item.Call = Call;
+                        item.CallsignId = CallsignId;
+                        //http://stackoverflow.com/questions/1210295/how-can-i-add-an-item-to-a-ienumerablet-collection
+                        //add the corrected qso to AllQsoWithLogsFromLog
+                        AllQsoWithLogsFromLog.Add(item);
+                    }
+                }
+
                 QsoDupesBand = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
             }
         }
@@ -261,7 +318,27 @@ namespace L2Sql.DataAccessLayer
                                                  QsoNo = lq.QsoNo,
                                                  LogId = ll.LogId
                                              }).OrderBy(x=>x.QsoDateTime)
-                                             .AsQueryable();
+                                             .AsEnumerable();
+                //Check if bad calls already exist where the corrected call is CallSignId
+                IList<UbnIncorrectCall> IncorrectCallsInMyLog = GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
+                if (IncorrectCallsInMyLog.Count != 0)
+                {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                    foreach (var item in IncorrectCallsInMyLog)
+                    {//correct call
+                        foreach (var qso in AllQsoWithLogsFromLog)
+                        {
+                            if (qso.QsoNo == item.QsoNo)
+                            {
+                                int CorrectedCallSignId = CallsignQuery.Where(x => x.Call == item.CorrectCall).Select(x => x.CallSignId).FirstOrDefault();
+
+                                qso.Call = item.CorrectCall;
+                                qso.CallsignId = CorrectedCallSignId;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
                 QsoDupesBand = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
             }
         }
@@ -358,7 +435,7 @@ namespace L2Sql.DataAccessLayer
         }
 
         public void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh,
-                        out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact>  QsoBadOrNotInMyLog)
+                        out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact>  QsoBadOrNotInMyLog , bool bCorrections)
         {
             //the return value represents all QSOs in my log that have not been verified with All contest Qso with mycall in the Qso table.
             //This returned list represents the potential NIls and Bad Qsos in my log.
@@ -406,8 +483,28 @@ namespace L2Sql.DataAccessLayer
                                                 QsoNo = lq.QsoNo,
                                                 LogId = ll.LogId
                                              })
-                                             .AsEnumerable();
-                //var AllQsoWithLogsFromLog2 = AllQsoWithLogsFromLog.Where(x => x.Call == "CN2R").ToList();
+                                             .ToList();
+                if (bCorrections == true)
+	            {
+                    //get Call for this log
+                    String Call = CallsignQuery.Where(x=>x.CallSignId == CallSignId).Select(x=>x.Call).FirstOrDefault();
+                    //Check if bad calls already exist where the corrected call is CallSignId
+                    IList<QsoBadNilContact> IncorrectQsosInThereLog = GetBandUbnIncorrectQsosForCall(ContestId, Call, FreqLow, FreqHigh);
+                    if (IncorrectQsosInThereLog.Count != 0)
+	                {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                        foreach (var item in IncorrectQsosInThereLog)
+                        {
+                            //correct the qso record to CN2R
+                            item.Call = Call;
+                            item.CallsignId = CallSignId;
+                            //http://stackoverflow.com/questions/1210295/how-can-i-add-an-item-to-a-ienumerablet-collection
+                            //add the corrected qso to AllQsoWithLogsFromLog
+                            AllQsoWithLogsFromLog.Add(item);
+                        }
+	                }
+                }
+                //var AllQsoWithLogsFromLog2 = AllQsoWithLogsFromLog.Where(x => x.LogId == 15004).ToList();
+
                 //All Qsos with my call
                 var AllQsosFromLog = (from lq in QsoQuery
                                       join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
@@ -425,7 +522,34 @@ namespace L2Sql.DataAccessLayer
 
                                       })
                                       .AsEnumerable();
-                //var AllQsosFromLog2 = AllQsosFromLog.Where(x => x.Call == "CN2R").ToList();
+                
+                if (bCorrections == true)
+	            {
+                    //Check if bad calls already exist where the corrected call is CallSignId
+                    IList<UbnIncorrectCall> IncorrectCallsInMyLog = GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
+                    AllQsosFromLog = AllQsosFromLog.ToList();
+                    if (IncorrectCallsInMyLog.Count != 0)
+	                {//fixup calls in AllQsoWithLogsFromLog. insert corretcions
+                        foreach (var item in IncorrectCallsInMyLog)
+                        {//correct call
+                            foreach (var qso in AllQsosFromLog)
+                            {
+                                if (qso.QsoNo == item.QsoNo)
+                                {
+                                    int CorrectedCallSignId = CallsignQuery.Where(x => x.Call == item.CorrectCall).Select(x => x.CallSignId).FirstOrDefault();
+
+                                    qso.Call = item.CorrectCall;
+                                    qso.CallsignId = CorrectedCallSignId;
+                                    break;
+                                }
+                            }
+                            //AllQsosFromLog.Update(x => x.Call = (x.QsoNo == item.QsoNo) ? item.CorrectCall : x.Call);
+                            //int CorrectedCallSignId = CallsignQuery.Where(x => x.Call == item.CorrectCall).Select(x => x.CallSignId).FirstOrDefault();
+                            //AllQsosFromLog.Update(x => x.CallsignId = (x.QsoNo == item.QsoNo) ? CorrectedCallSignId : x.CallsignId);
+                        }
+	                }
+                }
+                //var AllQsosFromLog2 = AllQsosFromLog.Where(x => x.Call == "K8AZ").ToList();
 
                 //Left Exclude join  CQD_GetNotInMyLog.sql
                 //QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.Call == y.Call).OrderBy(x => x.Call).ToList();
@@ -444,8 +568,67 @@ namespace L2Sql.DataAccessLayer
             }
 
 
-            return;
         }
+
+        public IList<QsoBadNilContact> GetBandUbnIncorrectQsosForCall(string ContestId, string Call, decimal FreqLow, decimal FreqHigh)
+        {
+            List<QsoBadNilContact> IncorrectQsos = null;
+
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<UbnIncorrectCall> UbnIncorrectCallQuery = context.Set<UbnIncorrectCall>().AsNoTracking();
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+                IQueryable<CallSign> CallSignQuery = context.Set<CallSign>().AsNoTracking();
+
+                IncorrectQsos = (from bad in UbnIncorrectCallQuery
+                                 join qq in QsoQuery on bad.QsoNo equals (qq.QsoNo)
+                                 join l in LogQuery on bad.LogId equals (l.LogId)
+                                 join c in CallSignQuery on qq.CallsignId equals (c.CallSignId)
+                                 where bad.LogId == qq.LogId &&
+                                (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) &&
+                                l.ContestId == ContestId && bad.CorrectCall == Call
+                                 select new QsoBadNilContact
+                                 {
+                                    Call = c.Call,
+                                    CallsignId = c.CallSignId,
+                                    Frequency = qq.Frequency,
+                                    LogId = bad.LogId,
+                                    QsoDateTime = qq.QsoDateTime,
+                                    QsoExchangeNumber = qq.QsoExchangeNumber,
+                                    QsoNo = bad.QsoNo
+                                 }
+                                ).OrderBy(x => x.QsoNo).ToList();
+
+            }
+
+            return IncorrectQsos;
+        }
+
+        public IList<UbnIncorrectCall> GetBandUbnIncorrectCallsForLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh)
+        {
+            List<UbnIncorrectCall> UbnIncorrectCalls = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<UbnIncorrectCall> UbnIncorrectCallQuery = context.Set<UbnIncorrectCall>().AsNoTracking();
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+
+                UbnIncorrectCalls = (from bad in UbnIncorrectCallQuery
+                                     join qq in QsoQuery on bad.QsoNo equals (qq.QsoNo)
+                                     join l in LogQuery on bad.LogId equals (l.LogId)
+                                     where bad.LogId == qq.LogId &&
+                                    (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) &&
+                                    l.ContestId == ContestId && bad.LogId == LogId
+                                     select bad
+                                ).OrderBy(x => x.QsoNo).ToList();
+
+            }
+
+            return UbnIncorrectCalls;
+        }
+
+
     }
 
 
@@ -478,6 +661,29 @@ namespace L2Sql.DataAccessLayer
     }
     public class UbnIncorrectCallRepository : GenericDataRepository<UbnIncorrectCall>, IUbnIncorrectCallRepository
     {
+
+        public IList<UbnIncorrectCall> GetBandUbnIncorrectCalls(string ContestId, decimal FreqLow, decimal FreqHigh)
+        {
+            List<UbnIncorrectCall> UbnIncorrectCalls = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<UbnIncorrectCall> UbnNotInLogQuery = context.Set<UbnIncorrectCall>().AsNoTracking();
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+
+                UbnIncorrectCalls = (from bad in UbnNotInLogQuery
+                                     join qq in QsoQuery on bad.QsoNo equals (qq.QsoNo)
+                                     join l in LogQuery on bad.LogId equals (l.LogId)
+                                     where bad.LogId == qq.LogId &&
+                                    (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) &&
+                                    l.ContestId == ContestId
+                                     select bad
+                                ).OrderBy(x => x.QsoNo).ToList();
+
+            }
+
+            return UbnIncorrectCalls;
+        }
     }
     public class UbnIncorrectExchangeRepository : GenericDataRepository<UbnIncorrectExchange>, IUbnIncorrectExchangeRepository
     {
@@ -485,18 +691,21 @@ namespace L2Sql.DataAccessLayer
     public class UbnNotInLogRepository : GenericDataRepository<UbnNotInLog>, IUbnNotInLogRepository
     {
 
-        public IList<UbnNotInLog> GetBandUbnNotInLogs(int LogId, decimal FreqLow, decimal FreqHigh)
+        public IList<UbnNotInLog> GetBandUbnNotInLogs(string ContestId, decimal FreqLow, decimal FreqHigh)
         {
             List<UbnNotInLog> UbnNotInLogs = null;
             using (var context = new ContestqsoDataEntities())
             {
                 IQueryable<UbnNotInLog> UbnNotInLogQuery = context.Set<UbnNotInLog>().AsNoTracking();
                 IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
 
                 UbnNotInLogs = (from Nil in UbnNotInLogQuery
                                 join qq in QsoQuery on Nil.QsoNo equals (qq.QsoNo)
+                                join l in LogQuery on Nil.LogId equals (l.LogId)
                                 where Nil.LogId == qq.LogId &&
-                                    (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) 
+                                    (qq.Frequency >= FreqLow && qq.Frequency <= FreqHigh) &&
+                                    l.ContestId == ContestId 
                                 select Nil 
                                 ).OrderBy(x=>x.QsoNo).ToList();
 

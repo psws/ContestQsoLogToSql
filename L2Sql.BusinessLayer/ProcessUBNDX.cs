@@ -58,7 +58,7 @@ namespace L2Sql.BusinessLayer
 
             //foreach (var log in Logs)
             //{ //for individual log2 testing
-            //    var log2 = Logs.Where(x => x.LogId == 20964).FirstOrDefault();
+            //    var log2 = Logs.Where(x => x.LogId == 14001).FirstOrDefault();
             //    var Logcategory = IBusiness.GetLogCategory(log2.LogCategoryId);
             //    CatOperatorEnum = Logcategory.CatOperatorEnum;
 
@@ -68,7 +68,8 @@ namespace L2Sql.BusinessLayer
             //    if (QsoAddPoinsMultsDTOs.Count != 0)
             //    {
             //        //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
-            //        SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log2.LogId, log2.CallSign.Prefix, log2.CallSign.CallSignId);
+            //        //Bad calls 
+            //        SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
 
             //    }
             //}
@@ -79,7 +80,23 @@ namespace L2Sql.BusinessLayer
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
 
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);  
+                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
+                //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
+                if (QsoAddPoinsMultsDTOs.Count != 0)
+                {
+                    //Bad calls 
+                    SetbDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
+                    //break;
+                }
+            }
+
+            foreach (var log in Logs)
+            {
+                var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
+                CatOperatorEnum = Logcategory.CatOperatorEnum;
+
+                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
                 worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
                 if (QsoAddPoinsMultsDTOs.Count != 0)
@@ -111,6 +128,22 @@ namespace L2Sql.BusinessLayer
 
         }
 
+        private void SetbDTOs(IList<Log> Logs, string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
+                    string LogPrefix, int CallSignId)
+        {//1st pass bad
+            IList<UbnIncorrectCall> UbnIncorrectCalls = new List<UbnIncorrectCall>();
+            IList<UbnNotInLog> UbnNotInLogs = new List<UbnNotInLog>();
+            IList<UbnDupe> UbnDupes = new List<UbnDupe>();
+
+
+            //find bad call pass one
+            IBusiness.GetBadCallsNils(Logs, ContestId, LogId, CallSignId, false, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
+ 
+            if (UbnIncorrectCalls.Count > 0)
+            {//store corrections in DB
+                IBusiness.UpdateIncorrectCallsFromContest(UbnIncorrectCalls);
+            }
+        }
 
         private void SetbnxdDTOs( IList<Log> Logs, string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
                     string LogPrefix, int CallSignId)
@@ -121,10 +154,12 @@ namespace L2Sql.BusinessLayer
             IList<UbnIncorrectExchange> UbnIncorrectExchanges = new List<UbnIncorrectExchange>();
 
 
-            IBusiness.GetBadCallsNils(Logs, ContestId, LogId, CallSignId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
+            //find bad call pass 2 with corrections from Pass 1 above
+            IBusiness.GetBadCallsNils(Logs, ContestId, LogId, CallSignId, true, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
             //check for callsigns in my log with no prefix (Country)
             IBusiness.GetBadQsosNoCountry(ContestId, LogId, ref UbnIncorrectCalls);
+
 
             IBusiness.GetDupesFromMyLog(ContestId, LogId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
@@ -151,7 +186,9 @@ namespace L2Sql.BusinessLayer
             {//store in DB
                 IBusiness.UpdateIncorrectExchangesFromContest(UbnIncorrectExchanges);
             }
-        
+
+
+
 //return;
 
         }

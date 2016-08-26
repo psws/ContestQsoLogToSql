@@ -27,13 +27,13 @@ namespace L2Sql.DataAccessLayer
         IList<QsoWorkedLogDTO> GetWorkedQsosFromContestInWorkesLog(string ContestId, int LogCallsignId, int NotCallsignId);
         // get all Qsos, with callsignId in ContestId, within freq range in QSo table, with no includes
         void GetQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
-                     out IList<QsoBadNilContact> QsoInMyLogBand);
+                     out IList<QsoBadNilContact> QsoInMyLogBand, bool bPass2);
         // gest all Qsos, with callsignId for Logs in Log table, within freq range 
         void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh,
-            out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog);
+            out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog, bool bCorrections);
         //get all my qsos from their logs
         void GetAllQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
-                     out IList<QsoBadNilContact> QsoInThereLogBand);
+                     out IList<QsoBadNilContact> QsoInThereLogBand, bool bPass2);
         // get logid dupes of my call in there logs, with callsignId in ContestId, within freq range in QSo table
         void GetDupeQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
                     out IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand);
@@ -44,6 +44,10 @@ namespace L2Sql.DataAccessLayer
         void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
                     ref IList<QsoBadNilContact> BadXchgQsos);
         void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<QsoBadNilContact> BadQsosNoCountry);
+
+        IList<QsoBadNilContact> GetBandUbnIncorrectQsosForCall(string ContestId, string Call, decimal FreqLow, decimal FreqHigh);
+        IList<UbnIncorrectCall> GetBandUbnIncorrectCallsForLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh);
+
     }
     public interface IQsoExchangeAlphaRepository : IGenericDataRepository<QsoExchangeAlpha> { }
     public interface IQsoExchangeNumberRepository : IGenericDataRepository<QsoExchangeNumber> { }
@@ -56,11 +60,12 @@ namespace L2Sql.DataAccessLayer
     public interface IStationRepository : IGenericDataRepository<Station> { }
     public interface IUbnDupeRepository : IGenericDataRepository<UbnDupe> { }
     public interface IUbnIncorrectCallRepository : IGenericDataRepository<UbnIncorrectCall> {
-        
+        IList<UbnIncorrectCall> GetBandUbnIncorrectCalls(string ContestId, decimal FreqLow, decimal FreqHigh);
+
     }
     public interface IUbnIncorrectExchangeRepository : IGenericDataRepository<UbnIncorrectExchange> { }
-    public interface IUbnNotInLogRepository : IGenericDataRepository<UbnNotInLog> {
-        IList<UbnNotInLog> GetBandUbnNotInLogs(int LogId, decimal FreqLow, decimal FreqHigh );
+    public interface IUbnNotInLogRepository : IGenericDataRepository<UbnNotInLog> {   
+        IList<UbnNotInLog> GetBandUbnNotInLogs(string ContestId, decimal FreqLow, decimal FreqHigh);
     }
     public interface IUbnSummaryRepository : IGenericDataRepository<UbnSummary> { }
     public interface IUbnUniqueRepository : IGenericDataRepository<UbnUnique> {

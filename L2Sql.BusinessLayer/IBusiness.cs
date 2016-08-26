@@ -47,7 +47,7 @@ namespace L2Sql.BusinessLayer
 
         void GetUniquesFromContest(string ContestId, int LogId, ref IList<UbnUnique> UbnUniques,
                 ref  IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
-        void GetBadCallsNils(IList<Log> Logs, string ContestId, int LogId, int CallSignId,
+        void GetBadCallsNils(IList<Log> Logs, string ContestId, int LogId, int CallSignId, bool bPass2,
                         ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
         void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<UbnIncorrectCall> UbnIncorrectCalls);
         void GetDupesFromMyLog(string ContestId, int LogId,
@@ -66,7 +66,7 @@ namespace L2Sql.BusinessLayer
         IList<UbnIncorrectCall> GetUbnIncorrectCalls(int LogId);
         IList<UbnIncorrectExchange> GetUbnIncorrectExchanges(int LogId);
         IList<UbnNotInLog> GetUbnNotInLogs(int LogId);
-        IList<UbnNotInLog> GetBandUbnNotInLogs(int LogId, decimal FreqLow, decimal FreqHigh );
+        IList<UbnNotInLog> GetBandUbnNotInLogs(string ContestId, decimal FreqLow, decimal FreqHigh);
         IList<UbnDupe> GetUbnDupes(int LogId);
         IList<UbnUnique> GetUbnUnique(int LogId);
 

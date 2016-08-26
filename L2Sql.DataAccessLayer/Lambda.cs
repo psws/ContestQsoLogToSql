@@ -47,6 +47,37 @@ namespace L2Sql.DataAccessLayer
         {             
             return listA.Intersect(listB, new Comparer<T>(lambda));
         }
+
+
+        //http://stackoverflow.com/questions/1210295/how-can-i-add-an-item-to-a-ienumerablet-collection
+        //public static IEnumerable Append(this IEnumerable first, params object[] second)
+        //{
+        //    return first.OfType<object>().Concat(second);
+        //}
+        public static IEnumerable<T> Append<T>(this IEnumerable<T> first, params T[] second)
+        {
+            return first.Concat(second);
+        }
+        //public static IEnumerable Prepend(this IEnumerable first, params object[] second)
+        //{
+        //    return second.Concat(first.OfType<object>());
+        //}
+        public static IEnumerable<T> Prepend<T>(this IEnumerable<T> first, params T[] second)
+        {
+            return second.Concat(first);
+        }
+
+
+        //http://stackoverflow.com/questions/3930510/simple-way-to-update-ienumerable-objects-using-linq
+        public static void Update<TSource>(this IEnumerable<TSource> outer, Action<TSource> updator)
+        {
+            foreach (var item in outer)
+            {
+                updator(item);
+            }
+
+
+        }
     } 
 
 }
