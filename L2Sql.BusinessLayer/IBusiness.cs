@@ -63,6 +63,9 @@ namespace L2Sql.BusinessLayer
 
         void UpdateUniquesFromContest(IList<UbnUnique> UbnUniques);
 
+        void GetUniquesForBadCallCheckSameCountryFromContest(IList<Log> Logs, string ContestId, int LogId, ref  IList<UbnIncorrectCall> UbnIncorrectCalls);
+        void GetUniquesForBadCallCheckForDifferrentCountryFromContest(IList<Log> Logs, string ContestId, int LogId,
+            ref  IList<UbnIncorrectCall> UbnIncorrectCalls);
         IList<UbnIncorrectCall> GetUbnIncorrectCalls(int LogId);
         IList<UbnIncorrectExchange> GetUbnIncorrectExchanges(int LogId);
         IList<UbnNotInLog> GetUbnNotInLogs(int LogId);

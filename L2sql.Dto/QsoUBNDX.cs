@@ -65,6 +65,15 @@ namespace L2Sql.Dto
         public Nullable<short> QsoExchangeNumber { get; set; }
     }
 
+    public class QsoUbnContact
+    {
+        public short QsoNo { get; set; }
+        public int CallsignId { get; set; }
+        public string Call { get; set; }
+        public System.DateTime QsoDateTime { get; set; }
+    }
+
+
 
     public class QsoUpdateUniquNilDupeDTO
     {

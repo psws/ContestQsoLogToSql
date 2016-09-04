@@ -47,7 +47,10 @@ namespace L2Sql.DataAccessLayer
 
         IList<QsoBadNilContact> GetBandUbnIncorrectQsosForCall(string ContestId, string Call, decimal FreqLow, decimal FreqHigh);
         IList<UbnIncorrectCall> GetBandUbnIncorrectCallsForLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh);
-
+        IList<QsoBadNilContact> GetBandSnippetQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso, decimal FreqLow,
+                    decimal FreqHigh, int DeltaMinutes, int HoleMinutes);
+        IList<QsoBadNilContact> GetBandSnippetDifferentCountryQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso,
+                    decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes);
     }
     public interface IQsoExchangeAlphaRepository : IGenericDataRepository<QsoExchangeAlpha> { }
     public interface IQsoExchangeNumberRepository : IGenericDataRepository<QsoExchangeNumber> { }
@@ -70,6 +73,8 @@ namespace L2Sql.DataAccessLayer
     public interface IUbnSummaryRepository : IGenericDataRepository<UbnSummary> { }
     public interface IUbnUniqueRepository : IGenericDataRepository<UbnUnique> {
         IList<short> GetUniquesFromContest(string ContestId, int LogId, ref IList<UbnUnique> UbnUniques);
-        bool? CheckCallIsUniqueInQsos(string ContestId, int CallsignId);
+        bool? CheckCallIsUniqueInQsos(string ContestId, int CallsignId, decimal FreqLow, decimal FreqHigh);
+        void GetAllUniqueBandQsosFromLog(string ContestId, int LogId, ref IList<QsoBadNilContact> AllUniqueQsosFromLog
+            , decimal FreqLow, decimal FreqHigh);
     }
 }

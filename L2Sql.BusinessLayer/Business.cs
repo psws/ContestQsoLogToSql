@@ -28,6 +28,10 @@ namespace L2Sql.BusinessLayer
         private readonly IUbnIncorrectExchangeRepository IUbnIncorrectExchangeRepository;
 
         private readonly int DeltaMinutesMatch = 3;
+        private readonly int criteria = 2; //default match criteria
+        private readonly int DeltaMinutesMatchPass1 = 3;
+        private readonly int DeltaMinutesMatchPass2 = 10;
+
 
         public Business()
         {
@@ -173,18 +177,19 @@ namespace L2Sql.BusinessLayer
                         ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes)
 
         {
-            IList<QsoBadNilContact> QsoNotInMyLog = null;
-            IList<QsoBadNilContact> QsoBadOrNotInMyLog = null;
-            IList<QsoBadNilContact> QsoInMyLogBand = null;
-            IList<QsoBadNilContact> QsoInThereLogBand = null;
+            IList<QsoUbnContact> QsoNotInMyLog = null;
+            IList<QsoUbnContact> QsoBadOrNotInMyLog = null;
+            IList<QsoUbnContact> QsoInMyLogBand = null;
+            IList<QsoUbnContact> QsoInThereLogBand = null;
 
             //get all for this log, We only mark Incorrect calls for mylog
+            //1st pass does not care about band
             UbnIncorrectCalls = GetUbnIncorrectCalls(LogId);
 
             //160M
             IQsoRepository.GetBandCallsInMyLogWithNoSubmittedLog(ContestId, LogId, CallSignId, 1800m, 2000m,
                 out QsoNotInMyLog, out QsoBadOrNotInMyLog, bPass2);
-            IQsoRepository.GetQsosFromLogWithFreqRange(ContestId, LogId, 1800m, 1800m, out QsoInMyLogBand, bPass2);
+            IQsoRepository.GetQsosFromLogWithFreqRange(ContestId, LogId, 1800m, 2000m, out QsoInMyLogBand, bPass2);
             IQsoRepository.GetAllQsosFromCallsignWithFreqRange(ContestId, LogId, CallSignId, 1800m, 2000m, out QsoInThereLogBand, bPass2);
             if (bPass2 == false)
             {
@@ -316,6 +321,49 @@ namespace L2Sql.BusinessLayer
 
         }
 
+        public void GetUniquesForBadCallCheckSameCountryFromContest(IList<Log> Logs, string ContestId, int LogId, ref  IList<UbnIncorrectCall> UbnIncorrectCalls)
+        {
+            //160M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 1800m, 2000m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 1800m, 2000m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+            //80M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 3500m, 4000m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 3500m, 4000m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+            //40M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 7000m, 7300m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 7000m, 7300m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+            //20M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 14000m, 14350m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 14000m, 14350m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+            //15M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 21000m, 21450m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 21000m, 21450m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+            //10M
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 28000m, 29700m, DeltaMinutesMatchPass1, 0);
+            ProcessUniquesForBadCallCheckForSameCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 28000m, 29700m, DeltaMinutesMatchPass2, DeltaMinutesMatchPass1);
+        }
+
+
+        public void GetUniquesForBadCallCheckForDifferrentCountryFromContest(IList<Log> Logs, string ContestId, int LogId,
+            ref  IList<UbnIncorrectCall> UbnIncorrectCalls)
+        {
+            //160M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 1800m, 2000m, 5, 0);
+            //80M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 3500m, 4000m, 5, 0);
+            //40M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 7000m, 7300m, 5, 0);
+            //20M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 14000m, 14350m, 5, 0);
+            //15M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 21000m, 21450m, 5, 0);
+            //10M
+            ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(Logs, ContestId, LogId, ref  UbnIncorrectCalls, 28000m, 29700m, 5, 0);
+        }
+
+
+
+
         public IList<Qso> GetQsos(int LogId)
         {
             return IQsoRepository.GetList(d => d.LogId.Equals(LogId));
@@ -358,6 +406,11 @@ namespace L2Sql.BusinessLayer
                 }
             }
         }
+
+
+
+
+
 
         public void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
             ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
@@ -593,7 +646,6 @@ namespace L2Sql.BusinessLayer
 
             IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand;
             QsoDupesBand = QsoInThereLogBand.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
-            int criteria = 2; //default match criteria
             IList<UbnNotInLog> UbnNotInLogsCurrent = null;
 
             UbnNotInLogsCurrent = IUbnNotInLogRepository.GetBandUbnNotInLogs(ContestId, FreqLow, FreqHigh);
@@ -624,7 +676,8 @@ namespace L2Sql.BusinessLayer
                     foreach (var itemQso in LogSnippet)
                     {
                         // look for bad call
-                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                            itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                         if (PartialMatchResult == null)
                         {
                             bBadCall = true;  //stops searn, No NIL or BAd
@@ -668,7 +721,8 @@ namespace L2Sql.BusinessLayer
                         foreach (var itemQso in LogSnippet)
                         {
                             // look for bad call
-                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                                itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                             if (PartialMatchResult == null)
                             {
                                 bBadCall = true;  //stops searn, No NIL or BAd
@@ -723,7 +777,8 @@ namespace L2Sql.BusinessLayer
                             foreach (var itemQsoRev in LogSnippet)
                             {
                                 // look for bad call
-                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, 1);
+                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call,
+                                                itemQsoRev.Call, itemQsoRev.CallsignId, FreqLow, FreqHigh, 1);
                                 if (PartialMatchResult == null)
                                 {
                                     bBadThereCall = true;  //stops searn, No NIL or BAd
@@ -763,7 +818,8 @@ namespace L2Sql.BusinessLayer
                                 foreach (var itemQsoRev in LogSnippet)
                                 {
                                     // look for bad call
-                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, 1);
+                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                        itemQsoRev.CallsignId, FreqLow, FreqHigh, 1);
                                     if (PartialMatchResult == null)
                                     {
                                         bBadThereCall = true;  //stops searcn, No NIL or BAd
@@ -880,7 +936,8 @@ namespace L2Sql.BusinessLayer
                     foreach (var itemQso in LogSnippet)
                     { //check against snippet collection
                         // look for bad call
-                        bool? PartialMatchResult = PartialMatch(ContestId, qso1.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                        bool? PartialMatchResult = PartialMatch(ContestId, qso1.Call, itemQso.Call, itemQso.CallsignId,
+                                                FreqLow, FreqHigh, criteria);
                         if (PartialMatchResult == true)
                         {
                             //UT8AL UT1AA off by 2 chars but UT1AA is valid dupe
@@ -956,7 +1013,8 @@ namespace L2Sql.BusinessLayer
                     foreach (var itemQso in LogSnippet)
                     { //check against snippet collection
                         // look for bad call
-                        bool? PartialMatchResult = PartialMatch(ContestId, qso.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                        bool? PartialMatchResult = PartialMatch(ContestId, qso.Call, itemQso.Call,
+                                            itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                         if (PartialMatchResult == null)
                         {
                             bBadCall = true;  //stops searn, No NIL or BAd
@@ -1054,7 +1112,21 @@ namespace L2Sql.BusinessLayer
 
             IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand;
             QsoDupesBand = QsoInThereLogBand.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
-            int criteria = 2; //default match criteria
+            //
+            //We have a case where
+            // PC4Y is in mylog, We have logs for PC4C and PC4A and PC4Y
+            //In Pc4Y log they have no QSO with Mycall
+            //In PC4A log there is a Qso with my call.
+            //Mycall is NIL of PC4Y
+            //  Mycall gets NIL for PC4Y  (when processing PC4Y)
+            // PC4C gets no point loss
+            //  PC4A gets NIL for CN2R
+            //OE------------------------
+            //  Mycall gets BAD for PC4Y Corrected is PC4C (when processing mylog)
+            //      ERROR: if we have a log NIL is exactly determined.
+            //  PC4C gets no point loss
+            //  PC4A gets no points loss
+            IList<UbnIncorrectCall> IncorrectCallsInMyLogband = IQsoRepository.GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
 
 
             IList<QsoBadNilContact> LogSnippet;
@@ -1073,17 +1145,18 @@ namespace L2Sql.BusinessLayer
                 //All logs are processed. When finished you have all NILS and Bads marked in DB
                 foreach (var item in QsoNotInMyLog)
                 {
-                    //if (item.Call == "CN2R")
-                    //{
+                    if (item.Call == "W2OAX")
+                    {
 
-                    //}
+                    }
                     bBadCall = false;
                     //get +- 3 minute window from QsoBadOrNotInMyLog
                     LogSnippet = QsoBadOrNotInMyLog.Where(x => x.QsoDateTime == item.QsoDateTime).ToList();
                     foreach (var itemQso in LogSnippet)
                     {
                         // look for bad call
-                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                            itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                         if (PartialMatchResult == null)
                         {
                             bBadCall = true;  //stops searn, No NIL or BAd
@@ -1095,7 +1168,10 @@ namespace L2Sql.BusinessLayer
                             //if (log != null)
                             //{
                                 var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
-                                if (entry == null)
+                                //entry=> the Bad call is not a compound primary key entry in the UbnIncorrectCalls
+                                //However this may be the second correction fo another QSo with the same corrected call on this band
+                                var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == item.Call).FirstOrDefault();
+                                if (entry == null && Entry2 == null)
                                 {
                                     //Mark QsoBadOrNotInMyLog as bad call
                                     UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1127,7 +1203,8 @@ namespace L2Sql.BusinessLayer
                         foreach (var itemQso in LogSnippet)
                         {
                             // look for bad call
-                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                                    itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                             if (PartialMatchResult == null)
                             {
                                 bBadCall = true;  //stops searn, No NIL or BAd
@@ -1141,7 +1218,10 @@ namespace L2Sql.BusinessLayer
                                 //{
 
                                     var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
-                                    if (entry == null)
+                                    //entry=> the Bad call is not a compound primary key entry in the UbnIncorrectCalls
+                                    //However this may be the second correction fo another QSo with the same corrected call on this band
+                                    var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == item.Call).FirstOrDefault();
+                                    if (entry == null && Entry2 == null)
                                     {
                                         //Mark QsoBadOrNotInMyLog as bad call
                                         UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1173,17 +1253,23 @@ namespace L2Sql.BusinessLayer
                         //The criteria is 1.
                         foreach (var itemRev in QsoBadOrNotInMyLog)
                         {
-                            //if (itemRev.Call == "CN2R")
-                            //{
+                            if (itemRev.Call == "W2OAX")
+                            {
 
-                            //}
+                            }
                             var bBadThereCall = false;
                             //get +- 3 minute window from QsoBadOrNotInMyLog
                             LogSnippet = QsoNotInMyLog.Where(x => x.QsoDateTime == itemRev.QsoDateTime).ToList();
                             foreach (var itemQsoRev in LogSnippet)
                             {
+                                //check if he has a log.  If we had his log 
+                                //var log = Logs.Where(x => x.CallsignId == itemQso.CallsignId).FirstOrDefault();
+                                //if (log != null)
+                                //{
+
                                 // look for bad call
-                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, criteria);
+                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                            itemQsoRev.CallsignId, FreqLow, FreqHigh, criteria);
                                 if (PartialMatchResult == null)
                                 {
                                     bBadThereCall = true;  //stops searn, No NIL or BAd
@@ -1195,8 +1281,10 @@ namespace L2Sql.BusinessLayer
                                     // A71GO in my log A71CV log has CN2R at exact freq and ...
                                     //2 chars are different.
                                     var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
-
-                                    if (entry == null)
+                                    //entry=> the Bad call is not a compound primary key entry in the UbnIncorrectCalls
+                                    //However this may be the second correction fo another QSo with the same corrected call on this band
+                                    var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == itemQsoRev.Call).FirstOrDefault();
+                                    if (entry == null && Entry2 == null)
                                     {
                                         //Mark QsoBadOrNotInMyLog as bad call
                                         UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1223,7 +1311,8 @@ namespace L2Sql.BusinessLayer
                                 foreach (var itemQsoRev in LogSnippet)
                                 {
                                     // look for bad call
-                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, criteria);
+                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                            itemQsoRev.CallsignId, FreqLow, FreqHigh, criteria);
                                     if (PartialMatchResult == null)
                                     {
                                         bBadThereCall = true;  //stops searcn, No NIL or BAd
@@ -1232,7 +1321,8 @@ namespace L2Sql.BusinessLayer
                                     else if (PartialMatchResult == true)
                                     {
                                         var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
-                                        if (entry == null)
+                                        var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == itemQsoRev.Call).FirstOrDefault();
+                                        if (entry == null && Entry2 == null)
                                         {
                                             //Mark QsoBadOrNotInMyLog as bad call
                                             UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1249,12 +1339,59 @@ namespace L2Sql.BusinessLayer
                                     }
                                 }
                             }
+                            if (bBadThereCall == false)
+                            {//if call is not unique check QSO table snippet.
+                                if (true)
+                                {
+
+                                    LogSnippet = IQsoRepository.GetBandSnippetQsosForQsoWithFreqRange(ContestId, item, FreqLow,
+                                                                                   FreqHigh, DeltaMinutesMatch, 0);
+                                    LogSnippet = QsoNotInMyLog.Where(
+                                        (x => x.QsoDateTime >= itemRev.QsoDateTime.AddMinutes(-DeltaMinutesMatch) && x.QsoDateTime < itemRev.QsoDateTime
+                                        ||
+                                        (x.QsoDateTime > itemRev.QsoDateTime && x.QsoDateTime <= itemRev.QsoDateTime.AddMinutes(DeltaMinutesMatch)))
+                                        )
+                                        .ToList();
+                                    foreach (var itemQsoRev in LogSnippet)
+                                    {
+                                        // look for bad call
+                                        bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                                itemQsoRev.CallsignId, FreqLow, FreqHigh, criteria);
+                                        if (PartialMatchResult == null)
+                                        {
+                                            bBadThereCall = true;  //stops searcn, No NIL or BAd
+                                            break;
+                                        }
+                                        else if (PartialMatchResult == true)
+                                        {
+                                            var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
+                                            var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == itemQsoRev.Call).FirstOrDefault();
+                                            if (entry == null && Entry2 == null)
+                                            {
+                                                //Mark QsoBadOrNotInMyLog as bad call
+                                                UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
+                                                {
+                                                    QsoNo = itemRev.QsoNo,
+                                                    LogId = LogId, //mylog
+                                                    CorrectCall = itemQsoRev.Call,
+                                                    EntityState = EntityState.Added
+                                                };
+                                                UbnIncorrectCalls.Add(UbnIncorrectCall);
+                                            }
+                                            bBadThereCall = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+
+                            }
                         }
                     }
 #endif
                 }
             }
-#if fakse
+#if false
              //CHECK QSOs wth my log but no QSO log was submitted
             //The bad call may be a dupe call in there log and one good and one bad call in my log? 
             //Ik2CYW was worked once IMYL IK2YCW. worked CN2R twice IK2CYW needs to be checked against log snippet
@@ -1438,10 +1575,10 @@ namespace L2Sql.BusinessLayer
 
             IList<IGrouping<int, QsoBadNilContact>> QsoDupesBand;
             QsoDupesBand = QsoInThereLogBand.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
-            int criteria = 2; //default match criteria
             IList<UbnNotInLog> UbnNotInLogsCurrent = null;
 
             UbnNotInLogsCurrent = IUbnNotInLogRepository.GetBandUbnNotInLogs(ContestId, FreqLow, FreqHigh);
+            IList<UbnIncorrectCall> IncorrectCallsInMyLogband = IQsoRepository.GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
 
             IList<QsoBadNilContact> LogSnippet;
             bool bBadCall = false;
@@ -1459,7 +1596,7 @@ namespace L2Sql.BusinessLayer
                 //All logs are processed. When finished you have all NILS and Bads marked in DB
                 foreach (var item in QsoNotInMyLog)
                 {
-                    //if (item.Call == "ZS1VV")
+                    //if (item.Call == "9A5ADI")
                     //{
 
                     //}
@@ -1469,7 +1606,8 @@ namespace L2Sql.BusinessLayer
                     foreach (var itemQso in LogSnippet)
                     {
                         // look for bad call
-                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                        bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                                itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                         if (PartialMatchResult == null)
                         {
                             bBadCall = true;  //stops searn, No NIL or BAd
@@ -1481,7 +1619,8 @@ namespace L2Sql.BusinessLayer
                             //if (log != null)
                             //{
                             var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
-                            if (entry == null)
+                            var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == item.Call).FirstOrDefault();
+                            if (entry == null && Entry2 == null)
                             {
                                 //Mark QsoBadOrNotInMyLog as bad call
                                 UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1513,7 +1652,8 @@ namespace L2Sql.BusinessLayer
                         foreach (var itemQso in LogSnippet)
                         {
                             // look for bad call
-                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call, itemQso.CallsignId, criteria);
+                            bool? PartialMatchResult = PartialMatch(ContestId, item.Call, itemQso.Call,
+                                                itemQso.CallsignId, FreqLow, FreqHigh, criteria);
                             if (PartialMatchResult == null)
                             {
                                 bBadCall = true;  //stops searn, No NIL or BAd
@@ -1527,7 +1667,8 @@ namespace L2Sql.BusinessLayer
                                 //{
 
                                 var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
-                                if (entry == null)
+                                var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == item.Call).FirstOrDefault();
+                                if (entry == null && Entry2 == null)
                                 {
                                     //Mark QsoBadOrNotInMyLog as bad call
                                     UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1568,7 +1709,8 @@ namespace L2Sql.BusinessLayer
                             foreach (var itemQsoRev in LogSnippet)
                             {
                                 // look for bad call
-                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, 1);
+                                bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                    itemQsoRev.CallsignId, FreqLow, FreqHigh, 1);
                                 if (PartialMatchResult == null)
                                 {
                                     bBadThereCall = true;  //stops searn, No NIL or BAd
@@ -1581,7 +1723,8 @@ namespace L2Sql.BusinessLayer
                                     //2 chars are different.
                                     var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
 
-                                    if (entry == null)
+                                    var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == itemQsoRev.Call).FirstOrDefault();
+                                    if (entry == null && Entry2 == null)
                                     {
                                         //Mark QsoBadOrNotInMyLog as bad call
                                         UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1608,7 +1751,8 @@ namespace L2Sql.BusinessLayer
                                 foreach (var itemQsoRev in LogSnippet)
                                 {
                                     // look for bad call
-                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call, itemQsoRev.CallsignId, 1);
+                                    bool? PartialMatchResult = PartialMatch(ContestId, itemRev.Call, itemQsoRev.Call,
+                                                    itemQsoRev.CallsignId, FreqLow, FreqHigh, 1);
                                     if (PartialMatchResult == null)
                                     {
                                         bBadThereCall = true;  //stops searcn, No NIL or BAd
@@ -1617,7 +1761,8 @@ namespace L2Sql.BusinessLayer
                                     else if (PartialMatchResult == true)
                                     {
                                         var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
-                                        if (entry == null)
+                                        var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.CorrectCall == itemQsoRev.Call).FirstOrDefault();
+                                        if (entry == null && Entry2 == null)
                                         {
                                             //Mark QsoBadOrNotInMyLog as bad call
                                             UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
@@ -1640,17 +1785,24 @@ namespace L2Sql.BusinessLayer
                                 var log = Logs.Where(x => x.CallsignId == itemRev.CallsignId).FirstOrDefault();
                                 if (log != null)
                                 {
-                                    var entry = UbnNotInLogsCurrent.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
-                                    if (entry == null)
+                                    //look for other  QSos later or earlier in their log
+                                    var AnyTimeCalL = QsoInThereLogBand.Where(x => x.CallsignId == itemRev.CallsignId).FirstOrDefault();
+                                    if (AnyTimeCalL == null)
                                     {
-                                        UbnNotInLog UbnNotInLog = new UbnNotInLog()
+                                        var entry = UbnNotInLogsCurrent.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
+                                        //if a call is already marked BAD it cannot be NIL
+                                        var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.QsoNo == itemRev.QsoNo).FirstOrDefault();
+                                        if (entry == null && Entry2 == null)
                                         {
-                                            LogId = LogId,
-                                            QsoNo = itemRev.QsoNo,
-                                            EntityState = EntityState.Added
-                                        };
-                                        UbnNotInLogs.Add(UbnNotInLog);
-                                        UbnNotInLogsCurrent.Add(UbnNotInLog);
+                                            UbnNotInLog UbnNotInLog = new UbnNotInLog()
+                                            {
+                                                LogId = LogId, //not in therelog, mark my qso NIL
+                                                QsoNo = itemRev.QsoNo,
+                                                EntityState = EntityState.Added
+                                            };
+                                            UbnNotInLogs.Add(UbnNotInLog);
+                                            UbnNotInLogsCurrent.Add(UbnNotInLog);
+                                        }
                                     }
                                     bBadThereCall = true;
                                     break;
@@ -1682,11 +1834,13 @@ namespace L2Sql.BusinessLayer
                         if (AnyTimeCalL == null)
                         {//no call found in there logs => it is not a dupe candidate, it is anull
                             var entry = UbnNotInLogsCurrent.Where(x => x.LogId == item.LogId && x.QsoNo == item.QsoNo).FirstOrDefault();
-                            if (entry == null)
+                            //if a call is already marked BAD it cannot be NIL
+                            var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.QsoNo == item.QsoNo).FirstOrDefault();
+                            if (entry == null && Entry2 == null)
                             {
                                 UbnNotInLog UbnNotInLog = new UbnNotInLog()
                                 {
-                                    LogId = item.LogId,
+                                    LogId = item.LogId, //not in my log, mark their qso NIL
                                     QsoNo = item.QsoNo,
                                     EntityState = EntityState.Added
                                 };
@@ -1698,6 +1852,7 @@ namespace L2Sql.BusinessLayer
                     }
                 }
             }
+#if false
             //CHECK QSOs wth my log but no QSO log was submitted
             //The bad call may be a dupe call in there log and one good and one bad call in my log? 
             //Ik2CYW was worked once IMYL IK2YCW. worked CN2R twice IK2CYW needs to be checked against log snippet
@@ -1884,13 +2039,383 @@ namespace L2Sql.BusinessLayer
 
                     }
                 }
-
             }
-
+#endif
         }
 
 
-        private bool? PartialMatch(string ContestId, string CallNotInMyLog, string LogSnippetCall, int SnippetCallsignId, int criteria)
+
+        public IList<UbnIncorrectCall> ProcessUniquesForBadCallCheckForSameCountryFromContest(IList<Log> Logs, string ContestId, int LogId,
+                    ref  IList<UbnIncorrectCall> UbnIncorrectCalls, decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes)
+        {
+
+            IList<UbnIncorrectCall> NewUbnIncorrectCalls = new List<UbnIncorrectCall>();
+            IList<QsoBadNilContact> AllUniqueQsosFromLog = null;
+            IList<UbnIncorrectCall> IncorrectCallsInMyLogband = IQsoRepository.GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
+
+           IUbnUniqueRepository.GetAllUniqueBandQsosFromLog( ContestId,  LogId, ref  AllUniqueQsosFromLog,  FreqLow,  FreqHigh );
+
+            if (AllUniqueQsosFromLog.Count != 0)
+            {
+
+                foreach (var item in AllUniqueQsosFromLog)
+                {
+                    if (item.Call == "W2OAX")
+                    {
+
+                    }
+                    //get logsnippet from QSO table =- 10 minutes, same band
+                    //then llok for match
+                    IList<QsoBadNilContact> LogSnippet = IQsoRepository.GetBandSnippetQsosForQsoWithFreqRange(ContestId, item, FreqLow,
+                                                                    FreqHigh, DeltaMinutes, HoleMinutes);
+                    //var Q = LogSnippet.Where(x => x.CallsignId == 10963).ToList();
+                    foreach (var itemQso in LogSnippet)
+                    {
+                        bool bMatchCall = true;
+                        //if (itemQso.Call == "WB4MSG")
+                        //{
+
+                        //}
+
+                        // CASE 1
+                        //if itemQso.call is same length as item.Call we need to check
+                        //YE0PO  YT0PO letters and numbers are in order
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        //Case 2
+                        //if itemQso.call is 1 + length of item(MM5AEK, M5AEK) every letter M5EAK must be contained in itemqso.call
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        //Case 3
+                        //if itemQso.call is 1 - length of item(DK9BZ, DK9BGZ) every letter DK9BZ must be contained in itemqso.call
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        if (itemQso.Call.Length == item.Call.Length)
+                        {//YE0PO  YT0PO(mylog)
+                            int difCnt = 0;
+                            for (int i = 0; i < itemQso.Call.Length; i++)
+                            {
+                                if (item.Call[i] != itemQso.Call[i])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // next itemQso 
+                                    }
+                                }
+                            }
+
+                        }
+                        else if (itemQso.Call.Length == item.Call.Length + 1)
+                        {//MM5AEK, M5AEK(mylog)
+                            int difCnt = 0;
+                            int itemIndex = 0;
+                            for (int i = 0; i < itemQso.Call.Length; i++)
+                            {
+                                if (item.Call[itemIndex] != itemQso.Call[i])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // next itemQso 
+                                    }
+                                }
+                                else
+                                {//MM5AEK, MM5AE(mylog)
+                                    itemIndex++;
+                                    if (itemIndex == item.Call.Length)
+                                    {
+                                        break; // match 
+                                    }
+                                }
+                            }
+                        }
+                        else if (itemQso.Call.Length == item.Call.Length - 1)
+                        {//DK9BZ, DK9BGZ(mylog)  or ON4AR ON4ARQ(mylog)
+                            int difCnt = 0;
+                            int itemQsoIndex = 0;
+                            for (int i = 0; i < item.Call.Length; i++)
+                            {
+                                if (item.Call[i] != itemQso.Call[itemQsoIndex])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // no match
+                                    }
+                                }
+                                else
+                                {//ON4AR ON4ARQ(mylog)
+                                    itemQsoIndex++;
+                                    if (itemQsoIndex == itemQso.Call.Length)
+                                    {
+                                        break; // match 
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {//skip call
+                            bMatchCall = false;
+                        }
+                        if (bMatchCall == true && itemQso.Call != item.Call)
+                        {
+                            int UniqueCriteria = criteria;
+                            if (item.Call.Length == 4)
+                            {
+                                UniqueCriteria = 1;
+                            }
+
+                            // look for bad call
+                            bool? PartialMatchResult = PartialMatch(ContestId, itemQso.Call, item.Call, item.CallsignId, FreqLow, FreqHigh, UniqueCriteria);
+                            if (PartialMatchResult == null)
+                            {
+                                break;
+                            }
+                            else if (PartialMatchResult == true)
+                            {
+                                var log = Logs.Where(x => x.CallsignId == itemQso.CallsignId).FirstOrDefault();
+                                if (log == null)
+                                {
+                                    var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
+                                    var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
+                                    if (entry == null && Entry2 == null)
+                                    {
+                                        //Mark QsoBadOrNotInMyLog as bad call
+                                        UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
+                                        {
+                                            QsoNo = item.QsoNo,
+                                            LogId = LogId, //mylog
+                                            CorrectCall = itemQso.Call,
+                                            EntityState = EntityState.Added
+                                        };
+                                        NewUbnIncorrectCalls.Add(UbnIncorrectCall);
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                if (NewUbnIncorrectCalls.Count > 0)
+                {//store in DB
+                    UpdateIncorrectCallsFromContest(NewUbnIncorrectCalls);
+                }
+
+                //Remove old uniques that turned into incorrect calls
+                IList<UbnUnique> RemoveUniques = new List<UbnUnique>();
+                foreach (var item in NewUbnIncorrectCalls)
+                {
+                    UbnUnique UbnUnique = new DomainModel.UbnUnique()
+                    {
+                        LogId = item.LogId,
+                        QsoNo = item.QsoNo,
+                        EntityState = EntityState.Deleted
+                    };
+                    RemoveUniques.Add(UbnUnique);
+                }
+                IUbnUniqueRepository.Remove(RemoveUniques.ToArray());
+            }
+            return NewUbnIncorrectCalls;
+        }
+
+
+        public IList<UbnIncorrectCall> ProcessUniquesForBadCallCheckForDifferrentCountryFromContest(IList<Log> Logs, string ContestId, int LogId,
+                    ref  IList<UbnIncorrectCall> UbnIncorrectCalls, decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes)
+        {
+            //process remaining uniques, only check lof snuppet qso in different country then tested uniqur
+            IList<UbnIncorrectCall> NewUbnIncorrectCalls = new List<UbnIncorrectCall>();
+            IList<QsoBadNilContact> AllUniqueQsosFromLog = null;
+            IUbnUniqueRepository.GetAllUniqueBandQsosFromLog(ContestId, LogId, ref  AllUniqueQsosFromLog, FreqLow, FreqHigh);
+            IList<UbnIncorrectCall> IncorrectCallsInMyLogband = IQsoRepository.GetBandUbnIncorrectCallsForLog(ContestId, LogId, FreqLow, FreqHigh);
+
+
+            if (AllUniqueQsosFromLog.Count != 0)
+            {
+
+                foreach (var item in AllUniqueQsosFromLog)
+                {
+                    //if (item.Call == "KB9ODO")
+                    //{
+
+                    //}
+                    //get logsnippet from QSO table =- 10 minutes, same band
+                    //then llok for match
+                    IList<QsoBadNilContact> LogSnippet = IQsoRepository.GetBandSnippetDifferentCountryQsosForQsoWithFreqRange(ContestId, item, FreqLow,
+                                                                    FreqHigh, DeltaMinutes, HoleMinutes);
+                    foreach (var itemQso in LogSnippet)
+                    {
+                        bool bMatchCall = true;
+                        //if (itemQso.CallsignId == 10963)
+                        //{
+
+                        //}
+
+                        // CASE 1
+                        //if itemQso.call is same length as item.Call we need to check
+                        //YE0PO  YT0PO letters and numbers are in order
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        //Case 2
+                        //if itemQso.call is 1 + length of item(MM5AEK, M5AEK) every letter M5EAK must be contained in itemqso.call
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        //Case 3
+                        //if itemQso.call is 1 - length of item(DK9BZ, DK9BGZ) every letter DK9BZ must be contained in itemqso.call
+                        // If match passes we need to test every letter in itemqso.call
+                        //      it is match if only one letter does not match
+                        if (itemQso.Call.Length == item.Call.Length)
+                        {//YE0PO  YT0PO(mylog)
+                            int difCnt = 0;
+                            for (int i = 0; i < itemQso.Call.Length; i++)
+                            {
+                                if (item.Call[i] != itemQso.Call[i])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // next itemQso 
+                                    }
+                                }
+                            }
+
+                        }
+                        else if (itemQso.Call.Length == item.Call.Length + 1)
+                        {//MM5AEK, M5AEK(mylog)
+                            int difCnt = 0;
+                            int itemIndex = 0;
+                            for (int i = 0; i < itemQso.Call.Length; i++)
+                            {
+                                if (item.Call[itemIndex] != itemQso.Call[i])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // next itemQso 
+                                    }
+                                }
+                                else
+                                {//MM5AEK, MM5AE(mylog)
+                                    itemIndex++;
+                                    if (itemIndex == item.Call.Length)
+                                    {
+                                        break; // match 
+                                    }
+                                }
+                            }
+                        }
+                        else if (itemQso.Call.Length == item.Call.Length - 1)
+                        {//DK9BZ, DK9BGZ(mylog)  or ON4AR ON4ARQ(mylog)
+                            int difCnt = 0;
+                            int itemQsoIndex = 0;
+                            for (int i = 0; i < item.Call.Length; i++)
+                            {
+                                if (item.Call[i] != itemQso.Call[itemQsoIndex])
+                                {
+                                    difCnt++;
+                                    if (difCnt > 1)
+                                    {
+                                        bMatchCall = false;
+                                        break; // no match
+                                    }
+                                }
+                                else
+                                {//ON4AR ON4ARQ(mylog)
+                                    itemQsoIndex++;
+                                    if (itemQsoIndex == itemQso.Call.Length)
+                                    {
+                                        break; // match 
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {//skip call
+                            bMatchCall = false;
+                        }
+                        if (bMatchCall == true && itemQso.Call != item.Call)
+                        {
+                            int UniqueCriteria = criteria;
+                            if (item.Call.Length == 4)
+                            {
+                                UniqueCriteria = 1;
+                            }
+
+                            // look for bad call
+                            bool? PartialMatchResult = PartialMatch(ContestId, itemQso.Call, item.Call, item.CallsignId, FreqLow, FreqHigh, UniqueCriteria);
+                            if (PartialMatchResult == null)
+                            {
+                                break;
+                            }
+                            else if (PartialMatchResult == true)
+                            {
+                                var log = Logs.Where(x => x.CallsignId == itemQso.CallsignId).FirstOrDefault();
+                                if (log == null)
+                                {
+                                    var entry = UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
+                                    var Entry2 = IncorrectCallsInMyLogband.Where(x => x.LogId == LogId && x.QsoNo == itemQso.QsoNo).FirstOrDefault();
+                                    if (entry == null && Entry2 == null)
+                                    {
+                                        //Mark QsoBadOrNotInMyLog as bad call
+                                        UbnIncorrectCall UbnIncorrectCall = new UbnIncorrectCall()
+                                        {
+                                            QsoNo = item.QsoNo,
+                                            LogId = LogId, //mylog
+                                            CorrectCall = itemQso.Call,
+                                            EntityState = EntityState.Added
+                                        };
+                                        NewUbnIncorrectCalls.Add(UbnIncorrectCall);
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    continue;
+                                }
+                            }
+                        }
+                    }
+
+                }
+
+                if (NewUbnIncorrectCalls.Count > 0)
+                {//store in DB
+                    UpdateIncorrectCallsFromContest(NewUbnIncorrectCalls);
+                }
+
+                //Remove old uniques that turned into incorrect calls
+                IList<UbnUnique> RemoveUniques = new List<UbnUnique>();
+                foreach (var item in NewUbnIncorrectCalls)
+                {
+                    UbnUnique UbnUnique = new DomainModel.UbnUnique()
+                    {
+                        LogId = item.LogId,
+                        QsoNo = item.QsoNo,
+                        EntityState = EntityState.Deleted
+                    };
+                    RemoveUniques.Add(UbnUnique);
+                }
+                IUbnUniqueRepository.Remove(RemoveUniques.ToArray());
+            }
+            return NewUbnIncorrectCalls;
+        }
+
+
+
+
+        private bool? PartialMatch(string ContestId, string CallNotInMyLog, string LogSnippetCall, int SnippetCallsignId,
+                            decimal FreqLow, decimal FreqHigh, int criteria)
         {
             bool? results = false;
             char[] CallChars = CallNotInMyLog.ToCharArray();
@@ -1927,9 +2452,9 @@ namespace L2Sql.BusinessLayer
                         results = true;
                     }
                     else if (NonMatchingCharsCount <= criteria && ((LogSnippetCall.Length - (CallNotInMyLog.Length - NonMatchingCharsCount)) <= LogSnippetCall.Length / 2))
-                    { //SP2FWC has CN2R qso bot in my log, My log has SP2JC which is unique. Mak SP2JC wrong
+                    { //SP2FWC has CN2R qso both in my log, My log has SP2JC which is unique. Mak SP2JC wrong
                         //Test unique
-                        var bUnique = IUbnUniqueRepository.CheckCallIsUniqueInQsos(ContestId, SnippetCallsignId);
+                        var bUnique = IUbnUniqueRepository.CheckCallIsUniqueInQsos(ContestId, SnippetCallsignId, FreqLow, FreqHigh);
                         if (bUnique == true)
                         {//its unique
                             results = true;
@@ -1963,7 +2488,7 @@ namespace L2Sql.BusinessLayer
                     else if (NonMatchingCharsCount <= criteria && ((LogSnippetCall.Length - (CallNotInMyLog.Length - NonMatchingCharsCount)) <= LogSnippetCall.Length / 2))
                     { //SP2FWC has CN2R qso bot in my log, My log has SP2JC which is unique. Mak SP2JC wrong
                         //Test unique
-                        var bUnique = IUbnUniqueRepository.CheckCallIsUniqueInQsos(ContestId, SnippetCallsignId);
+                        var bUnique = IUbnUniqueRepository.CheckCallIsUniqueInQsos(ContestId, SnippetCallsignId, FreqLow, FreqHigh);
                         if (bUnique == true)
                         {//its unique
                             results = true;

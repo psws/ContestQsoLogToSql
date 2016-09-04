@@ -115,6 +115,7 @@ namespace L2Sql.BusinessLayer
 
                 //go through all logs and capture the callsigns
                 //  sae changes after every log is processed.
+                int count = 1;
                 foreach (var item in rgFiles)
                 {
                     //worker.ReportProgress(1,new InputLog(item.Name, item.Length) );
@@ -128,7 +129,7 @@ namespace L2Sql.BusinessLayer
                     if (INewCallSigns.Count > 0)
                     {
                         CallSign[] CallSigns;
-                        worker.ReportProgress(1,new InputLog(item.Name, INewCallSigns.Count));
+                        worker.ReportProgress(1, new InputLog(item.Name, INewCallSigns.Count, count++, DateTime.Now.ToString("HH:mm:ss")));
                         CallSigns = INewCallSigns.ToArray();
                         IBusiness.AddCallSign(CallSigns);
                     }
@@ -177,7 +178,7 @@ namespace L2Sql.BusinessLayer
 
                 //refresh list
                 ICurrentCallSigns = IBusiness.GetAllCallsigns();
-
+                int count = 1;
                 foreach (var item in rgFiles)
                 {
                     Log Log = null;
@@ -202,7 +203,7 @@ namespace L2Sql.BusinessLayer
 
                            GetCabrilloInfo(PeekingStreamReader, CabInfo);
 
-                            worker.ReportProgress(1, new InputLog(item.Name, item.Length));
+                           worker.ReportProgress(1, new InputLog(item.Name, item.Length, count++, DateTime.Now.ToString("HH:mm:ss")));
                             CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                             if (CallSign != null)
                             {
@@ -436,7 +437,7 @@ namespace L2Sql.BusinessLayer
 
             IList<Log> Logs = IBusiness.GetAllLogs(ContestId);      //includes CallSign , logcategory
 
-
+            int count = 1;
             foreach (var log in Logs)
             {
 
@@ -462,7 +463,7 @@ namespace L2Sql.BusinessLayer
                 IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);  //include related Callsign
 
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count));
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss")));
 
                 if (QsoAddPoinsMultsDTOs.Count != 0)
 	            {

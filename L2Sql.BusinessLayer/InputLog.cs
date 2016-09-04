@@ -11,11 +11,15 @@ namespace L2Sql.BusinessLayer
     {
         public String LogName { get; set; }
         public long Size { get; set; }
+        public int LogCount { get; set; }
+        public string Time{ get; set; }
 
-        public InputLog(String LogName, long Size)
+        public InputLog(String LogName, long Size, int LogCount, string Time)
         {
             this.LogName = LogName;
             this.Size = Size;
+            this.LogCount = LogCount;
+            this.Time = Time;
         }
 
     }

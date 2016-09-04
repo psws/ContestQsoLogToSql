@@ -5,7 +5,7 @@
         xmlns:src="clr-namespace:ContestQsoLogToSql.web"
         xmlns:src2="clr-namespace:L2Sql.BusinessLayer;assembly=L2Sql.BusinessLayer"
         xmlns:dialog1="clr-namespace:WpfModalDialog;assembly=WpfModalDialog"
-        Title=" Contest Log To SQL" Height="599" Width="500" WindowStartupLocation="CenterScreen" Closing="Main_Closing" ContentRendered="Window_ContentRendered" >
+        Title=" Contest Log To SQL" Height="750" Width="500" WindowStartupLocation="CenterScreen" Closing="Main_Closing" ContentRendered="Window_ContentRendered" >
     <Window.Resources>
         <Style x:Key="FocusVisual">
             <Setter Property="Control.Template">
@@ -294,25 +294,25 @@
 
 
     <Grid x:Name="LayoutRoot" Width="500" Height="600" HorizontalAlignment="Left">
-        <GroupBox Header="Log Source Directory" HorizontalAlignment="Left" Margin="11,2,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray">
+        <GroupBox Header="Log Source Directory" HorizontalAlignment="Left" Margin="1,-55,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray">
             <xctk:WatermarkTextBox x:Name="LogsTextBox" HorizontalAlignment="Left" Height="22" Margin="10,0,0,-1" TextWrapping="Wrap" Text="Enter the Logs Source directory" Width="350" VerticalAlignment="Center" Padding="3,2" SelectAllOnGotFocus="True" Background="White"/>
         </GroupBox>
-        <GroupBox Header="Country Cty File" HorizontalAlignment="Left" Margin="11,55,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray">
+        <GroupBox Header="Country Cty File" HorizontalAlignment="Left" Margin="1,-2,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray">
             <xctk:WatermarkTextBox x:Name="CtyTextBox" HorizontalAlignment="Left" Height="22" Margin="10,0,0,-1" TextWrapping="Wrap" Text="Enter the Country File" Width="350" VerticalAlignment="Center" Padding="3,2" SelectAllOnGotFocus="True" Background="White"/>
         </GroupBox>
-        <Button x:Name="BrowseLogSourceButton" Content="Browse" HorizontalAlignment="Left" Margin="394,21,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseLogSourceButton_Click"/>
-        <Button x:Name="BrowseCtyFileButton" Content="Browse" HorizontalAlignment="Left" Margin="394,74,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseCtyFileButton_Click"/>
-        <GroupBox Header="SQL Database Server" HorizontalAlignment="Left" Margin="11,108,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray"/>
-        <GroupBox Header="Sql Database Instance" HorizontalAlignment="Left" Margin="23,167,0,0" VerticalAlignment="Top" Width="458" Height="164" Background="LightGray"/>
-        <Button x:Name="BrowseServerInstance" Content="Get" HorizontalAlignment="Left" Margin="394,127,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseServerInstance_Click"/>
-        <GroupBox Header="Sql Database Qso Table Name" HorizontalAlignment="Left" Margin="27,270,0,0" VerticalAlignment="Top" Width="449" Height="48" Background="LightGray"/>
-        <Grid>
+        <Button x:Name="BrowseLogSourceButton" Content="Browse" HorizontalAlignment="Left" Margin="384,-36,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseLogSourceButton_Click"/>
+        <Button x:Name="BrowseCtyFileButton" Content="Browse" HorizontalAlignment="Left" Margin="384,17,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseCtyFileButton_Click"/>
+        <GroupBox Header="SQL Database Server" HorizontalAlignment="Left" Margin="1,51,0,0" VerticalAlignment="Top" Width="470" Height="48" Background="LightGray"/>
+        <GroupBox Header="Sql Database Instance" HorizontalAlignment="Left" Margin="13,110,0,0" VerticalAlignment="Top" Width="458" Height="164" Background="LightGray"/>
+        <Button x:Name="BrowseServerInstance" Content="Get" HorizontalAlignment="Left" Margin="384,70,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="BrowseServerInstance_Click"/>
+        <GroupBox Header="Sql Database Qso Table Name" HorizontalAlignment="Left" Margin="17,213,0,0" VerticalAlignment="Top" Width="449" Height="48" Background="LightGray"/>
+        <Grid Margin="-4,-57,4,57">
             <Grid.Resources>
                 <src2:InputLogs x:Key="inputLogs"/>
             </Grid.Resources>
 
 
-            <ListBox x:Name="LogListbox" ItemsSource="{StaticResource inputLogs}" HorizontalAlignment="Left" Height="179" Margin="50,376,0,0"
+            <ListBox x:Name="LogListbox" ItemsSource="{StaticResource inputLogs}" HorizontalAlignment="Left" Height="179" Margin="36,512,0,-91"
                      Grid.IsSharedSizeScope="True" VerticalAlignment="Top" Width="200" >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -334,14 +334,34 @@
             </ListBox>
             <Button x:Name="ImportCalls" Content="Import Calls" HorizontalAlignment="Left" Margin="292,345,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportCalls_Click"/>
             <Button x:Name="CalculateMult_Points" Content="Calculate Mults and Points" HorizontalAlignment="Left" Margin="292,421,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcMults_Click"/>
-            <Button x:Name="Calculate_UBNDX" Content="Calculate UBNDX" HorizontalAlignment="Left" Margin="292,457,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcUBNFX_Click"/>
+            <Button x:Name="Calculate_UBNDX" Content="Calculate UBNDX" HorizontalAlignment="Left" Margin="292,457,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcUBNDX_Click"/>
+            <ListBox x:Name="LogStsbox" ItemsSource="{StaticResource inputLogs}" HorizontalAlignment="Left" Height="105" Margin="36,365,0,0"
+                     Grid.IsSharedSizeScope="True" VerticalAlignment="Top" Width="200" >
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" SharedSizeGroup="Column1"/>
+                                <ColumnDefinition Width="Auto" SharedSizeGroup="Column2"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Height="12px"  Foreground="Maroon" 
+                                       FontFamily="Courier New" FontSize="12" Text="{Binding LogCount}"/>
+                            <TextBlock Grid.Column="1" Height="12px" Foreground="Green" FontFamily="Courier New"
+                                       FontSize="12" Text="{Binding Time}"/>
+
+
+                        </Grid>
+
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
         </Grid>
-        <Label Content="Processed Logs" HorizontalAlignment="Left" Margin="50,345,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Button x:Name="ImportLogs" Content="Import Logs" HorizontalAlignment="Left" Margin="292,385,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportLogs_Click"/>
-        <xctk:WatermarkTextBox x:Name="SQLLoginTextbox" Watermark="SQl Instance  Login" HorizontalAlignment="Left" Margin="27,190,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Background="White" Width="190" ToolTip="SQl Instance  Login" />
-        <xctk:WatermarkTextBox x:Name="SqlPasswordTextbox" Watermark="SQl Instance  Password" HorizontalAlignment="Left" Margin="233,190,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="White" Width="141" ToolTip="SQl Instance  Password" />
-        <Button x:Name="GetInstanceDatabases" Content="Get" HorizontalAlignment="Left" Margin="394,194,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetInstanceDatabases_Click"/>
-        <ComboBox x:Name="SqlServerInstanceCombobox" HorizontalAlignment="Left" Margin="26,125,0,0" VerticalAlignment="Top" Width="348" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlServerInstanceCombobox_SelectionChanged">
+        <Label Content="Processed Logs Times" HorizontalAlignment="Left" Margin="17,279,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Button x:Name="ImportLogs" Content="Import Logs" HorizontalAlignment="Left" Margin="282,328,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportLogs_Click"/>
+        <xctk:WatermarkTextBox x:Name="SQLLoginTextbox" Watermark="SQl Instance  Login" HorizontalAlignment="Left" Margin="17,133,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Background="White" Width="190" ToolTip="SQl Instance  Login" />
+        <xctk:WatermarkTextBox x:Name="SqlPasswordTextbox" Watermark="SQl Instance  Password" HorizontalAlignment="Left" Margin="223,133,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="White" Width="141" ToolTip="SQl Instance  Password" />
+        <Button x:Name="GetInstanceDatabases" Content="Get" HorizontalAlignment="Left" Margin="384,137,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetInstanceDatabases_Click"/>
+        <ComboBox x:Name="SqlServerInstanceCombobox" HorizontalAlignment="Left" Margin="16,68,0,0" VerticalAlignment="Top" Width="348" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlServerInstanceCombobox_SelectionChanged">
             <ComboBox.ItemContainerStyle>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="Background" Value="White"/>
@@ -349,7 +369,7 @@
                 </Style>
             </ComboBox.ItemContainerStyle>
         </ComboBox>
-        <ComboBox x:Name="SqlDatabaseCombobox" HorizontalAlignment="Left" Margin="27,228,0,0" VerticalAlignment="Top" Width="347" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlDatabaseCombobox_SelectionChanged">
+        <ComboBox x:Name="SqlDatabaseCombobox" HorizontalAlignment="Left" Margin="17,171,0,0" VerticalAlignment="Top" Width="347" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlDatabaseCombobox_SelectionChanged">
             <ComboBox.ItemContainerStyle>
                 <Style TargetType="ComboBoxItem">
                     <Setter Property="Background" Value="White"/>
@@ -358,9 +378,10 @@
             </ComboBox.ItemContainerStyle>
         </ComboBox>
         <PasswordBox HorizontalAlignment="Left" Margin="756,108,-356,0" VerticalAlignment="Top" Width="100"/>
-        <ComboBox x:Name="SqlQsoTablesComboBox" HorizontalAlignment="Left" Margin="33,288,0,0" VerticalAlignment="Top" Width="342" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlQsoTablesComboBox_SelectionChanged"/>
+        <ComboBox x:Name="SqlQsoTablesComboBox" HorizontalAlignment="Left" Margin="23,231,0,0" VerticalAlignment="Top" Width="342" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlQsoTablesComboBox_SelectionChanged"/>
         <dialog1:ModalMsgDialog x:Name="ModalMsgDialog"  Margin="0,-2,-12,-30" Visibility="Hidden"/>
-        <Button x:Name="GetSqlQsoTables" Content="Get" HorizontalAlignment="Left" Margin="394,290,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetSqlQsoTables_Click"/>
+        <Button x:Name="GetSqlQsoTables" Content="Get" HorizontalAlignment="Left" Margin="384,233,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetSqlQsoTables_Click"/>
+        <Label Content="Processed Logs" HorizontalAlignment="Left" Margin="28,426,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
     </Grid>
 
 

@@ -628,13 +628,15 @@ namespace ContestQsoLogToSql.web
 
             ProcessLogs ProcessLogsobj = e.Argument as ProcessLogs;
             ProcessLogsobj.LogsToDatabase(worker);
-
+            
         }
 
         private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
            
             InputLog InputLog = e.UserState as InputLog;
+            //CountTextBox.Text = InputLog.LogCount.ToString() + "     " + DateTime.Now.ToString("HH:mm:ss");
+           // ((InputLogs)(LogStsbox.ItemsSource)).Insert(0, InputLog);
             ((InputLogs)(LogListbox.ItemsSource)).Insert(0, InputLog);
 
         }
@@ -740,7 +742,7 @@ namespace ContestQsoLogToSql.web
 
         }
 
-        private void CalcUBNFX_Click(object sender, RoutedEventArgs e)
+        private void CalcUBNDX_Click(object sender, RoutedEventArgs e)
         {
             string instance = null;
             if (SqlServerInstanceCombobox.SelectedValue != null &&
@@ -833,6 +835,7 @@ namespace ContestQsoLogToSql.web
             ProcessUBNDXobj.UbndxToDatabase(worker);
 
         }
+
 
 
 
