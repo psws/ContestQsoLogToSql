@@ -13,6 +13,7 @@ namespace L2Sql.DataAccessLayer
     public interface ICallInfoRepository : IGenericDataRepository<CallInfo> { }
     public interface ICallSignRepository : IGenericDataRepository<CallSign> {
          IList<CallSign> GetCallSignsFromLog(int Logid);
+         IList<CallSign> GetBadCallSignsContainingString(string PartialCall);
     }
     public interface IContestRepository : IGenericDataRepository<Contest> { }
     public interface IContestTypeRepository : IGenericDataRepository<ContestType> { }
@@ -30,7 +31,8 @@ namespace L2Sql.DataAccessLayer
                      out IList<QsoBadNilContact> QsoInMyLogBand, bool bPass2);
         // gest all Qsos, with callsignId for Logs in Log table, within freq range 
         void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh,
-            out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog, bool bCorrections);
+            out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog,
+            out  IList<QsoBadNilContact> QsoNotInMyLogIntersection, bool bCorrections);
         //get all my qsos from their logs
         void GetAllQsosFromCallsignWithFreqRange(string ContestId, int LogId, int CallsignId, decimal FreqLow, decimal FreqHigh,
                      out IList<QsoBadNilContact> QsoInThereLogBand, bool bPass2);
@@ -47,10 +49,12 @@ namespace L2Sql.DataAccessLayer
 
         IList<QsoBadNilContact> GetBandUbnIncorrectQsosForCall(string ContestId, string Call, decimal FreqLow, decimal FreqHigh);
         IList<UbnIncorrectCall> GetBandUbnIncorrectCallsForLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh);
-        IList<QsoBadNilContact> GetBandSnippetQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso, decimal FreqLow,
+        IList<QsoBadNilContact> GetBandSnippetSameCountryQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso, decimal FreqLow,
                     decimal FreqHigh, int DeltaMinutes, int HoleMinutes);
         IList<QsoBadNilContact> GetBandSnippetDifferentCountryQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso,
                     decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes);
+        Qso GetQsoFromLog(int Logid, int QsoNo);
+        void AdjustBadCallsignIds(string ContestId, int BadCallSignId, int UpdatedCallSignId);
     }
     public interface IQsoExchangeAlphaRepository : IGenericDataRepository<QsoExchangeAlpha> { }
     public interface IQsoExchangeNumberRepository : IGenericDataRepository<QsoExchangeNumber> { }

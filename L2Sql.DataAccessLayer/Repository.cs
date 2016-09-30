@@ -33,6 +33,26 @@ namespace L2Sql.DataAccessLayer
             }
         }
 
+        public IList<CallSign> GetBadCallSignsContainingString(string PartialCall)
+        {
+            IList<CallSign> BadBadCallSigns = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<CallSign> CallSignQuery = context.Set<CallSign>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+
+                BadBadCallSigns = (from lc in CallSignQuery
+                                 join lq in QsoQuery on lc.CallSignId equals lq.CallsignId
+                                   join ll in LogQuery on lq.LogId equals ll.LogId
+                                   where lc.Call.Contains(PartialCall)
+                                   select lc).DistinctBy(x => x.CallSignId).ToList();
+            }
+
+
+            return BadBadCallSigns;
+        }
+
     }
     public class ContestRepository : GenericDataRepository<Contest>, IContestRepository
     {
@@ -107,7 +127,7 @@ namespace L2Sql.DataAccessLayer
                 var QsoWorkedLogDTOs = (from lq in QsoQuery
                                         join ll in LogQuery on lq.LogId equals ll.LogId
                                         where ll.ContestId == ContestId &&
-                                lq.CallsignId == LogCallsignId
+                                         lq.CallsignId == LogCallsignId
                                         select new QsoWorkedLogDTO
                                         {
                                             LogId = ll.LogId,
@@ -438,28 +458,13 @@ namespace L2Sql.DataAccessLayer
         }
 
         public void GetBandCallsInMyLogWithNoSubmittedLog(string ContestId, int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh,
-                        out IList<QsoUbnContact> QsoNotInMyLog, out IList<QsoUbnContact> QsoBadOrNotInMyLog, bool bCorrections)
+                        out IList<QsoBadNilContact> QsoNotInMyLog, out IList<QsoBadNilContact> QsoBadOrNotInMyLog,
+                        out IList<QsoBadNilContact> QsoNotInMyLogIntersection, bool bCorrections)
         {
             //the return value represents all QSOs in my log that have not been verified with All contest Qso with mycall in the Qso table.
             //This returned list represents the potential NIls and Bad Qsos in my log.
-            /*SELECT
-              y.CallsignId,x.CallsignId, y.Call, y.QsoDateTime
-	            from 
-              (select l.callsignid, l.LogId
-			            from Qso q
-			             INNER JOIN Log l on q.LogId = l.LogId
-			             where l.ContestId = 'CQWWSSB2015'  and q.CallsignId = 1 and l.LogId <> 14001
-			             and q.Frequency between 14000 and 14350) as x
-			             right join
-			            ( select q.CallsignId,c.Call, q.QsoDateTime
-			            from Qso q 
-			             --INNER JOIN Log l on l.CallsignId = q.CallsignId
-			             INNER JOIN Callsign c on q.CallsignId = c.CallsignId
-			            where q.LogId = 14001 and q.Frequency between 14000 and 14350) as y
-			
-			            on x.CallsignId = y.CallsignId
-			             where x.LogId  IS NULL
-			             order by y.QsoDateTime */
+            int deltaminutes =  5; //some guys clock is off by 5 minutes
+            QsoNotInMyLogIntersection = new List<QsoBadNilContact>();
 
             using (var context = new ContestqsoDataEntities())
             {
@@ -474,7 +479,7 @@ namespace L2Sql.DataAccessLayer
                                              where ll.ContestId == ContestId && lq.CallsignId == CallSignId
                                                  && ll.LogId != LogId
                                                  && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
-                                             select new QsoUbnContact
+                                             select new QsoBadNilContact
                                              {
                                                  CallsignId = ll.CallsignId,
                                                  Call = (from cl in CallsignQuery
@@ -487,6 +492,25 @@ namespace L2Sql.DataAccessLayer
                                                 LogId = ll.LogId
                                              })
                                              .ToList();
+                // Mylog has W2OAX 1825z abd WA2OAX 1827Z
+                // Therelog is WA2OAX which has 2 CN2R Qsis 2 minutes apart.
+                // The except fails on the right Join cuz the 1825Z WA2OAX (not in mylog) is found by the 1827Z WA2OAX Q,
+                // The except clause covers a +- 5 minute window, to catch people with bad clock settings,
+
+                //look for duplicates within +-5 minute window
+                var DupeIntersection = AllQsoWithLogsFromLog.OrderBy(x=>x.QsoDateTime).GroupBy(x => x.CallsignId).Where(g => g.Count() > 1).ToList();
+                //var DupeIntersection = AllQsoWithLogsFromLog.GroupBy(x => x.CallsignId).Where(g => g.Count() > 1)
+                //            .Select(g => new { g.Key, records = g.OrderBy(r => r.QsoDateTime) }); 
+
+                foreach (var dupe in DupeIntersection)
+                { //group dupes
+                    foreach (var qso in dupe)
+                    {//arbitrarily choose the first instancr
+                        QsoNotInMyLogIntersection.Add(qso);
+                        break;  //only one
+                    }
+                }
+
                 //if (bCorrections == true)
                 //{
                 //    //get Call for this log
@@ -507,7 +531,7 @@ namespace L2Sql.DataAccessLayer
                 //    }
                 //}
                 //var AllQsoWithLogsFromLog2 = AllQsoWithLogsFromLog.Where(x => x.LogId == 15004).ToList();
-                var call = AllQsoWithLogsFromLog.Where(x => x.Call == "WA2OAX").ToList();
+                //var call = AllQsoWithLogsFromLog.Where(x => x.Call == "BY9CA").ToList();
                 //All Qsos with my call
                 var AllQsosFromLog = (from lq in QsoQuery
                                       join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
@@ -525,7 +549,7 @@ namespace L2Sql.DataAccessLayer
 
                                       })
                                       .AsEnumerable();
-                var call3 = AllQsosFromLog.Where(x => x.Call == "W2OAX").ToList();
+                //var call3 = AllQsosFromLog.Where(x => x.Call == "BY9CA").ToList();
                 if (bCorrections == true)
 	            {
                     //Check if bad calls already exist where the corrected call is CallSignId
@@ -537,6 +561,10 @@ namespace L2Sql.DataAccessLayer
                         {//correct call
                             foreach (var qso in AllQsosFromLog)
                             {
+                                //if (qso.Call == "BY9CA")
+                                //{
+                                    
+                                //}
                                 if (qso.QsoNo == item.QsoNo)
                                 {
                                     int CorrectedCallSignId = CallsignQuery.Where(x => x.Call == item.CorrectCall).Select(x => x.CallSignId).FirstOrDefault();
@@ -553,7 +581,7 @@ namespace L2Sql.DataAccessLayer
 	                }
                 }
                 //var AllQsosFromLog2 = AllQsosFromLog.Where(x => x.Call == "N8NA").ToList();
-                //var call1 = AllQsosFromLog.Where(x => x.Call == "ZS1WW").FirstOrDefault();
+                //var call1 = AllQsosFromLog.Where(x => x.Call == "BY9CA").FirstOrDefault();
 
                 //Left Exclude join  CQD_GetNotInMyLog.sql
                 //QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.Call == y.Call).OrderBy(x => x.Call).ToList();
@@ -561,23 +589,36 @@ namespace L2Sql.DataAccessLayer
                 //we need time because K4LR could have worked us more then once on a band.
                 //We nned to catch the K3LR QSO that is not in myLog, since my log has only one K3LR band Qso. K3RL is a bad call in my log
                 QsoNotInMyLog = AllQsoWithLogsFromLog.Except(AllQsosFromLog, (x, y) => x.Call == y.Call &&
-                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-5) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(5))).OrderBy(x => x.Call).ToList();
+                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes))).OrderBy(x => x.Call).ToList();
+
                 //Right Exclude join  CQD_GetNoLogsWithBadCallsJoin.sql
                 QsoBadOrNotInMyLog = AllQsosFromLog.Except(AllQsoWithLogsFromLog, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.Call).ToList();
 
-                var QsoNotInMyLog2 = QsoNotInMyLog.Where(x => x.Call == "W2OAX").ToList();
-                var QsoBadOrNotInMyLog2 = QsoBadOrNotInMyLog.Where(x => x.Call == "W2OAX").ToList();
-                var QsoNotInMyLo3 = QsoNotInMyLog.Where(x => x.Call == "WA2OAX").ToList();
-                var QsoBadOrNotInMyLog3 = QsoBadOrNotInMyLog.Where(x => x.Call == "WA2OAX").ToList();
-         
+                //var QsoNotInMyLog2 = QsoNotInMyLog.Where(x => x.Call == "BY9CA").ToList();
+                //var QsoBadOrNotInMyLog2 = QsoBadOrNotInMyLog.Where(x => x.Call == "BY9CA").ToList();
+                //var QsoNotInMyLo3 = QsoNotInMyLog.Where(x => x.Call == "WA2OAX").ToList();
+                //var QsoBadOrNotInMyLog3 = QsoBadOrNotInMyLog.Where(x => x.Call == "WA2OAX").ToList();
+#if false
+        //NO GOOD
+                QsoNotInMyLogIntersection = AllQsoWithLogsFromLog.Intersect(AllQsosFromLog, (x, y) => x.Call == y.Call &&
+                  (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-5) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(5))).OrderBy(x => x.Call).ToList();
+
+                var QsoNotInMyLogIntersection2 = QsoNotInMyLogIntersection.Where(x => x.Call == "W2OAX").ToList();
+                var QsoNotInMyLogIntersection3 = QsoNotInMyLogIntersection.Where(x => x.Call == "WA2OAX").ToList();
+#endif
+
+       
                 
             }
 
 
         }
 
-        public IList<QsoBadNilContact> GetBandSnippetQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso,
-                    decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes)
+
+
+
+        public IList<QsoBadNilContact> GetBandSnippetSameCountryQsosForQsoWithFreqRange(string ContestId, QsoBadNilContact Qso,
+                    decimal FreqLow, decimal FreqHigh, int DeltaMinutes, int HoleMinutes )
         {
             List<QsoBadNilContact> BandSnippetQsos = null;
             DateTime DateTimeLow = Qso.QsoDateTime.AddMinutes(-DeltaMinutes);
@@ -591,91 +632,104 @@ namespace L2Sql.DataAccessLayer
                 IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
                 IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
                 IQueryable<CallSign> CallSignQuery = context.Set<CallSign>().AsNoTracking();
-                 var QsoPrefix = CallSignQuery.Where(x=>x.CallSignId == Qso.CallsignId).FirstOrDefault().Prefix;
+                var QsoPrefix = CallSignQuery.Where(x => x.CallSignId == Qso.CallsignId).FirstOrDefault().Prefix;
 
-                 IQueryable<QsoBadNilContact> BandSnippetCallsigns = null;
-                 IQueryable<QsoBadNilContact> BandSnippetLogs = null;
+                IQueryable<QsoBadNilContact> BandSnippetCallsigns = null;
+                IQueryable<QsoBadNilContact> BandSnippetLogs = null;
 
-                 if (HoleMinutes == 0)
-                 {
-                     //all CallsignId with or without log
+                if (HoleMinutes == 0)
+                {
+                    //all CallsignId with or without log
                     BandSnippetCallsigns = (from q in QsoQuery
-                                                 //join l in LogQuery on q.CallsignId equals (l.CallsignId)
-                                                 join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                                 where  (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                                 c.Prefix == QsoPrefix && 
-                                                 (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh)
-                                                 
-                                                
-                                                     select new QsoBadNilContact
-                                                     {
-                                                         Call = c.Call,//qso call
-                                                         CallsignId = q.CallsignId, //Qso callsignId
-                                                         Frequency = q.Frequency,
-                                                         LogId = q.LogId,
-                                                         QsoDateTime = q.QsoDateTime,
-                                                         QsoExchangeNumber = q.QsoExchangeNumber,
-                                                         QsoNo = q.QsoNo
-                                                     }).AsQueryable();
-
-                    //all CallsignId with log
-                    BandSnippetLogs = (from l in LogQuery
-                                            join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                                            //join l in LogQuery on q.CallsignId equals (l.CallsignId)
                                             join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                            where (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                             c.Prefix == QsoPrefix &&
-                                             (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh)
+                                            where (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh) &&
+                                                 (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                                 c.Prefix == QsoPrefix
+
+
                                             select new QsoBadNilContact
                                             {
                                                 Call = c.Call,//qso call
-                                                CallsignId = l.CallsignId, //log callsignId
+                                                CallsignId = q.CallsignId, //Qso callsignId
                                                 Frequency = q.Frequency,
-                                                LogId = l.LogId,
+                                                LogId = q.LogId,
                                                 QsoDateTime = q.QsoDateTime,
                                                 QsoExchangeNumber = q.QsoExchangeNumber,
                                                 QsoNo = q.QsoNo
                                             }).AsQueryable();
-                 }
-                 else
-                 {//timespan has a hole in the moddle REALLY NO NEEDED, MAYBE FASTER
-                     BandSnippetCallsigns = (from q in QsoQuery
-                                                 //join l in LogQuery on q.CallsignId equals (l.CallsignId)
-                                                 join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                                 where  (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                                    c.Prefix == QsoPrefix &&
-                                                     ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
-                                                 (q.QsoDateTime >= DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) 
-                                                 select new QsoBadNilContact
-                                                 {
-                                                     Call = c.Call,//qso call
-                                                     CallsignId = q.CallsignId, //Qso callsignId
-                                                     Frequency = q.Frequency,
-                                                     LogId = q.LogId,
-                                                     QsoDateTime = q.QsoDateTime,
-                                                     QsoExchangeNumber = q.QsoExchangeNumber,
-                                                     QsoNo = q.QsoNo
-                                                 }).AsQueryable();
 
-                     BandSnippetLogs = (from l in LogQuery
-                                            join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                    //all CallsignId with log
+                    // We need l.ContestId == ContestId clause to get K9GWS t onot be in the BandSnippetLogs set.
+                    //He submitted a log for a WPX contest but not CQWWSSB2015
+                    BandSnippetLogs = (from l in LogQuery
+                                       join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                                       join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                       where (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh) &&
+                                       (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                       l.ContestId == ContestId &&
+                                       c.Prefix == QsoPrefix
+
+                                       select new QsoBadNilContact
+                                       {
+                                           Call = c.Call,//qso call
+                                           CallsignId = l.CallsignId, //log callsignId
+                                           Frequency = q.Frequency,
+                                           LogId = l.LogId,
+                                           QsoDateTime = q.QsoDateTime,
+                                           QsoExchangeNumber = q.QsoExchangeNumber,
+                                           QsoNo = q.QsoNo
+                                       }).AsQueryable();
+
+                }
+                else
+                {//timespan has a hole in the moddle 
+                    BandSnippetCallsigns = (from q in QsoQuery
+                                            //join l in LogQuery on q.CallsignId equals (l.CallsignId)
                                             join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                            where (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                                  c.Prefix == QsoPrefix &&
-                                                ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
-                                                (q.QsoDateTime >= DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) 
-                                                select new QsoBadNilContact
-                                                {
-                                                    Call = c.Call,//qso call
-                                                    CallsignId = l.CallsignId, //log callsignId
-                                                    Frequency = q.Frequency,
-                                                    LogId = l.LogId,
-                                                    QsoDateTime = q.QsoDateTime,
-                                                    QsoExchangeNumber = q.QsoExchangeNumber,
-                                                    QsoNo = q.QsoNo
-                                                }).AsQueryable();
-                 }
-                 //LEFT full outer join, yielding CallsignIds with no submitted log
-                 BandSnippetQsos = BandSnippetCallsigns.Except(BandSnippetLogs, (x, y) => x.CallsignId == y.CallsignId ).OrderBy(x => x.QsoDateTime).ToList();
+                                            where ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
+                                            (q.QsoDateTime > DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) &&
+                                               (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                               c.Prefix == QsoPrefix
+
+                                            select new QsoBadNilContact
+                                            {
+                                                Call = c.Call,//qso call
+                                                CallsignId = q.CallsignId, //Qso callsignId
+                                                Frequency = q.Frequency,
+                                                LogId = q.LogId,
+                                                QsoDateTime = q.QsoDateTime,
+                                                QsoExchangeNumber = q.QsoExchangeNumber,
+                                                QsoNo = q.QsoNo
+                                            }).AsQueryable();
+                    // We need l.ContestId == ContestId clause to get K9GWS t onot be in the BandSnippetLogs set.
+                    //He submitted a log for a WPX contest but not CQWWSSB2015
+                    //var t = BandSnippetCallsigns.Where(x => x.Call == "K9GWS").ToList();
+                    BandSnippetLogs = (from l in LogQuery
+                                       join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                                       join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                       where ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
+                                           (q.QsoDateTime > DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) &&
+                                               (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                                l.ContestId == ContestId &&
+                                                 c.Prefix == QsoPrefix
+                                       select new QsoBadNilContact
+                                       {
+                                           Call = c.Call,//qso call
+                                           CallsignId = l.CallsignId, //log callsignId
+                                           Frequency = q.Frequency,
+                                           LogId = l.LogId,
+                                           QsoDateTime = q.QsoDateTime,
+                                           QsoExchangeNumber = q.QsoExchangeNumber,
+                                           QsoNo = q.QsoNo
+                                       }).AsQueryable();
+
+                   // var t2 = BandSnippetLogs.Where(x => x.Call == "K9GWS").ToList();
+
+                }
+                //LEFT full outer join, yielding CallsignIds with no submitted log
+                BandSnippetQsos = BandSnippetCallsigns.Except(BandSnippetLogs, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.QsoDateTime).ToList();
+                //var t3 = BandSnippetQsos.Where(x => x.Call == "K9GWS").ToList();
             }
 
             return BandSnippetQsos;
@@ -702,41 +756,88 @@ namespace L2Sql.DataAccessLayer
                 IQueryable<QsoBadNilContact> BandSnippetCallsigns = null;
                 IQueryable<QsoBadNilContact> BandSnippetLogs = null;
 
-                BandSnippetCallsigns = (from q in QsoQuery
-                                        //join l in LogQuery on q.CallsignId equals (l.CallsignId)
-                                        join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                        where  (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                            c.Prefix != QsoPrefix &&
-                                            ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
-                                            (q.QsoDateTime >= DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) 
-                                        select new QsoBadNilContact
-                                        {
-                                            Call = c.Call,//qso call
-                                            CallsignId = q.CallsignId, //Qso callsignId
-                                            Frequency = q.Frequency,
-                                            LogId = q.LogId,
-                                            QsoDateTime = q.QsoDateTime,
-                                            QsoExchangeNumber = q.QsoExchangeNumber,
-                                            QsoNo = q.QsoNo
-                                        }).AsQueryable();
+                if (HoleMinutes == 0)
+                {
+                    //all CallsignId with or without log
+                    BandSnippetCallsigns = (from q in QsoQuery
+                                            //join l in LogQuery on q.CallsignId equals (l.CallsignId)
+                                            join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                            where (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh) &&
+                                                 (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                                 c.Prefix != QsoPrefix
 
-                BandSnippetLogs = (from l in LogQuery
-                                   join q in QsoQuery on l.CallsignId equals (q.CallsignId)
-                                   join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
-                                   where (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
-                                       c.Prefix != QsoPrefix &&
-                                       ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
-                                         (q.QsoDateTime >= DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) 
-                                   select new QsoBadNilContact
-                                   {
-                                       Call = c.Call,//qso call
-                                       CallsignId = l.CallsignId, //log callsignId
-                                       Frequency = q.Frequency,
-                                       LogId = l.LogId,
-                                       QsoDateTime = q.QsoDateTime,
-                                       QsoExchangeNumber = q.QsoExchangeNumber,
-                                       QsoNo = q.QsoNo
-                                   }).AsQueryable();
+
+                                            select new QsoBadNilContact
+                                            {
+                                                Call = c.Call,//qso call
+                                                CallsignId = q.CallsignId, //Qso callsignId
+                                                Frequency = q.Frequency,
+                                                LogId = q.LogId,
+                                                QsoDateTime = q.QsoDateTime,
+                                                QsoExchangeNumber = q.QsoExchangeNumber,
+                                                QsoNo = q.QsoNo
+                                            }).AsQueryable();
+
+                    //all CallsignId with log
+                    BandSnippetLogs = (from l in LogQuery
+                                       join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                                       join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                       where (q.QsoDateTime >= DateTimeLow && q.QsoDateTime <= DateTimeHigh) &&
+                                       (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                       l.ContestId == ContestId &&
+                                        c.Prefix != QsoPrefix
+
+                                       select new QsoBadNilContact
+                                       {
+                                           Call = c.Call,//qso call
+                                           CallsignId = l.CallsignId, //log callsignId
+                                           Frequency = q.Frequency,
+                                           LogId = l.LogId,
+                                           QsoDateTime = q.QsoDateTime,
+                                           QsoExchangeNumber = q.QsoExchangeNumber,
+                                           QsoNo = q.QsoNo
+                                       }).AsQueryable();
+                }
+                else
+                {
+                    BandSnippetCallsigns = (from q in QsoQuery
+                                            //join l in LogQuery on q.CallsignId equals (l.CallsignId)
+                                            join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                            where ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
+                                                (q.QsoDateTime > DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) &&
+                                                (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                                c.Prefix != QsoPrefix 
+                                            select new QsoBadNilContact
+                                            {
+                                                Call = c.Call,//qso call
+                                                CallsignId = q.CallsignId, //Qso callsignId
+                                                Frequency = q.Frequency,
+                                                LogId = q.LogId,
+                                                QsoDateTime = q.QsoDateTime,
+                                                QsoExchangeNumber = q.QsoExchangeNumber,
+                                                QsoNo = q.QsoNo
+                                            }).AsQueryable();
+
+                    BandSnippetLogs = (from l in LogQuery
+                                       join q in QsoQuery on l.CallsignId equals (q.CallsignId)
+                                       join c in CallSignQuery on q.CallsignId equals (c.CallSignId)
+                                       where ((q.QsoDateTime >= DateTimeLow && q.QsoDateTime < DateTimeLowTop) ||
+                                             (q.QsoDateTime > DateTimeHighBottom && q.QsoDateTime <= DateTimeHigh)) &&
+                                            (q.Frequency >= FreqLow && q.Frequency <= FreqHigh) &&
+                                             l.ContestId == ContestId &&
+                                            c.Prefix != QsoPrefix 
+                                            
+                                       select new QsoBadNilContact
+                                       {
+                                           Call = c.Call,//qso call
+                                           CallsignId = l.CallsignId, //log callsignId
+                                           Frequency = q.Frequency,
+                                           LogId = l.LogId,
+                                           QsoDateTime = q.QsoDateTime,
+                                           QsoExchangeNumber = q.QsoExchangeNumber,
+                                           QsoNo = q.QsoNo
+                                       }).AsQueryable();
+                }
                 //LEFT full outer join, yielding CallsignIds with no submitted log
                 BandSnippetQsos = BandSnippetCallsigns.Except(BandSnippetLogs, (x, y) => x.CallsignId == y.CallsignId).OrderBy(x => x.QsoDateTime).ToList();
 
@@ -780,6 +881,8 @@ namespace L2Sql.DataAccessLayer
             return IncorrectQsos;
         }
 
+
+
         public IList<UbnIncorrectCall> GetBandUbnIncorrectCallsForLog(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh)
         {
             List<UbnIncorrectCall> UbnIncorrectCalls = null;
@@ -804,7 +907,44 @@ namespace L2Sql.DataAccessLayer
         }
 
 
+        public Qso GetQsoFromLog(int Logid, int QsoNo)
+        {
+            Qso Qso = null;
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                 Qso = (from q in QsoQuery
+                           where q.LogId ==Logid && q.QsoNo == QsoNo
+                           select q).FirstOrDefault();
 
+            }
+            return Qso;
+        }
+
+
+        public void AdjustBadCallsignIds(string ContestId, int BadCallSignId, int UpdatedCallSignId)
+        {
+
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>();  //track changes
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+
+                var QsosToUpdate = (from q in QsoQuery
+                                    //join l in LogQuery on q.CallsignId equals l.CallsignId
+                                    where q.CallsignId == BadCallSignId
+                                    //&& l.ContestId == ContestId
+                                    select q).ToList();
+                if (QsosToUpdate.Count != 0)
+                {
+                    foreach (var item in QsosToUpdate)
+                    {
+                        item.CallsignId = UpdatedCallSignId;
+                    }
+                    context.SaveChanges();
+                }
+            }
+        }
 
 
 
@@ -840,6 +980,8 @@ namespace L2Sql.DataAccessLayer
     }
     public class UbnIncorrectCallRepository : GenericDataRepository<UbnIncorrectCall>, IUbnIncorrectCallRepository
     {
+
+
 
         public IList<UbnIncorrectCall> GetBandUbnIncorrectCalls(string ContestId, decimal FreqLow, decimal FreqHigh)
         {

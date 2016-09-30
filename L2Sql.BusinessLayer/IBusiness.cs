@@ -26,7 +26,7 @@ namespace L2Sql.BusinessLayer
         IList<CallSign> GetAllCallsigns();
         IList<CallSign> GetCallSignsFromLog(int Logid);
         CallSign GetCallSign(int CallSignId);
-
+        bool FixupBadCallSignsContainingString(string ContestId, string PartialCall);
         void AddCabrilloInfo(params CabrilloInfo[] CabrilloInfos);
         CabrilloInfo GetCabrilloInfo(string ContestId, int CallSignId);
 

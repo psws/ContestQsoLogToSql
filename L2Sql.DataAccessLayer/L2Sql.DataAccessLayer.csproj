@@ -108,6 +108,7 @@
     <Content Include="sql\CQD_GetNotInMyLog.sql" />
     <Content Include="sql\CQD_GetUniquesIntersect.sql" />
     <Content Include="sql\CQD_GetUniquesJoin.sql" />
+    <Content Include="sql\GetBandSnippetQsosForQsoWithFreqRangeWithNolog.sql" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\vwd projects mvc\Logqso.mvc\logqso.mvc.common\Logqso.mvc.common.csproj">

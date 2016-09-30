@@ -53,13 +53,15 @@ namespace L2Sql.BusinessLayer
             var Contest = IBusiness.GetContest(ContestId);
             ContestTypeEnum = Contest.ContestTypeEnum;
 
-#if false
+#if true
             IList<Log> Logs = IBusiness.GetAllLogsWithCallsign(ContestId);      //includes CallSign , logcategory
 #else
            // 1 Log for testing
-            Log logtest = IBusiness.GetLog("CQWWSSB2015", 1);
+            Log logtest = IBusiness.GetLog("CQWWSSB2015", 3);
             IList<Log> Logs = new List<Log>();
             Logs.Add(logtest);
+            //logtest = IBusiness.GetLog("CQWWSSB2015", 11702);
+            //Logs.Add(logtest);
 
 #endif
             ////TESTING
@@ -82,12 +84,15 @@ namespace L2Sql.BusinessLayer
             //    }
             //}
 
+            //BAD CALL
+            DateTime StartTime = DateTime.Now;
             int count = 1;
+
+
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
-
                 IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
                 worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call));
@@ -98,9 +103,9 @@ namespace L2Sql.BusinessLayer
                     //break;
                 }
             }
-            
 
-            count =1;
+            //NIL therelog Dupes mylog
+            count = 1;
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
@@ -111,6 +116,8 @@ namespace L2Sql.BusinessLayer
                 worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-2", QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-2"));
                 if (QsoAddPoinsMultsDTOs.Count != 0)
                 {
+                    //var L = Logs.Where(X => X.CallsignId == 4487).ToList();
+                    //var Ll = Logs.Where(X => X.LogId == 16167).ToList();
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
                     SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
 
@@ -172,6 +179,8 @@ namespace L2Sql.BusinessLayer
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
                     SetutoBadDifferentCountryDTOs(Logs, Contest.ContestId, log.LogId);
 
+
+                    worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-done", QsoAddPoinsMultsDTOs.Count, count, (DateTime.Now - StartTime).ToString("h'h 'm'm 's's'") + "  " + log.CallSign.Call + "-done"));
                     //break;
                 }
             }
@@ -205,14 +214,16 @@ namespace L2Sql.BusinessLayer
             IList<UbnDupe> UbnDupes = new List<UbnDupe>();
             IList<UbnIncorrectExchange> UbnIncorrectExchanges = new List<UbnIncorrectExchange>();
 
-
             //find bad call pass 2 with corrections from Pass 1 above
+            //saves NILs to DB, loads UbnIncorrectCalls from DB. Uses local fetch of current DB UbnNotInLogs
+            // laods only new NILs into UbnNotInLogs
+
             IBusiness.GetBadCallsNils(Logs, ContestId, LogId, CallSignId, true, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
             //check for callsigns in my log with no prefix (Country)
             IBusiness.GetBadQsosNoCountry(ContestId, LogId, ref UbnIncorrectCalls);
 
-
+            //loads UbnDupes 
             IBusiness.GetDupesFromMyLog(ContestId, LogId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
 
@@ -250,7 +261,7 @@ namespace L2Sql.BusinessLayer
         private void SetuDTOs( string ContestId, int LogId)
         {
 
-            IList<UbnUnique> UbnUniques = new List<UbnUnique>();
+            IList<UbnUnique> UbnUniques = IBusiness.GetUbnUnique(LogId);
 
             IList<UbnIncorrectCall> UbnIncorrectCalls = IBusiness.GetUbnIncorrectCalls(LogId);
             IList<UbnNotInLog> UbnNotInLogs = IBusiness.GetUbnNotInLogs(LogId);

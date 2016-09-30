@@ -332,11 +332,11 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
-            <Button x:Name="ImportCalls" Content="Import Calls" HorizontalAlignment="Left" Margin="292,345,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportCalls_Click"/>
-            <Button x:Name="CalculateMult_Points" Content="Calculate Mults and Points" HorizontalAlignment="Left" Margin="292,421,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcMults_Click"/>
-            <Button x:Name="Calculate_UBNDX" Content="Calculate UBNDX" HorizontalAlignment="Left" Margin="292,457,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcUBNDX_Click"/>
-            <ListBox x:Name="LogStsbox" ItemsSource="{StaticResource inputLogs}" HorizontalAlignment="Left" Height="105" Margin="36,365,0,0"
-                     Grid.IsSharedSizeScope="True" VerticalAlignment="Top" Width="200" >
+            <Button x:Name="ImportCalls" Content="Import Calls" HorizontalAlignment="Left" Margin="306,341,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportCalls_Click"/>
+            <Button x:Name="CalculateMult_Points" Content="Calculate Mults and Points" HorizontalAlignment="Left" Margin="306,420,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcMults_Click"/>
+            <Button x:Name="Calculate_UBNDX" Content="Calculate UBNDX" HorizontalAlignment="Left" Margin="306,455,0,0" VerticalAlignment="Top" Width="158" Background="Yellow" Click="CalcUBNDX_Click"/>
+            <ListBox x:Name="LogStsbox" ItemsSource="{StaticResource inputLogs}" HorizontalAlignment="Left" Height="105" Margin="24,365,0,0"
+                     Grid.IsSharedSizeScope="True" VerticalAlignment="Top" Width="267" >
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -355,9 +355,10 @@
                     </DataTemplate>
                 </ListBox.ItemTemplate>
             </ListBox>
+            <Button x:Name="FixupStub" Content="Fixup" HorizontalAlignment="Left" Margin="292,671,0,-91" VerticalAlignment="Top" Width="158" Background="Yellow" Click="FixupStub_Click"/>
         </Grid>
         <Label Content="Processed Logs Times" HorizontalAlignment="Left" Margin="17,279,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
-        <Button x:Name="ImportLogs" Content="Import Logs" HorizontalAlignment="Left" Margin="282,328,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportLogs_Click"/>
+        <Button x:Name="ImportLogs" Content="Import Logs" HorizontalAlignment="Left" Margin="301,324,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="ImportLogs_Click"/>
         <xctk:WatermarkTextBox x:Name="SQLLoginTextbox" Watermark="SQl Instance  Login" HorizontalAlignment="Left" Margin="17,133,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Background="White" Width="190" ToolTip="SQl Instance  Login" />
         <xctk:WatermarkTextBox x:Name="SqlPasswordTextbox" Watermark="SQl Instance  Password" HorizontalAlignment="Left" Margin="223,133,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Background="White" Width="141" ToolTip="SQl Instance  Password" />
         <Button x:Name="GetInstanceDatabases" Content="Get" HorizontalAlignment="Left" Margin="384,137,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetInstanceDatabases_Click"/>
@@ -381,7 +382,7 @@
         <ComboBox x:Name="SqlQsoTablesComboBox" HorizontalAlignment="Left" Margin="23,231,0,0" VerticalAlignment="Top" Width="342" Style="{DynamicResource ComboBoxStyle1}" SelectionChanged="SqlQsoTablesComboBox_SelectionChanged"/>
         <dialog1:ModalMsgDialog x:Name="ModalMsgDialog"  Margin="0,-2,-12,-30" Visibility="Hidden"/>
         <Button x:Name="GetSqlQsoTables" Content="Get" HorizontalAlignment="Left" Margin="384,233,0,0" VerticalAlignment="Top" Width="75" Background="Yellow" Click="GetSqlQsoTables_Click"/>
-        <Label Content="Processed Logs" HorizontalAlignment="Left" Margin="28,426,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
+        <Label Content="Processed Logs" HorizontalAlignment="Left" Margin="17,425,0,0" VerticalAlignment="Top" FontWeight="Bold"/>
     </Grid>
 
 

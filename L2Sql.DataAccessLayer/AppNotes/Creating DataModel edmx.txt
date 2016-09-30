@@ -1,0 +1,17 @@
+﻿Right click on L2Sql.DataAccessLayer project
+Add-> new item
+select Data
+Select ADO.net entity data model
+	Name: DataModel
+select EF designer from database
+Next
+Select connection: pss60\sql2014\ContestqsoData.dbo
+	Check Save connection settings App.Config
+	ContestqsoDataEntities
+Next
+Select checkbox tables. uncheck the Mogration table
+	Plueakize and Include foreign key check boxes checked.
+	Model Namespace: ContestDataModel
+Finish
+
+Go to Mapping Enums in EF 6 edmx model.txt to fixup enum

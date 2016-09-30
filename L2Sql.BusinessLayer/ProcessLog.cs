@@ -498,7 +498,7 @@ namespace L2Sql.BusinessLayer
                 {
 
                     //get bandenum
-                    CatBandEnum CatBandEnumQso = GetBandEnum(Qso.Frequency);
+                    CatBandEnum CatBandEnumQso = EnumUtils.GetBandEnum(Qso.Frequency);
 
                     QsoUpdatePoinsMultsDTO QsoUpdatePoinsMultsDTO = new QsoUpdatePoinsMultsDTO()
                         {
@@ -784,37 +784,6 @@ namespace L2Sql.BusinessLayer
 
 
 
-        private CatBandEnum GetBandEnum(decimal Frequency)
-        {
-            CatBandEnum CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum.ALL;
-            if (Frequency >= 1800.0m && Frequency <= 2000.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._160M;
-            }
-            else if (Frequency >= 3500.0m && Frequency <= 4000.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._80M;
-            }
-            else if (Frequency >= 7000.0m && Frequency <= 7300.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._40M;
-            }
-            else if (Frequency >= 14000.0m && Frequency <= 14350.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._20M;
-            }
-            else if (Frequency >= 21000.0m && Frequency <= 21450.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._15M;
-            }
-            else if (Frequency >= 28000.0m && Frequency <= 29700.0m)
-            {
-                CatBandEnum = Logqso.mvc.common.Enum.CatBandEnum._10M;
-            }
-
-            return CatBandEnum;
-
-        }
 
         private ContinentEnum GetContinentEnum(string Call)
         {
@@ -1769,7 +1738,7 @@ namespace L2Sql.BusinessLayer
                                                     {
                                                         if (Qso.Frequency != 1)
 	                                                    {
-                                                            CatBandEnum CatBandEnum = GetBandEnum(Qso.Frequency);
+                                                            CatBandEnum CatBandEnum = EnumUtils.GetBandEnum(Qso.Frequency);
                                                             short  QsoExhangeNumberValue= 0;
                                                             switch (CatBandEnum)
                                                             {
