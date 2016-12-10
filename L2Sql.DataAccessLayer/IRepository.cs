@@ -43,8 +43,10 @@ namespace L2Sql.DataAccessLayer
         void GetDupeQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
                     ref IList<IGrouping<int, QsoBadNilContact>> QsoDupesMyLogBand);
         //bad xchgs all bansd my log
-        void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
-                    ref IList<QsoBadNilContact> BadXchgQsos);
+        void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, ref IList<QsoBadNilContact> BadXchgQsos);
+        void GetWPXBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh, ref IList<QsoBadNilContact> BadXchgQsos);
         void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<QsoBadNilContact> BadQsosNoCountry);
 
         IList<QsoBadNilContact> GetBandUbnIncorrectQsosForCall(string ContestId, string Call, decimal FreqLow, decimal FreqHigh);

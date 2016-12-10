@@ -70,6 +70,12 @@ namespace L2Sql.BusinessLayer
                 d => d.CallSign); //include related 
         }
 
+        public Log GetLog(int LogId)
+        {
+            return ILogRepository.GetSingle(d => d.LogId.Equals(LogId));
+        }
+
+
         public Log GetLog(string ContestId, int CallsignId)
         {
             return ILogRepository.GetSingle(d => d.ContestId.Equals(ContestId) &&
@@ -455,14 +461,39 @@ namespace L2Sql.BusinessLayer
 
 
 
-        public void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
-            ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
+        public void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
             ref IList<UbnDupe> UbnDupes, ref IList<UbnIncorrectExchange> UbnIncorrectExchanges)
         {
             UbnIncorrectExchanges = GetUbnIncorrectExchanges(LogId);
 
             IList<QsoBadNilContact> BadXchgQsos = null;
-            IQsoRepository.GetBadXchgQsosFromLog(ContestId, ContestTypeEnum,  CatOperatorEnum, LogId, ref BadXchgQsos);
+            if (ContestTypeEnum == Logqso.mvc.common.Enum.ContestTypeEnum.CQWPX)
+            {
+                //160M
+                IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                    1800m, 2000m, ref BadXchgQsos);
+                //80M
+                 IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                    3500m, 4000m, ref BadXchgQsos);
+                //40M
+                 IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                   7000m, 7300m, ref BadXchgQsos);
+                //20M
+                 IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                   14000m, 14350m, ref BadXchgQsos);
+                //15M
+                  IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                   21000m, 21450m, ref BadXchgQsos);
+                //10M
+                   IQsoRepository.GetWPXBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
+                   28000m, 29700m, ref BadXchgQsos);
+
+            }
+            else
+            {
+                IQsoRepository.GetBadXchgQsosFromLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId, ref BadXchgQsos);
+            }
             foreach (var qso in BadXchgQsos)
             { 
                 if (UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == qso.QsoNo).FirstOrDefault() != null)
@@ -3059,5 +3090,6 @@ namespace L2Sql.BusinessLayer
             }
             return results;
         }
+
     }
 }

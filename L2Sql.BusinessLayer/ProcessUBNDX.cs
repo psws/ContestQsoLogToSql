@@ -50,6 +50,7 @@ namespace L2Sql.BusinessLayer
 
             ContestTypeEnum ContestTypeEnum;
             CatOperatorEnum CatOperatorEnum;
+            CatNoOfTxEnum CatNoOfTxEnum;
             var Contest = IBusiness.GetContest(ContestId);
             ContestTypeEnum = Contest.ContestTypeEnum;
 
@@ -57,9 +58,14 @@ namespace L2Sql.BusinessLayer
             IList<Log> Logs = IBusiness.GetAllLogsWithCallsign(ContestId);      //includes CallSign , logcategory
 #else
            // 1 Log for testing
-            Log logtest = IBusiness.GetLog("CQWWSSB2015", 3);
+            Log logtest = IBusiness.GetLog("CQWPXSSB2015", 101508); //5e5e
             IList<Log> Logs = new List<Log>();
             Logs.Add(logtest);
+
+
+            //Log logtest = IBusiness.GetLog("CQWWSSB2015", 3);
+            //IList<Log> Logs = new List<Log>();
+            //Logs.Add(logtest);
             //logtest = IBusiness.GetLog("CQWWSSB2015", 11702);
             //Logs.Add(logtest);
 
@@ -88,11 +94,12 @@ namespace L2Sql.BusinessLayer
             DateTime StartTime = DateTime.Now;
             int count = 1;
 
-
+//goto bnxdDTOs;
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
+                CatNoOfTxEnum = Logcategory.CatNoOfTxEnum;
                 IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
                 worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call));
@@ -105,10 +112,12 @@ namespace L2Sql.BusinessLayer
             }
 
             //NIL therelog Dupes mylog
+bnxdDTOs:
             count = 1;
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
+                CatNoOfTxEnum = Logcategory.CatNoOfTxEnum;
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
 
                 IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
@@ -119,7 +128,8 @@ namespace L2Sql.BusinessLayer
                     //var L = Logs.Where(X => X.CallsignId == 4487).ToList();
                     //var Ll = Logs.Where(X => X.LogId == 16167).ToList();
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
-                    SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
+                    SetbnxdDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, 
+                                log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
 
                     //break;
                 }
@@ -206,8 +216,8 @@ namespace L2Sql.BusinessLayer
             }
         }
 
-        private void SetbnxdDTOs( IList<Log> Logs, string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
-                    string LogPrefix, int CallSignId)
+        private void SetbnxdDTOs( IList<Log> Logs, string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum,
+                    CatNoOfTxEnum CatNoOfTxEnum, int LogId,string LogPrefix, int CallSignId)
         {
             IList<UbnIncorrectCall> UbnIncorrectCalls = new List<UbnIncorrectCall>();
             IList<UbnNotInLog> UbnNotInLogs = new List<UbnNotInLog>();
@@ -227,7 +237,7 @@ namespace L2Sql.BusinessLayer
             IBusiness.GetDupesFromMyLog(ContestId, LogId, ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes);
 
 
-            IBusiness.GetBadXchgsFromMyLog(ContestId, ContestTypeEnum, CatOperatorEnum, LogId, 
+            IBusiness.GetBadXchgsFromMyLog(ContestId, ContestTypeEnum, CatOperatorEnum, CatNoOfTxEnum, LogId, CallSignId,
                 ref UbnIncorrectCalls, ref UbnNotInLogs, ref UbnDupes, ref UbnIncorrectExchanges);
 
             if (UbnIncorrectCalls.Count > 0)

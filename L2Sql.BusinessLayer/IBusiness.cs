@@ -18,6 +18,7 @@ namespace L2Sql.BusinessLayer
         void RemoveLog(params Log[] Logs);
         IList<Log> GetAllLogs(string ContestId);
         IList<Log> GetAllLogsWithCallsign(string ContestId);
+        Log GetLog(int LogId);
         Log GetLog(string ContestId, int CallsignId);
 
          void AddCallSign(params CallSign[] CallSigns);
@@ -52,8 +53,8 @@ namespace L2Sql.BusinessLayer
         void GetBadQsosNoCountry(string ContestId, int LogId, ref IList<UbnIncorrectCall> UbnIncorrectCalls);
         void GetDupesFromMyLog(string ContestId, int LogId,
                         ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs, ref IList<UbnDupe> UbnDupes);
-        void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
-            ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
+        void GetBadXchgsFromMyLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, ref IList<UbnIncorrectCall> UbnIncorrectCalls, ref IList<UbnNotInLog> UbnNotInLogs,
             ref IList<UbnDupe> UbnDupes, ref IList<UbnIncorrectExchange> UbnIncorrectExchanges);
 
         void UpdateIncorrectCallsFromContest(IList<UbnIncorrectCall> UbnIncorrectCalls);

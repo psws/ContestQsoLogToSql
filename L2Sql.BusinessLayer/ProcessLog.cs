@@ -201,7 +201,7 @@ namespace L2Sql.BusinessLayer
                             try
                             {
 
-                           GetCabrilloInfo(PeekingStreamReader, CabInfo);
+                                GetCabrilloInfo(PeekingStreamReader, ContestTypeEnum, CabInfo);
 
                            worker.ReportProgress(1, new InputLog(item.Name, item.Length, count++, DateTime.Now.ToString("HH:mm:ss")));
                             CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
@@ -318,6 +318,10 @@ namespace L2Sql.BusinessLayer
                                     CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                                 }
                                 Log.CallsignId = CallSign.CallSignId;
+                                if (CallSign.Call == "2E0LKC")
+                                {
+                                    
+                                }
 
                                 //Update Log
                                 try
@@ -488,10 +492,16 @@ namespace L2Sql.BusinessLayer
             //get all callsigns for this log
             IList<CallSign> Callsigns = IBusiness.GetCallSignsFromLog(LogId);
             int ctyCount = 0;
+            //get the logs callsignid
+            Log MyLog = IBusiness.GetLog(LogId);
             //init collection
             QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion = new QsoUpdatePoinsMultsDTOCollextion();
             foreach (QsoAddPoinsMultsDTO Qso in Qsos)
             {
+                if (Qso.CallsignId == MyLog.CallsignId)
+	            {//no mults no points
+                    continue;		 
+	            }
                 string Prefix = string.Empty;
                 CallSign QsoCallSign = Callsigns.Where(d => d.CallSignId == Qso.CallsignId).FirstOrDefault();
                 if (QsoCallSign.Call.Length >= 3)
@@ -908,7 +918,7 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private bool GetCabrilloInfo(PeekingStreamReader PeekingStreamReader, CabrilloLTagInfos CInfo)
+        private bool GetCabrilloInfo(PeekingStreamReader PeekingStreamReader, ContestTypeEnum ContestTypeEnum, CabrilloLTagInfos CInfo)
         {
             bool bOK = true;
             bool Version3 = true;
@@ -1557,12 +1567,14 @@ namespace L2Sql.BusinessLayer
         {
             string line;
             short QsoNum = 1;
+#if false
             short QsoNum160 = 1;
             short QsoNum80 = 1;
             short QsoNum40 = 1;
             short QsoNum20 = 1;
             short QsoNum15 = 1;
             short QsoNum10 = 1;
+#endif
             short NextDBQsoNum = 0;
             bool PartialLog = false;
 
@@ -1730,16 +1742,38 @@ namespace L2Sql.BusinessLayer
                                             case 7:
                                                 if (ContestTypeEnum == Logqso.mvc.common.Enum.ContestTypeEnum.CQWPX)
                                                 {
+                                                    short QsoExhangeNumberValue = 0;
+                                                    //GRAB sent qso #
+                                                    try
+                                                    {
+                                                        short num;
+                                                        if (short.TryParse(Qcolumns[i], out num))
+                                                        {
+                                                            QsoExhangeNumberValue = num;
+                                                        }
+                                                        else
+                                                        {
+                                                            QsoExhangeNumberValue = 0xff;
+                                                        }
+                                                    }
+                                                    catch
+                                                    {
+                                                        Debug.WriteLine(string.Format(" bad sent QsoExchangeNumber: {0} for {1} log ",
+                                                            (Qcolumns[i]).ToString(), Log.CallSign.Call));
+                                                        QsoExhangeNumberValue = 0xfe;
+                                                        throw;
+                                                    }
+
                                                     //if LogCategory is Multi mo of TX = Unlimited or two, we need to store the sent serial number 
                                                     //in the QSOExchangeNumber table.
                                                     if (LogCategory.CatOperatorEnum == CatOperatorEnum.MULTI_OP &&
                                                         (LogCategory.CatNoOfTxEnum == CatNoOfTxEnum.TWO || 
                                                         LogCategory.CatNoOfTxEnum == CatNoOfTxEnum.UNLIMITED ) )
                                                     {
+#if false
                                                         if (Qso.Frequency != 1)
 	                                                    {
                                                             CatBandEnum CatBandEnum = EnumUtils.GetBandEnum(Qso.Frequency);
-                                                            short  QsoExhangeNumberValue= 0;
                                                             switch (CatBandEnum)
                                                             {
                                                                 case CatBandEnum.ALL:
@@ -1769,19 +1803,25 @@ namespace L2Sql.BusinessLayer
                                                             {
                                                                 
                                                             }
-                                                            QsoExchangeNumber QsoExchangeNumber = new DomainModel.QsoExchangeNumber()
-                                                            {
-                                                                LogId = Qso.LogId,
-                                                                QsoNo = Qso.QsoNo,
-                                                                QsoExhangeNumberValue = QsoExhangeNumberValue,
-                                                                EntityState = EntityState.Added
-                                                            };
+#endif
 
-                                                            QsoExchangeNumbers.Add(QsoExchangeNumber);
+                                                        QsoExchangeNumber QsoExchangeNumber = new DomainModel.QsoExchangeNumber()
+                                                        {
+                                                            LogId = Qso.LogId,
+                                                            QsoNo = Qso.QsoNo,
+                                                            QsoExhangeNumberValue = QsoExhangeNumberValue,
+                                                            EntityState = EntityState.Added
+                                                        };
+
+                                                        QsoExchangeNumbers.Add(QsoExchangeNumber);
                                                             		 
-	                                                    }
+	                                                }
+                                                    else
+                                                    {
+                                                        //WPX serial # is stored as the Qso.QsoNo,
+                                                        Qso.QsoNo = QsoExhangeNumberValue;
+                                                    }
 
-                                                    }  
                                                 }
                                                 //try
                                                 //{
@@ -1916,6 +1956,18 @@ namespace L2Sql.BusinessLayer
                             {
                                 try
                                 {
+                                    //2e0kcl has qso#23 twice
+                                    //we will invert the qsono
+                                    //it wtll show up as bad
+                                    if (QsoInsertContactsDTOCollextion.FindIndex(x=>x.QsoNo == Qso.QsoNo) != -1)
+                                    {
+                                        Qso.QsoNo = (short)-Qso.QsoNo;
+                                        while (QsoInsertContactsDTOCollextion.FindIndex(x=>x.QsoNo == Qso.QsoNo) != -1)
+                                        {// duplicate sent exchanges more then twice
+                                            Qso.QsoNo = (short)(Qso.QsoNo - 1); // hack
+                                        }
+
+                                    }
                                     QsoInsertContactsDTOCollextion.Add(Qso);
                                 }
                                 catch (Exception)
@@ -1931,7 +1983,7 @@ namespace L2Sql.BusinessLayer
                         {
                              IBusiness.AddQsoInsertContacts(QsoInsertContactsDTOCollextion);
                         }
-                        catch (Exception)
+                        catch (Exception ex)
                         {
                             
                             throw;

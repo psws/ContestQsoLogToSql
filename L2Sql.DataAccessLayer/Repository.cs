@@ -367,69 +367,135 @@ namespace L2Sql.DataAccessLayer
         }
 
 
-
-        public void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, int LogId,
-                    ref IList<QsoBadNilContact> BadXchgQsos)
+        public void GetBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, ref IList<QsoBadNilContact> BadXchgQsos)
         {
+            if (BadXchgQsos == null)
+            {
+                BadXchgQsos = new List<QsoBadNilContact>();
+            }
+
             using (var context = new ContestqsoDataEntities())
             {
                 IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
                 IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
                 IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
 
-                if (ContestTypeEnum == Logqso.mvc.common.Enum.ContestTypeEnum.CQWPX && CatOperatorEnum == Logqso.mvc.common.Enum.CatOperatorEnum.MULTI_OP)
-                {
-                    IQueryable<QsoExchangeNumber> QsoExchangeNumberQuery = context.Set<QsoExchangeNumber>().AsNoTracking();
-                    //All Qsos with submitted logs
-                    BadXchgQsos = (from lq in QsoQuery
-                                   join ll in LogQuery on lq.CallsignId equals ll.CallsignId
-                                   join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
-                                   join xc in QsoExchangeNumberQuery on lq.LogId equals xc.LogId
-                                   where ll.ContestId == ContestId && lq.LogId == LogId
-                                       && lq.QsoNo == xc.QsoNo
-                                       && xc.QsoExhangeNumberValue != ll.QsoExchangeNumber
-                                   select new QsoBadNilContact
-                                   {
-                                       CallsignId = lq.CallsignId,
-                                       Call = (from cl in CallsignQuery
-                                               where cl.CallSignId == lq.CallsignId
-                                               select cl.Call).FirstOrDefault(),
-                                       Frequency = lq.Frequency,
-                                       QsoDateTime = lq.QsoDateTime,
-                                       QsoExchangeNumber = ll.QsoExchangeNumber, //corected xchng
-                                       //QsoExchangeNumber = (from xc in QsoExchangeNumberQuery
-                                       //                     where xc.LogId == LogId &&
-                                       //                     xc.QsoNo == lq.QsoNo
-                                       //                     select xc.QsoExhangeNumberValue).FirstOrDefault(),
-                                       QsoNo = lq.QsoNo,
-                                       LogId = ll.LogId
-                                   }).OrderBy(x => x.QsoDateTime)
-                                                 .ToList();
-                }
-                else 
-                {
-                    //All Qsos with submitted logs
-                    BadXchgQsos = (from lq in QsoQuery
-                                   join ll in LogQuery on lq.CallsignId equals ll.CallsignId
-                                   join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
-                                   where ll.ContestId == ContestId && lq.LogId == LogId
-                                       && lq.QsoExchangeNumber != ll.QsoExchangeNumber
-                                   select new QsoBadNilContact
-                                   {
-                                       CallsignId = lq.CallsignId,
-                                       Call = (from cl in CallsignQuery
-                                               where cl.CallSignId == lq.CallsignId
-                                               select cl.Call).FirstOrDefault(),
-                                       Frequency = lq.Frequency,
-                                       QsoDateTime = lq.QsoDateTime,
-                                       QsoExchangeNumber = ll.QsoExchangeNumber,
-                                       QsoNo = lq.QsoNo,
-                                       LogId = ll.LogId
-                                   }).OrderBy(x => x.QsoDateTime)
-                                                 .ToList();
-                }
+
+                //All Qsos with submitted logs
+                BadXchgQsos = (from lq in QsoQuery
+                               join ll in LogQuery on lq.CallsignId equals ll.CallsignId
+                               join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                               where ll.ContestId == ContestId && lq.LogId == LogId
+                                   && lq.QsoExchangeNumber != ll.QsoExchangeNumber
+                               select new QsoBadNilContact
+                               {
+                                   CallsignId = lq.CallsignId,
+                                   Call = (from cl in CallsignQuery
+                                           where cl.CallSignId == lq.CallsignId
+                                           select cl.Call).FirstOrDefault(),
+                                   Frequency = lq.Frequency,
+                                   QsoDateTime = lq.QsoDateTime,
+                                   QsoExchangeNumber = ll.QsoExchangeNumber,
+                                   QsoNo = lq.QsoNo,
+                                   LogId = ll.LogId
+                               }).OrderBy(x => x.QsoDateTime)
+                                             .ToList();
             }
         }
+
+
+        public void GetWPXBadXchgQsosFromLog(string ContestId, ContestTypeEnum ContestTypeEnum, CatOperatorEnum CatOperatorEnum, CatNoOfTxEnum CatNoOfTxEnum,
+            int LogId, int CallSignId, decimal FreqLow, decimal FreqHigh, ref IList<QsoBadNilContact> BadXchgQsos)
+        {
+            //cases
+            // Mylog:M2  Therelog:S
+            //      Mylog# Qso:QsoExchangeNumber => Therelog# Qso:QsoNo
+            // Mylog:M2  Therelog:M2
+            //      Mylog# Qso:QsoExchangeNumber => Therelog# QsoExchangeNumber:QsoExchangeNumberValue
+            // Mylog:S  Therelog:S
+            //      Mylog# Qso:QsoExchangeNumber => Therelog# Qso:QsoNo
+            // Mylog:S  Therelog:M2
+            //      Mylog# Qso:QsoExchangeNumber => Therelog# QsoExchangeNumber:QsoExchangeNumberValue
+
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                IQueryable<Log> LogQuery = context.Set<Log>().AsNoTracking();
+                IQueryable<CallSign> CallsignQuery = context.Set<CallSign>().AsNoTracking();
+                IQueryable<QsoExchangeNumber> QsoExchangeNumberQuery = context.Set<QsoExchangeNumber>().AsNoTracking();
+
+                var AllQsoWithLogsFromLog = (from lq in QsoQuery
+                                             join ll in LogQuery on lq.LogId equals ll.LogId
+                                             join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                             where ll.ContestId == ContestId && lq.CallsignId == CallSignId
+                                                 && ll.LogId != LogId
+                                                 && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
+                                             select new QsoBadNilContact
+                                             {
+                                                 CallsignId = ll.CallsignId,
+                                                 Call = (from cl in CallsignQuery
+                                                         where cl.CallSignId == ll.CallsignId
+                                                         select cl.Call).FirstOrDefault(),
+                                                 Frequency = lq.Frequency,
+                                                 QsoDateTime = lq.QsoDateTime,
+                                                 QsoExchangeNumber = (from xc in QsoExchangeNumberQuery
+                                                                      where xc.LogId == ll.LogId &&
+                                                                      xc.QsoNo == lq.QsoNo
+                                                                      select xc.QsoExhangeNumberValue).FirstOrDefault(),
+                                                 QsoNo = lq.QsoNo,
+                                                 LogId = ll.LogId
+                                             }).OrderBy(x => x.QsoDateTime)
+                                              .AsEnumerable();
+
+                //All Qsos with submitted logs
+                var AllQsoFromMyLog = (from lq in QsoQuery
+                                             join ll in LogQuery on lq.LogId equals ll.LogId
+                                             join lc in CallsignQuery on lq.CallsignId equals lc.CallSignId
+                                             where ll.ContestId == ContestId && lq.LogId == LogId
+                                                 && (lq.Frequency >= FreqLow && lq.Frequency <= FreqHigh)
+                                          select new QsoBadNilContact
+                                          {
+                                              CallsignId = lq.CallsignId,
+                                              Call = lc.Call,
+                                              Frequency = lq.Frequency,
+                                              QsoDateTime = lq.QsoDateTime,
+                                              QsoExchangeNumber = lq.QsoExchangeNumber,
+                                              QsoNo = lq.QsoNo,
+                                              LogId = ll.LogId
+
+                                          }).OrderBy(x => x.QsoDateTime)
+                                      .AsEnumerable();
+
+                int deltaminutes = 3;
+                // QsoExchangeNumber sourced in  Qso:QsoExchangeNumberValue
+                var QsosWithValidQsoNo = AllQsoFromMyLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.Call == y.Call &&
+                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes)) 
+                    && x.QsoExchangeNumber == 0 
+                    && y.QsoExchangeNumber != x.QsoNo).OrderBy(x => x.QsoDateTime).ToList();
+
+                // QsoExchangeNumber sourced in  QsoExchangeNumber:QsoExchangeNumberValue
+                var QsosWithInvalidQsoNo = AllQsoFromMyLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.Call == y.Call &&
+                   (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes))
+                   && x.QsoExchangeNumber != 0
+                   && y.QsoExchangeNumber != x.QsoExchangeNumber).OrderBy(x => x.QsoDateTime).ToList();
+                
+              
+                if (BadXchgQsos == null)
+                {
+                    BadXchgQsos = new List<QsoBadNilContact>();
+                }
+
+                BadXchgQsos.Concat(QsosWithValidQsoNo);
+                BadXchgQsos.Concat(QsosWithInvalidQsoNo);
+
+            }
+
+                //if (CatOperatorEnum == Logqso.mvc.common.Enum.CatOperatorEnum.MULTI_OP &&
+                //    (CatNoOfTxEnum == CatNoOfTxEnum.TWO || CatNoOfTxEnum == CatNoOfTxEnum.UNLIMITED))
+                //    {
+
+       }
 
 
 

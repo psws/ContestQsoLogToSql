@@ -4,7 +4,7 @@ using System.Text;
 
 namespace L2Sql.BusinessLayer
 {
-    class CabrilloLTagInfos
+    public class CabrilloLTagInfos
     {
         public string Callsign;
         public string CatAssisted;
