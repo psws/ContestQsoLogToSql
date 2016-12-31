@@ -94,7 +94,7 @@ namespace L2Sql.BusinessLayer
             DateTime StartTime = DateTime.Now;
             int count = 1;
 
-//goto bnxdDTOs;
+//goto bnxdDTOs4;
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
@@ -112,7 +112,7 @@ namespace L2Sql.BusinessLayer
             }
 
             //NIL therelog Dupes mylog
-bnxdDTOs:
+//bnxdDTOs:
             count = 1;
             foreach (var log in Logs)
             {
@@ -157,6 +157,7 @@ bnxdDTOs:
             //+- 10 min allows for the Op who only makes a few qsos spread in time.
             //if a criteria match is found:
             //Mark the Qso as a bad call in my log and remove the UNique qsp from the UbnUniques SQl table
+//bnxdDTOs4:
             count = 1;
             foreach (var log in Logs)
             {

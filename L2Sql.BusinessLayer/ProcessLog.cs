@@ -318,10 +318,10 @@ namespace L2Sql.BusinessLayer
                                     CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                                 }
                                 Log.CallsignId = CallSign.CallSignId;
-                                if (CallSign.Call == "2E0LKC")
-                                {
+                                //if (CallSign.Call == "2E0LKC")
+                                //{
                                     
-                                }
+                                //}
 
                                 //Update Log
                                 try

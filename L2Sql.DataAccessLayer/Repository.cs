@@ -469,25 +469,62 @@ namespace L2Sql.DataAccessLayer
 
                 int deltaminutes = 3;
                 // QsoExchangeNumber sourced in  Qso:QsoExchangeNumberValue
-                var QsosWithValidQsoNo = AllQsoFromMyLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.Call == y.Call &&
-                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes)) 
-                    && x.QsoExchangeNumber == 0 
-                    && y.QsoExchangeNumber != x.QsoNo).OrderBy(x => x.QsoDateTime).ToList();
+                var QsosWithValidQsoNo = AllQsoWithLogsFromLog.Intersect(AllQsoFromMyLog, (x, y) => x.Call == y.Call &&
+                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes))
+                    && y.QsoExchangeNumber == 0
+                    && x.QsoExchangeNumber != y.QsoNo).OrderBy(y => y.QsoDateTime).ToList();
+                //put correct exchange in QsoExchangeNumber
+                foreach (var item in QsosWithValidQsoNo)
+                {
+                    item.QsoExchangeNumber = item.QsoNo;
+                    //get qsono from my log
+                    QsoBadNilContact QsoFromMyLog = AllQsoFromMyLog.Where(x => x.CallsignId == item.CallsignId &&
+                    (x.QsoDateTime >= item.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= item.QsoDateTime.AddMinutes(deltaminutes)))
+                    .FirstOrDefault();
+                    if (QsoFromMyLog != null)
+                    {
+                        item.QsoNo = QsoFromMyLog.QsoNo;
+                    }
+                }
+
+
+                //var QsosWithValidQsoNo = AllQsoFromMyLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.Call == y.Call &&
+                //    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes)) 
+                //    && x.QsoExchangeNumber == 0 
+                //    && y.QsoExchangeNumber != x.QsoNo).OrderBy(x => x.QsoDateTime).ToList();
 
                 // QsoExchangeNumber sourced in  QsoExchangeNumber:QsoExchangeNumberValue
                 var QsosWithInvalidQsoNo = AllQsoFromMyLog.Intersect(AllQsoWithLogsFromLog, (x, y) => x.Call == y.Call &&
                    (x.QsoDateTime >= y.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= y.QsoDateTime.AddMinutes(deltaminutes))
                    && x.QsoExchangeNumber != 0
                    && y.QsoExchangeNumber != x.QsoExchangeNumber).OrderBy(x => x.QsoDateTime).ToList();
-                
+
+                //put correct exchange in QsoExchangeNumber from AllQsoFromMyLog
+                foreach (var item2 in QsosWithInvalidQsoNo)
+                {
+                    QsoBadNilContact QsofromFromThereLog  = AllQsoWithLogsFromLog.Where(x => x.CallsignId == item2.CallsignId &&
+                        (x.QsoDateTime >= item2.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= item2.QsoDateTime.AddMinutes(deltaminutes)))
+                        .FirstOrDefault();
+                    if (QsofromFromThereLog != null)
+                    {
+                        item2.QsoExchangeNumber = QsofromFromThereLog.QsoExchangeNumber;
+                        QsoBadNilContact QsoFromMyLog2 = AllQsoFromMyLog.Where(x => x.CallsignId == item2.CallsignId &&
+                            (x.QsoDateTime >= item2.QsoDateTime.AddMinutes(-deltaminutes) && x.QsoDateTime <= item2.QsoDateTime.AddMinutes(deltaminutes)))
+                            .FirstOrDefault();
+                        if (QsoFromMyLog2 != null)
+                        {
+                            item2.QsoNo = QsoFromMyLog2.QsoNo;
+                        }
+                    }
+                }
               
                 if (BadXchgQsos == null)
                 {
                     BadXchgQsos = new List<QsoBadNilContact>();
                 }
 
-                BadXchgQsos.Concat(QsosWithValidQsoNo);
-                BadXchgQsos.Concat(QsosWithInvalidQsoNo);
+                BadXchgQsos = BadXchgQsos.Concat(QsosWithValidQsoNo).ToList();
+                BadXchgQsos = BadXchgQsos.Concat(QsosWithInvalidQsoNo).ToList();
 
             }
 

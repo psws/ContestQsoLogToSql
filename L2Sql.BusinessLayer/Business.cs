@@ -497,7 +497,7 @@ namespace L2Sql.BusinessLayer
             foreach (var qso in BadXchgQsos)
             { 
                 if (UbnIncorrectCalls.Where(x => x.LogId == LogId && x.QsoNo == qso.QsoNo).FirstOrDefault() != null)
-                {//not a dupe, its nas Call
+                {//not a dupe, its bad Call
                     continue;
                 }
                 else if (UbnNotInLogs.Where(x => x.LogId == LogId && x.QsoNo == qso.QsoNo).FirstOrDefault() != null)
