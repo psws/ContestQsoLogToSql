@@ -39,9 +39,11 @@ namespace L2Sql.BusinessLayer
 
         void AddQso(params Qso[] Qsos);
         IList<Qso> GetQsoContacts(int Logid);
+        int GetQsoCount(int Logid);
         IList<Qso> GetQsos(int LogId);
         void UpdateQso(params Qso[] Qsos);
         IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId);
+        int GetQsoPointsMultsCount(int LogId);
         void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion);
         void AddQsoInsertContacts(QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion);
         void AddQsoExchangeNumber(params QsoExchangeNumber[] QsoExchangeNumbers);

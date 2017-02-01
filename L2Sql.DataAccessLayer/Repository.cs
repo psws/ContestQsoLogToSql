@@ -80,6 +80,18 @@ namespace L2Sql.DataAccessLayer
             }
         }
 
+        public int GetQsoCount(int Logid)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                int Cnt = (from lc in QsoQuery
+                            where lc.LogId == Logid
+                            select lc).Count();
+                return Cnt;
+            }
+        }
+
 
         public IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int Logid)
         {
@@ -100,6 +112,27 @@ namespace L2Sql.DataAccessLayer
                 return Qsos;
             }
         }
+
+        public int GetQsoPointsMultsCount(int Logid)
+        {
+            using (var context = new ContestqsoDataEntities())
+            {
+                IQueryable<Qso> QsoQuery = context.Set<Qso>().AsNoTracking();
+                int Cnt = (from lc in QsoQuery
+                            where lc.LogId == Logid
+                            select new QsoAddPoinsMultsDTO
+                            {
+                                QsoNo = lc.QsoNo,
+                                LogId = lc.LogId,
+                                CallsignId = lc.CallsignId,
+                                Frequency = lc.Frequency,
+                                QsoExchangeNumber = lc.QsoExchangeNumber,
+                                QsoModeTypeEnum = lc.QsoModeTypeEnum,
+                            }).Count();
+                return Cnt;
+            }
+        }
+
         //TVP method for updating QsoPointsMults using stored Proc
         public void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion)
         {
@@ -155,6 +188,8 @@ namespace L2Sql.DataAccessLayer
                 sqp.TypeName = "udt_QsoContacts";
 
                 string command = "EXEC " + "CQD_sp_QsoInsertContacts" + " @sqp";
+                //http://stackoverflow.com/questions/8602395/timeout-expired-the-timeout-period-elapsed-prior-to-completion-of-the-operation
+                context.Database.CommandTimeout = 0; //no timeout
                 context.Database.ExecuteSqlCommand(command, sqp);
             }
         }

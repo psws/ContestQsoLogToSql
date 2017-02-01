@@ -200,6 +200,12 @@ namespace L2Sql.BusinessLayer
             return IQsoRepository.GetQsoPointsMults(LogId);
         }
 
+        public int GetQsoPointsMultsCount(int LogId)
+        {
+            return IQsoRepository.GetQsoPointsMultsCount(LogId);
+        }
+
+
         public void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion)
         {
             if (QsoUpdatePoinsMultsDTOCollextion.Count > 0)
@@ -647,6 +653,11 @@ namespace L2Sql.BusinessLayer
         public IList<Qso> GetQsoContacts(int LogId)
         {
             return IQsoRepository.GetQsoContacts(LogId);
+        }
+
+        public int GetQsoCount(int LogId)
+        {
+            return IQsoRepository.GetQsoCount(LogId);
         }
 
         public void UpdateQso(params Qso[] Qsos)

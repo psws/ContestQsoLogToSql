@@ -94,16 +94,16 @@ namespace L2Sql.BusinessLayer
             DateTime StartTime = DateTime.Now;
             int count = 1;
 
-//goto bnxdDTOs4;
+//goto bnxdDTOs3;
             foreach (var log in Logs)
             {
                 var Logcategory = IBusiness.GetLogCategory(log.LogCategoryId);
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
                 CatNoOfTxEnum = Logcategory.CatNoOfTxEnum;
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
+                int QsoCnt = IBusiness.GetQsoPointsMultsCount(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call));
-                if (QsoAddPoinsMultsDTOs.Count != 0)
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call, QsoCnt, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call));
+                if (QsoCnt != 0)
                 {
                     //Bad calls 
                     SetbDTOs(Logs, Contest.ContestId, ContestTypeEnum, CatOperatorEnum, log.LogId, log.CallSign.Prefix, log.CallSign.CallSignId);
@@ -120,10 +120,10 @@ namespace L2Sql.BusinessLayer
                 CatNoOfTxEnum = Logcategory.CatNoOfTxEnum;
                 CatOperatorEnum = Logcategory.CatOperatorEnum;
 
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
+                int QsoCnt = IBusiness.GetQsoPointsMultsCount(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-2", QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-2"));
-                if (QsoAddPoinsMultsDTOs.Count != 0)
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-2", QsoCnt, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-2"));
+                if (QsoCnt != 0)
                 {
                     //var L = Logs.Where(X => X.CallsignId == 4487).ToList();
                     //var Ll = Logs.Where(X => X.LogId == 16167).ToList();
@@ -135,15 +135,16 @@ namespace L2Sql.BusinessLayer
                 }
             }
 
+//bnxdDTOs3:
             //Uniques
             count = 1;
             foreach (var log in Logs)
             {
                 //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
+                int QsoCnt = IBusiness.GetQsoPointsMultsCount(log.LogId);
                 //CallSign CallSign = IBusiness.GetCallSign(log.CallsignId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-3", QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-3"));
-                if (QsoAddPoinsMultsDTOs.Count != 0)
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-3", QsoCnt, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-3"));
+                if (QsoCnt != 0)
                 {
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
                     SetuDTOs(Contest.ContestId, log.LogId);
@@ -162,9 +163,9 @@ namespace L2Sql.BusinessLayer
             foreach (var log in Logs)
             {
                 //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-4", QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-4"));
-                if (QsoAddPoinsMultsDTOs.Count != 0)
+                int QsoCnt = IBusiness.GetQsoPointsMultsCount(log.LogId);
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-4", QsoCnt, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-4"));
+                if (QsoCnt != 0)
                 {
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
                     SetutoBadSameCountryDTOs(Logs, Contest.ContestId, log.LogId);
@@ -183,15 +184,15 @@ namespace L2Sql.BusinessLayer
             foreach (var log in Logs)
             {
                 //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
-                IList<QsoAddPoinsMultsDTO> QsoAddPoinsMultsDTOs = IBusiness.GetQsoPointsMults(log.LogId);
-                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-5", QsoAddPoinsMultsDTOs.Count, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-5"));
-                if (QsoAddPoinsMultsDTOs.Count != 0)
+                int QsoCnt = IBusiness.GetQsoPointsMultsCount(log.LogId);
+                worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-5", QsoCnt, count++, DateTime.Now.ToString("HH:mm:ss") + "  " + log.CallSign.Call + "-5"));
+                if (QsoCnt != 0)
                 {
                     //all NILS and Dupes and Bad calls and incorrect exchanges need to be processed before collecting UNiques
                     SetutoBadDifferentCountryDTOs(Logs, Contest.ContestId, log.LogId);
 
 
-                    worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-done", QsoAddPoinsMultsDTOs.Count, count, (DateTime.Now - StartTime).ToString("h'h 'm'm 's's'") + "  " + log.CallSign.Call + "-done"));
+                    worker.ReportProgress(1, new InputLog(log.CallSign.Call + "-done", QsoCnt, count, (DateTime.Now - StartTime).ToString("h'h 'm'm 's's'") + "  " + log.CallSign.Call + "-done"));
                     //break;
                 }
             }

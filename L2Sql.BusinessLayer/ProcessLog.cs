@@ -129,10 +129,10 @@ namespace L2Sql.BusinessLayer
                     if (INewCallSigns.Count > 0)
                     {
                         CallSign[] CallSigns;
-                        worker.ReportProgress(1, new InputLog(item.Name, INewCallSigns.Count, count++, DateTime.Now.ToString("HH:mm:ss")));
                         CallSigns = INewCallSigns.ToArray();
                         IBusiness.AddCallSign(CallSigns);
                     }
+                    worker.ReportProgress(1, new InputLog(item.Name, INewCallSigns.Count, count++, DateTime.Now.ToString("HH:mm:ss")));
                     ICurrentCallSigns.Clear();
                     INewCallSigns.Clear();
                 }
@@ -151,59 +151,60 @@ namespace L2Sql.BusinessLayer
         public bool LogsToDatabase(BackgroundWorker worker)
         {
             bool result = true;
-                IBusiness = new Business();
-                DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
-                QsoModeTypeEnum QsoModeTypeEnum;
-                IList<CallSign> ICurrentCallSigns;
 
-                //create cty file
-                CtyObj = new CtyLib.CCtyObj(CtyLib.CCtyObj.DatType.CtyDat, CtyFile);
-                CtyObj.Load();
-                string ContestId = di.Name.ToUpper();
-                DateTime ContestYear;
-                Contest Contest = IBusiness.GetContest(ContestId);
-                ContestYear = Contest.StartDateTime;
-                //if (DateTime.TryParse("1,1," + di.Name.Substring(di.Name.Length - 4, 4), out ContestYear) == false)
+            IBusiness = new Business();
+            DirectoryInfo di = new DirectoryInfo(LogFileDirectory);
+            QsoModeTypeEnum QsoModeTypeEnum;
+            IList<CallSign> ICurrentCallSigns;
+
+            //create cty file
+            CtyObj = new CtyLib.CCtyObj(CtyLib.CCtyObj.DatType.CtyDat, CtyFile);
+            CtyObj.Load();
+            string ContestId = di.Name.ToUpper();
+            DateTime ContestYear;
+            Contest Contest = IBusiness.GetContest(ContestId);
+            ContestYear = Contest.StartDateTime;
+            //if (DateTime.TryParse("1,1," + di.Name.Substring(di.Name.Length - 4, 4), out ContestYear) == false)
+            //{
+            //    return false;
+            //}
+
+            FileInfo[] rgFiles = di.GetFiles("*.log");
+
+            //Create LogBase
+
+            //get LogCategory
+            IList<LogCategory> LogCategorys = IBusiness.GetAllLogCategorys();
+
+
+            //refresh list
+            ICurrentCallSigns = IBusiness.GetAllCallsigns();
+            int count = 1;
+            foreach (var item in rgFiles)
+            {
+                Log Log = null;
+                //IList<Log> Logs = null;
+                LogCategory LogCategory = null;
+
+                //Create Cabrillo base
+                CabrilloLTagInfos CabInfo;
+                CabInfo = new CabrilloLTagInfos();
+                StreamReader TxtStreambase = new StreamReader(item.FullName);
+                PeekingStreamReader PeekingStreamReader = new PeekingStreamReader(TxtStreambase.BaseStream);
+                //if (item.FullName.Contains("ai4co"))
                 //{
-                //    return false;
-                //}
 
-                FileInfo[] rgFiles = di.GetFiles("*.log");
-
-                //Create LogBase
-
-                //get LogCategory
-                IList<LogCategory> LogCategorys = IBusiness.GetAllLogCategorys();
-
-
-                //refresh list
-                ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                int count = 1;
-                foreach (var item in rgFiles)
+                //}   
+                if (PeekingStreamReader != null)
                 {
-                    Log Log = null;
-                    //IList<Log> Logs = null;
-                    LogCategory LogCategory = null;
-
-                    //Create Cabrillo base
-                    CabrilloLTagInfos CabInfo;
-                    CabInfo = new CabrilloLTagInfos();
-                    StreamReader TxtStreambase = new StreamReader(item.FullName);
-                    PeekingStreamReader PeekingStreamReader = new PeekingStreamReader(TxtStreambase.BaseStream);
-                    //if (item.FullName.Contains("ai4co"))
-                    //{
-
-                    //}   
-                    if (PeekingStreamReader != null)
+                    using (PeekingStreamReader)
                     {
-                        using (PeekingStreamReader)
+                        try
                         {
-                            try
-                            {
 
-                                GetCabrilloInfo(PeekingStreamReader, ContestTypeEnum, CabInfo);
+                            GetCabrilloInfo(PeekingStreamReader, ContestTypeEnum, CabInfo);
 
-                           worker.ReportProgress(1, new InputLog(item.Name, item.Length, count++, DateTime.Now.ToString("HH:mm:ss")));
+                            worker.ReportProgress(1, new InputLog(item.Name, item.Length, count++, DateTime.Now.ToString("HH:mm:ss")));
                             CallSign CallSign = ICurrentCallSigns.Where(c => c.Call == CabInfo.Callsign).SingleOrDefault();
                             if (CallSign != null)
                             {
@@ -217,7 +218,6 @@ namespace L2Sql.BusinessLayer
 
                             if (Log == null)
                             {
-
                                 Log = new Log()
                                 {
                                     ContestYear = ContestYear,
@@ -249,12 +249,12 @@ namespace L2Sql.BusinessLayer
                                 {
                                     DBLogCategory = LogCategorys.Where(
                                         l => l.CatAssistedEnum == LogCategory.CatAssistedEnum &&
-                                         l.CatBandEnum == LogCategory.CatBandEnum &&
-                                         l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
-                                         l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
-                                         l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
-                                         l.CatPowerEnum == LogCategory.CatPowerEnum
-                                       ).SingleOrDefault();
+                                            l.CatBandEnum == LogCategory.CatBandEnum &&
+                                            l.CatNoOfTxEnum == LogCategory.CatNoOfTxEnum &&
+                                            l.CatOperatorEnum == LogCategory.CatOperatorEnum &&
+                                            l.CatOperatorOverlayEnum == LogCategory.CatOperatorOverlayEnum &&
+                                            l.CatPowerEnum == LogCategory.CatPowerEnum
+                                        ).SingleOrDefault();
                                 }
                                 catch (Exception ex)
                                 {
@@ -334,6 +334,10 @@ namespace L2Sql.BusinessLayer
                                     throw;
                                 }
                             }
+                            else
+                            {
+                                continue;
+                            }
                             //CabrilloInfo
                             CabrilloInfo CabrilloInfo = null;
                             CabrilloInfo = IBusiness.GetCabrilloInfo(ContestId, Log.CallsignId);
@@ -356,7 +360,7 @@ namespace L2Sql.BusinessLayer
                                         }
                                         CabrilloInfo.Operators = CabInfo.Operators;
                                     }
-                                     if (!string.IsNullOrEmpty( CabInfo.Club ) )
+                                        if (!string.IsNullOrEmpty( CabInfo.Club ) )
                                     {
                                         if (CabInfo.Club.Length >20)
                                         {
@@ -364,7 +368,7 @@ namespace L2Sql.BusinessLayer
                                         }
                                         CabrilloInfo.Club = CabInfo.Club;
                                     }
-                                   IBusiness.AddCabrilloInfo(CabrilloInfo);
+                                    IBusiness.AddCabrilloInfo(CabrilloInfo);
                                 }
                             }
                             catch (Exception ex)
@@ -381,11 +385,12 @@ namespace L2Sql.BusinessLayer
                                 case ContestTypeEnum.CQWW:
                                     try
                                     {
-                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ContestTypeEnum);
+                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ICurrentCallSigns, ContestTypeEnum);
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
-                                        
+
+                                        Debug.WriteLine(string.Format(" Problem in LogsToDatabase() GetQSOInfo:cqww {0} message {1}"), Log.CallsignId, ex.Message);
                                         throw;
                                     }
                                     break;
@@ -393,14 +398,15 @@ namespace L2Sql.BusinessLayer
                                     //Multi twq and multi multi 
                                     //  have to store their sent serial number in QsoExchangeNumber
                                     //Single and Multi One 
-                                     // Store there sent serial number in Qso.QsoNo
+                                        // Store there sent serial number in Qso.QsoNo
                                     try
                                     {
-                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ContestTypeEnum);
+                                        GetQSOInfo(PeekingStreamReader, Log, LogCategory, ICurrentCallSigns, ContestTypeEnum);
                                     }
-                                    catch (Exception)
+                                    catch (Exception ex)
                                     {
-                                        
+
+                                        Debug.WriteLine(string.Format(" Problem in LogsToDatabase() GetQSOInfo:cqwpx {0} message {1}"), Log.CallsignId, ex.Message);
                                         throw;
                                     }
                                     break;
@@ -417,10 +423,10 @@ namespace L2Sql.BusinessLayer
                             Debug.WriteLine(string.Format(" Problem in LogsToDatabase() stream: {0}  message {1}"),item.FullName,  ex.Message);
                             //throw;
                         }
-                    }//stream 
+                    }//using 
 
                 }//stream null
-            }
+            } //for
             return result;
         }
 
@@ -1563,7 +1569,7 @@ namespace L2Sql.BusinessLayer
         }
 
 
-        private void GetQSOInfo(PeekingStreamReader PeekingStreamReader, Log Log, LogCategory LogCategory, ContestTypeEnum ContestTypeEnum)
+        private void GetQSOInfo(PeekingStreamReader PeekingStreamReader, Log Log, LogCategory LogCategory, IList<CallSign> ICurrentCallSigns, ContestTypeEnum ContestTypeEnum)
         {
             string line;
             short QsoNum = 1;
@@ -1578,9 +1584,9 @@ namespace L2Sql.BusinessLayer
             short NextDBQsoNum = 0;
             bool PartialLog = false;
 
-            IList<CallSign> ICurrentCallSigns;
+           // IList<CallSign> ICurrentCallSigns;
             //IList<Qso> Qsos = new List<Qso>();
-            IList<Qso> CurrentQsos;
+            int CurrentQsoCount;
             IList<QsoExchangeNumber> QsoExchangeNumbers = new List<QsoExchangeNumber>();
             QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion = new QsoInsertContactsDTOCollextion();
 
@@ -1589,11 +1595,11 @@ namespace L2Sql.BusinessLayer
             {
                 if (PeekingStreamReader != null)
                 {
-                    ICurrentCallSigns = IBusiness.GetAllCallsigns();
-                    CurrentQsos = IBusiness.GetQsoContacts(Log.LogId);
-                    if (CurrentQsos.Count != 0)
+                    //ICurrentCallSigns = IBusiness.GetAllCallsigns();
+                    CurrentQsoCount = IBusiness.GetQsoCount(Log.LogId);
+                    if (CurrentQsoCount != 0)
 	                {//set to last qso in DB
-                        NextDBQsoNum = (short)(CurrentQsos.Count + 1);
+                        NextDBQsoNum = (short)(CurrentQsoCount + 1);
                         PartialLog = true;
 	                }
 

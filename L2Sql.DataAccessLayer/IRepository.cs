@@ -22,9 +22,11 @@ namespace L2Sql.DataAccessLayer
     public interface IQsoRepository : IGenericDataRepository<Qso>
     {
         IList<QsoAddPoinsMultsDTO> GetQsoPointsMults(int LogId);
+        int GetQsoPointsMultsCount(int Logid);
         void UpdateQsoPointsMults(QsoUpdatePoinsMultsDTOCollextion QsoUpdatePoinsMultsDTOCollextion);
         void AddQsoInsertContacts(QsoInsertContactsDTOCollextion QsoInsertContactsDTOCollextion);
         IList<Qso> GetQsoContacts(int Logid);
+        int GetQsoCount(int Logid);
         IList<QsoWorkedLogDTO> GetWorkedQsosFromContestInWorkesLog(string ContestId, int LogCallsignId, int NotCallsignId);
         // get all Qsos, with callsignId in ContestId, within freq range in QSo table, with no includes
         void GetQsosFromLogWithFreqRange(string ContestId, int LogId, decimal FreqLow, decimal FreqHigh,
